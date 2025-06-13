@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // --- Style Definitions ---
 const STYLES = {
@@ -78,11 +79,11 @@ const translations = {
 // --- Main Application Component ---
 export default function App() {
   // --- State Management ---
+  const navigate = useNavigate();
   const [language, setLanguage] = useState('en');
   const [activeCategory, setActiveCategory] = useState('clinical');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [showSummary, setShowSummary] = useState(false);
-  const [preferences, setPreferences] = useState({}); 
+  const [answers, setAnswers] = useState([]);
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [sliderValue, setSliderValue] = useState(null);
@@ -95,14 +96,16 @@ export default function App() {
   useEffect(() => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
     if (currentQuestion.type === 'slider') {
-        const initialValue = preferences[currentQuestionIndex] || currentQuestion.min;
+        const initialValue = answers[currentQuestionIndex] || currentQuestion.min;
         setSliderValue(initialValue);
-        if (!preferences[currentQuestionIndex]) {
-             setPreferences(prev => ({ ...prev, [currentQuestionIndex]: initialValue }));
+        const newAnswers = [...answers];
+        if (newAnswers[currentQuestionIndex] === undefined) {
+             newAnswers[currentQuestionIndex] = initialValue;
+             setAnswers(newAnswers);
         }
-        setIsAnswered(true); // For slider, consider it answered on display
+        setIsAnswered(true);
     }
-  }, [currentQuestionIndex, activeCategory, activeQuestions, preferences]);
+  }, [currentQuestionIndex, activeCategory, activeQuestions, answers]);
 
 
   // --- Event Handlers ---
@@ -113,22 +116,25 @@ export default function App() {
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
     setCurrentQuestionIndex(0);
-    setShowSummary(false);
-    setPreferences({});
+    setAnswers([]);
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
   };
 
   const handleAnswerOptionClick = (answerText, index) => {
     setSelectedAnswerIndex(index);
-    setPreferences(prev => ({...prev, [currentQuestionIndex]: answerText }));
+    const newAnswers = [...answers];
+    newAnswers[currentQuestionIndex] = index;
+    setAnswers(newAnswers);
     if (!isAnswered) setIsAnswered(true);
   };
 
   const handleSliderChange = (e) => {
     const value = parseInt(e.target.value, 10);
     setSliderValue(value);
-    setPreferences(prev => ({ ...prev, [currentQuestionIndex]: value }));
+    const newAnswers = [...answers];
+    newAnswers[currentQuestionIndex] = value;
+    setAnswers(newAnswers);
   };
   
   const handleNextQuestion = () => {
@@ -141,18 +147,15 @@ export default function App() {
             setSliderValue(null);
         }
     } else {
-        setShowSummary(true);
+        navigate('/summary', { 
+            state: { 
+                questions: activeQuestions, 
+                answers: answers, 
+                content: content 
+            } 
+        });
     }
   }
-
-  const handleRestart = () => {
-    setCurrentQuestionIndex(0);
-    setShowSummary(false);
-    setPreferences({});
-    setSelectedAnswerIndex(null);
-    setIsAnswered(false);
-    setSliderValue(null);
-  };
   
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 pt-10 sm:pt-12 font-sans">
@@ -192,25 +195,6 @@ export default function App() {
         </div>
         
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 transition-all duration-500 max-w-2xl mx-auto">
-          {showSummary ? (
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold mb-4 text-indigo-700">{content.summaryTitle}</h2>
-              <p className="text-lg text-slate-600 mb-6">{content.summarySubtitle}</p>
-              <div className="text-left bg-slate-50 rounded-lg p-4 mb-6 space-y-4 border border-slate-200">
-                 {activeQuestions.map((q, index) => (
-                    <div key={index}>
-                        <p className="font-semibold text-slate-500 text-sm">{q.questionText}</p>
-                        <p className="text-indigo-800 font-medium text-lg mt-1">
-                            {preferences[index]} {q.type === 'slider' ? q.unit : ''}
-                        </p>
-                    </div>
-                 ))}
-              </div>
-              <button onClick={handleRestart} className={STYLES.restartButton}>
-                {content.startOver}
-              </button>
-            </div>
-          ) : (
             <>
               <div className="mb-8">
                 <h2 className="text-sm font-semibold text-slate-500 mb-2 tracking-wide uppercase">
@@ -263,7 +247,6 @@ export default function App() {
                   </div>
               )}
             </>
-          )}
         </div>
       </div>
     </div>
