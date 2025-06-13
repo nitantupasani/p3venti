@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // --- Style Definitions ---
 const STYLES = {
@@ -33,8 +33,14 @@ const translations = {
         viewSummary: 'View Summary',
         questionSets: {
             clinical: [
-                { questionText: 'What is the most immediate clinical priority for today?', answerOptions: [{ answerText: 'Reviewing Patient Medication Schedules' }, { answerText: 'Conducting Fall Risk Assessments' }, { answerText: 'Updating Wound Care Protocols' }, { answerText: 'Auditing Infection Control Compliance' }] },
-                { questionText: 'What is the top focus for clinical staff training this month?', answerOptions: [{ answerText: 'Advanced Dementia Care Techniques' }, { answerText: 'Emergency Response Drills' }, { answerText: 'Patient Empathy and Communication' }, { answerText: 'Using New Medical Equipment' }] },
+                { questionText: 'How many people live in this living group/department?', type: 'slider', min: 1, max: 50, step: 1, unit: 'People' },
+                { questionText: 'How many employees are present in the living/activity room at the same time (e.g. during dinner or an activity)?', type: 'slider', min: 1, max: 50, step: 1, unit: 'People' },
+                { questionText: 'What is the status of the ventilation system?', answerOptions: [{ answerText: 'Good maintenance air ventilation system' }, { answerText: 'Sometimes good, sometimes bad' }, { answerText: 'No ventilation system' }, { answerText: 'Unknown' }] },
+                { questionText: 'What is the air quality usually like?', answerOptions: [{ answerText: 'Air quality generally good' }, { answerText: 'Sometimes good, sometimes bad' }, { answerText: 'Air quality generally poor (e.g. complaints about dry eyes, mouth, skin)' }, { answerText: 'Unknown' }] },
+                { questionText: 'Do you have enough personal protective equipment in store?', answerOptions: [{ answerText: 'There is enough PPE in stock' }, { answerText: 'There is some PPE in stock to get through the first weeks' }, { answerText: 'There is not enough PPE in stock' }, { answerText: 'Unknown' }] },
+                { questionText: 'Can residents safely receive the (physical and mental) care they need?', answerOptions: [{ answerText: 'Yes' }, { answerText: 'No, need to scale down' }, { answerText: 'No, most care must be stopped' }, { answerText: 'Unknown' }] },
+                { questionText: 'What is the status of staff capacity?', answerOptions: [{ answerText: 'Staff have room in workload to take on extra measures' }, { answerText: 'No room for extra measures in workload but possible extra staff deployment' }, { answerText: 'Staff capacity is at its fullest' }, { answerText: 'Unknown' }] },
+                { questionText: 'Is there enough budget to invest in possible measures if needed?', answerOptions: [{ answerText: 'Enough budget to finance possible measures' }, { answerText: 'Some budget to finance possible measures, but not enough to cover all costs' }, { answerText: 'No budget to finance possible measures' }, { answerText: 'Unknown' }] }
             ],
             operational: [
                 { questionText: 'Which operational improvement should be prioritized?', answerOptions: [{ answerText: 'Optimizing Staff Scheduling and Rotas' }, { answerText: 'Renovating Common Areas for Comfort' }, { answerText: 'Improving Kitchen and Nutritional Facilities' }, { answerText: 'Upgrading the Family Visitation System' }] },
@@ -58,6 +64,7 @@ const translations = {
             clinical: [
                 { questionText: 'Wat is de meest directe klinische prioriteit voor vandaag?', answerOptions: [{ answerText: 'Medicatieschema\'s van patiënten beoordelen' }, { answerText: 'Valrisicobeoordelingen uitvoeren' }, { answerText: 'Wondzorgprotocollen bijwerken' }, { answerText: 'Naleving van infectiebeheersing controleren' }] },
                 { questionText: 'Wat is de belangrijkste focus voor klinische personeelstraining deze maand?', answerOptions: [{ answerText: 'Geavanceerde dementiezorgtechnieken' }, { answerText: 'Noodhulp oefeningen' }, { answerText: 'Empathie en communicatie met de patiënt' }, { answerText: 'Gebruik van nieuwe medische apparatuur' }] },
+                { questionText: 'Hoeveel medewerkers moeten worden toegewezen aan het nieuwe trainingsprogramma?', type: 'slider', min: 1, max: 20, step: 1, unit: 'medewerkers' }
             ],
             operational: [
                 { questionText: 'Welke operationele verbetering moet worden geprioriteerd?', answerOptions: [{ answerText: 'Optimaliseren van personeelsplanning en roosters' }, { answerText: 'Renoveren van gemeenschappelijke ruimtes voor comfort' }, { answerText: 'Verbeteren van keuken- en voedingsfaciliteiten' }, { answerText: 'Upgraden van het familiebezoek-systeem' }] },
@@ -78,10 +85,25 @@ export default function App() {
   const [preferences, setPreferences] = useState({}); 
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [sliderValue, setSliderValue] = useState(null);
 
   // --- Dynamic Content Variables ---
   const content = translations[language];
   const activeQuestions = content.questionSets[activeCategory];
+
+  // --- Effect for slider initialization ---
+  useEffect(() => {
+    const currentQuestion = activeQuestions[currentQuestionIndex];
+    if (currentQuestion.type === 'slider') {
+        const initialValue = preferences[currentQuestionIndex] || currentQuestion.min;
+        setSliderValue(initialValue);
+        if (!preferences[currentQuestionIndex]) {
+             setPreferences(prev => ({ ...prev, [currentQuestionIndex]: initialValue }));
+        }
+        setIsAnswered(true); // For slider, consider it answered on display
+    }
+  }, [currentQuestionIndex, activeCategory, activeQuestions, preferences]);
+
 
   // --- Event Handlers ---
   const handleLanguageChange = (e) => {
@@ -102,6 +124,12 @@ export default function App() {
     setPreferences(prev => ({...prev, [currentQuestionIndex]: answerText }));
     if (!isAnswered) setIsAnswered(true);
   };
+
+  const handleSliderChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setSliderValue(value);
+    setPreferences(prev => ({ ...prev, [currentQuestionIndex]: value }));
+  };
   
   const handleNextQuestion = () => {
     const nextQuestion = currentQuestionIndex + 1;
@@ -109,6 +137,9 @@ export default function App() {
         setCurrentQuestionIndex(nextQuestion);
         setSelectedAnswerIndex(null);
         setIsAnswered(false);
+        if (activeQuestions[nextQuestion].type !== 'slider') {
+            setSliderValue(null);
+        }
     } else {
         setShowSummary(true);
     }
@@ -120,15 +151,14 @@ export default function App() {
     setPreferences({});
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
+    setSliderValue(null);
   };
   
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 pt-10 sm:pt-12 font-sans">
-      {/* Increased max-width to give more space for the layout */}
       <div className="w-full max-w-8xl mx-auto">
         
         <div className="grid grid-cols-3 items-center mb-12">
-            {/* Left Column: Category Buttons */}
             <div className="flex justify-start items-center space-x-4">
                 <button
                     onClick={() => handleCategoryChange('clinical')}
@@ -144,13 +174,11 @@ export default function App() {
                 </button>
             </div>
             
-            {/* Center Column: Title */}
             <div className="text-center">
                 <h1 className="text-4xl font-bold text-indigo-600">P3Venti</h1>
                 <p className="text-slate-500 mt-1 text-lg">{content.pageSubtitle}</p>
             </div>
 
-            {/* Right Column: Language Dropdown */}
             <div className="flex justify-end">
                 <select 
                     onChange={handleLanguageChange} 
@@ -172,7 +200,9 @@ export default function App() {
                  {activeQuestions.map((q, index) => (
                     <div key={index}>
                         <p className="font-semibold text-slate-500 text-sm">{q.questionText}</p>
-                        <p className="text-indigo-800 font-medium text-lg mt-1">{preferences[index] || '...'}</p>
+                        <p className="text-indigo-800 font-medium text-lg mt-1">
+                            {preferences[index]} {q.type === 'slider' ? q.unit : ''}
+                        </p>
                     </div>
                  ))}
               </div>
@@ -191,22 +221,39 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
-                {activeQuestions[currentQuestionIndex].answerOptions.map((option, index) => {
-                  const isSelected = index === selectedAnswerIndex;
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerOptionClick(option.answerText, index)}
-                      className={isSelected ? STYLES.answerButton.selected : STYLES.answerButton.default}
-                    >
-                      <span className={isSelected ? 'text-white' : 'text-slate-700'}>
-                        {option.answerText}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              {activeQuestions[currentQuestionIndex].type === 'slider' ? (
+                <div className="mt-8">
+                    <input
+                        type="range"
+                        min={activeQuestions[currentQuestionIndex].min}
+                        max={activeQuestions[currentQuestionIndex].max}
+                        step={activeQuestions[currentQuestionIndex].step}
+                        value={sliderValue || activeQuestions[currentQuestionIndex].min}
+                        onChange={handleSliderChange}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="text-center text-xl font-semibold text-indigo-600 mt-4">
+                        {sliderValue} {activeQuestions[currentQuestionIndex].unit}
+                    </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
+                  {activeQuestions[currentQuestionIndex].answerOptions.map((option, index) => {
+                    const isSelected = index === selectedAnswerIndex;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleAnswerOptionClick(option.answerText, index)}
+                        className={isSelected ? STYLES.answerButton.selected : STYLES.answerButton.default}
+                      >
+                        <span className={isSelected ? 'text-white' : 'text-slate-700'}>
+                          {option.answerText}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               
               {isAnswered && (
                   <div className="flex justify-end mt-8">
