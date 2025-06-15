@@ -48,7 +48,7 @@ const Dial = ({ value, label }) => {
                 
                 {/* Labels */}
                 <text x="10" y="58" fontSize="8" fill="#64748b" textAnchor="middle">LOW</text>
-                <text x="50" y="5" fontSize="8" fill="#64748b" textAnchor="middle">MEDIUM</text>
+                <text x="50" y="5.5" fontSize="8" fill="#64748b" textAnchor="middle">MEDIUM</text>
                 <text x="90" y="58" fontSize="8" fill="#64748b" textAnchor="middle">HIGH</text>
             </svg>
             <span className="mt-1 text-sm font-semibold text-slate-600">{label}</span>
@@ -67,12 +67,12 @@ const AnalysisRow = ({ title, score1, score2, texts }) => {
                 <h3 className="text-lg font-bold text-slate-800">{title}</h3>
             </div>
             {/* Dials column - made wider to prevent overlap */}
-            <div className="md:col-span-6 flex justify-around">
+            <div className="md:col-span-4 flex justify-around">
                 <Dial value={score1} label="Impact on values" />
                 <Dial value={score2} label="Risk of exposure" />
             </div>
             {/* Recommendations columns - made narrower */}
-            <div className="md:col-span-4 grid grid-cols-3 gap-4">
+            <div className="md:col-span-6 grid grid-cols-3 gap-4">
                 <div>
                     <h4 className="font-semibold text-slate-700 mb-1">Risk of exposure</h4>
                     <p className="text-sm text-slate-600">{texts[0]}</p>
@@ -246,7 +246,7 @@ export default function Dashboard() {
     
     return (
         <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
-             <div className="max-w-7xl mx-auto">
+             <div className="max-w-9xl mx-auto">
                 <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">Analysis per Categories</h1>
                 
                 {/* Analysis Rows */}
