@@ -105,27 +105,8 @@ const TotalScoreBar = ({ label, value, colorClass }) => {
     );
 };
 
-// --- Dashboard Layout Configuration ---
-const dashboardLayout = [
-    {
-        title: "Behavior & Cognition",
-        questionIds: ['self_isolate', 'cognitive_level']
-    },
-    {
-        title: "Building & Ventilation",
-        questionIds: ['ventilation_status', 'air_quality', 'ventilation_effects']
-    },
-    {
-        title: "Health & Care Readiness",
-        questionIds: ['ppe_stock', 'care_safety']
-    },
-    {
-        title: "Operational Readiness",
-        questionIds: ['staff_capacity', 'budget_status']
-    },
-];
 
-// --- Recommendation Data ---
+// --- Recommendation Data (as before) ---
 const recommendations = {
     'self_isolate' : [
         ["If people can and will self-isolate or take preventive measures, the risk of exposure decreases", "Isolation will reduce quality of life by increasing anxiety and loneliness in addition to possible health struggles. Quality of life will likely not be impacted as much if people can and like to be on their own.", "Prepare residents with the plan so they are prepared when a new pandemic hits. "],
@@ -255,38 +236,36 @@ export default function Dashboard() {
     };
     
     // --- Category Data Processing ---
-    const analysisData = dashboardLayout.map(row => {
-        let totalValueScore = 0;
-        let totalRiskScore = 0;
-        let highestRiskQuestionId = null;
-        let maxRisk = -1;
-
-        row.questionIds.forEach(id => {
-            const answerIndex = answers[id];
-            totalValueScore += getValuesScore(id, answerIndex);
-            
-            const riskScore = getRiskScore(id, answerIndex);
-            totalRiskScore += riskScore;
-
-            if (riskScore > maxRisk) {
-                maxRisk = riskScore;
-                highestRiskQuestionId = id;
-            }
-        });
-
-        const avgValueScore = totalValueScore / row.questionIds.length;
-        const avgRiskScore = totalRiskScore / row.questionIds.length;
-        
-        const recommendationId = highestRiskQuestionId || row.questionIds[0];
-        const recommendationAnswerIndex = answers[recommendationId] || 0;
-
-        return {
-            title: row.title,
-            score1: avgValueScore,
-            score2: avgRiskScore,
-            texts: recommendations[recommendationId] ? recommendations[recommendationId][recommendationAnswerIndex] : ["", "", ""]
-        };
-    });
+    const analysisData = [
+        {
+            title: "Building & Ventilation (System)",
+            score1: getValuesScore('ventilation_status', answers['ventilation_status']),
+            score2: getRiskScore('ventilation_status', answers['ventilation_status']),
+            texts: recommendations['ventilation_status'] ? recommendations['ventilation_status'][answers['ventilation_status'] || 0] : ["", "", ""]
+        },
+        {
+            title: "Building & Ventilation (Air Quality)",
+            score1: getValuesScore('air_quality', answers['air_quality']),
+            score2: getRiskScore('air_quality', answers['air_quality']),
+            texts: recommendations['air_quality'] ? recommendations['air_quality'][answers['air_quality'] || 0] : ["", "", ""]
+        },
+        {
+            title: "Health & Care (Readiness)",
+            score1: (getValuesScore('ppe_stock', answers['ppe_stock']) + getValuesScore('care_safety', answers['care_safety'])) / 2,
+            score2: (getRiskScore('ppe_stock', answers['ppe_stock']) + getRiskScore('care_safety', answers['care_safety'])) / 2,
+            texts: getRiskScore('ppe_stock', answers['ppe_stock']) > getRiskScore('care_safety', answers['care_safety'])
+                   ? (recommendations['ppe_stock'] ? recommendations['ppe_stock'][answers['ppe_stock'] || 0] : ["", "", ""])
+                   : (recommendations['care_safety'] ? recommendations['care_safety'][answers['care_safety'] || 0] : ["", "", ""])
+        },
+        {
+            title: "Operational Readiness",
+            score1: (getValuesScore('staff_capacity', answers['staff_capacity']) + getValuesScore('budget_status', answers['budget_status'])) / 2,
+            score2: (getRiskScore('staff_capacity', answers['staff_capacity']) + getRiskScore('budget_status', answers['budget_status'])) / 2,
+            texts: getRiskScore('staff_capacity', answers['staff_capacity']) > getRiskScore('budget_status', answers['budget_status'])
+                   ? (recommendations['staff_capacity'] ? recommendations['staff_capacity'][answers['staff_capacity'] || 0] : ["", "", ""])
+                   : (recommendations['budget_status'] ? recommendations['budget_status'][answers['budget_status'] || 0] : ["", "", ""])
+        },
+    ];
 
     const totalScoreValues = normalizeScore(analysisData.reduce((acc, item) => acc + item.score1, 0) / analysisData.length);
     const totalScoreExposure = normalizeScore(analysisData.reduce((acc, item) => acc + item.score2, 0) / analysisData.length);
