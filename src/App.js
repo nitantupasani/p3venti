@@ -34,18 +34,18 @@ const translations = {
         viewSummary: 'View Summary',
         questionSets: {
             clinical: [
-                { questionText: 'How many people live in this living group/department?', type: 'slider', min: 1, max: 50, step: 1, unit: 'People' },
-                { questionText: 'How many employees are present in the living/activity room at the same time (e.g. during dinner or an activity)?', type: 'slider', min: 1, max: 50, step: 1, unit: 'Employees' },
-                { questionText: 'How many visitors are in the living room in one day?', type: 'slider', min: 1, max: 50, step: 1, unit: 'Visitors' },
-                { questionText: 'Can the residents self-isolate?', answerOptions: [{ answerText: 'Yes, all of them can self-isolate ' }, { answerText: 'No, not all of them can self-isolate (e.g. due to urge to walk/agression/loneliness)' },{ answerText: 'Unknown' }] },
-                { questionText: 'What is the cognitive level of the residents?', answerOptions: [{ answerText: 'High' }, { answerText: 'Some impairments' }, { answerText: 'Large cognitive impairments' }, { answerText: 'Unknown' }] },
-                { questionText: 'What is the status of the ventilation system?', answerOptions: [{ answerText: 'Good maintenance air ventilation system' }, { answerText: 'Sometimes good, sometimes bad' }, { answerText: 'No ventilation system' }, { answerText: 'Unknown' }] },
-                { questionText: 'What is the air quality usually like?', answerOptions: [{ answerText: 'Air quality generally good' }, { answerText: 'Sometimes good, sometimes bad' }, { answerText: 'Air quality generally poor (e.g. complaints about dry eyes, mouth, skin)' }, { answerText: 'Unknown' }] },
-                { questionText: 'Do the residents feel the effects of increased ventilation? Positive effects could be noticing the fresh air and feeling energized. Negative effects include feeling draughts, feeling cold, getting a stiff neck or feeling dull (suf in NL).', answerOptions: [{ answerText: 'Residents do not feel the effects of increased ventilation (positive or negative)' }, { answerText: 'Residents only feel the positive effects of increased ventilation' }, { answerText: 'Residents feel both the positive and negative effects of increased ventilation' }, { answerText: 'Residents only feel the negative effects of increased ventilation' }, {answerText: 'Unknown'}]},
-                { questionText: 'Do you have enough personal protective equipment in store?', answerOptions: [{ answerText: 'There is enough PPE in stock' }, { answerText: 'There is some PPE in stock to get through the first weeks' }, { answerText: 'There is not enough PPE in stock' }, { answerText: 'Unknown' }] },
-                { questionText: 'Can residents safely receive the (physical and mental) care they need?', answerOptions: [{ answerText: 'Yes' }, { answerText: 'No, need to scale down' }, { answerText: 'No, most care must be stopped' }, { answerText: 'Unknown' }] },
-                { questionText: 'What is the status of staff capacity?', answerOptions: [{ answerText: 'Staff have room in workload to take on extra measures' }, { answerText: 'No room for extra measures in workload but possible extra staff deployment' }, { answerText: 'Staff capacity is at its fullest' }, { answerText: 'Unknown' }] },
-                { questionText: 'Is there enough budget to invest in possible measures if needed?', answerOptions: [{ answerText: 'Enough budget to finance possible measures' }, { answerText: 'Some budget to finance possible measures, but not enough to cover all costs' }, { answerText: 'No budget to finance possible measures' }, { answerText: 'Unknown' }] }
+                { id: 'living_group_size', questionText: 'How many people live in this living group/department?', type: 'slider', min: 1, max: 50, step: 1, unit: 'People' },
+                { id: 'employees_present', questionText: 'How many employees are present in the living/activity room at the same time (e.g. during dinner or an activity)?', type: 'slider', min: 1, max: 50, step: 1, unit: 'Employees' },
+                { id: 'visitors_per_day', questionText: 'How many visitors are in the living room in one day?', type: 'slider', min: 1, max: 50, step: 1, unit: 'Visitors' },
+                { id: 'self_isolate', questionText: 'Can the residents self-isolate?', answerOptions: [{ answerText: 'Yes, all of them can self-isolate ' }, { answerText: 'No, not all of them can self-isolate (e.g. due to urge to walk/agression/loneliness)' },{ answerText: 'Unknown' }] },
+                { id: 'cognitive_level', questionText: 'What is the cognitive level of the residents?', answerOptions: [{ answerText: 'High' }, { answerText: 'Some impairments' }, { answerText: 'Large cognitive impairments' }, { answerText: 'Unknown' }] },
+                { id: 'ventilation_status', questionText: 'What is the status of the ventilation system?', answerOptions: [{ answerText: 'Good maintenance air ventilation system' }, { answerText: 'Sometimes good, sometimes bad' }, { answerText: 'No ventilation system' }, { answerText: 'Unknown' }] },
+                { id: 'air_quality', questionText: 'What is the air quality usually like?', answerOptions: [{ answerText: 'Air quality generally good' }, { answerText: 'Sometimes good, sometimes bad' }, { answerText: 'Air quality generally poor (e.g. complaints about dry eyes, mouth, skin)' }, { answerText: 'Unknown' }] },
+                { id: 'ventilation_effects', questionText: 'Do the residents feel the effects of increased ventilation? Positive effects could be noticing the fresh air and feeling energized. Negative effects include feeling draughts, feeling cold, getting a stiff neck or feeling dull (suf in NL).', answerOptions: [{ answerText: 'Residents do not feel the effects of increased ventilation (positive or negative)' }, { answerText: 'Residents only feel the positive effects of increased ventilation' }, { answerText: 'Residents feel both the positive and negative effects of increased ventilation' }, { answerText: 'Residents only feel the negative effects of increased ventilation' }, {answerText: 'Unknown'}]},
+                { id: 'ppe_stock', questionText: 'Do you have enough personal protective equipment in store?', answerOptions: [{ answerText: 'There is enough PPE in stock' }, { answerText: 'There is some PPE in stock to get through the first weeks' }, { answerText: 'There is not enough PPE in stock' }, { answerText: 'Unknown' }] },
+                { id: 'care_safety', questionText: 'Can residents safely receive the (physical and mental) care they need?', answerOptions: [{ answerText: 'Yes' }, { answerText: 'No, need to scale down' }, { answerText: 'No, most care must be stopped' }, { answerText: 'Unknown' }] },
+                { id: 'staff_capacity', questionText: 'What is the status of staff capacity?', answerOptions: [{ answerText: 'Staff have room in workload to take on extra measures' }, { answerText: 'No room for extra measures in workload but possible extra staff deployment' }, { answerText: 'Staff capacity is at its fullest' }, { answerText: 'Unknown' }] },
+                { id: 'budget_status', questionText: 'Is there enough budget to invest in possible measures if needed?', answerOptions: [{ answerText: 'Enough budget to finance possible measures' }, { answerText: 'Some budget to finance possible measures, but not enough to cover all costs' }, { answerText: 'No budget to finance possible measures' }, { answerText: 'Unknown' }] }
             ],
             operational: [
                 { questionText: 'Which operational improvement should be prioritized?', answerOptions: [{ answerText: 'Optimizing Staff Scheduling and Rotas' }, { answerText: 'Renovating Common Areas for Comfort' }, { answerText: 'Improving Kitchen and Nutritional Facilities' }, { answerText: 'Upgrading the Family Visitation System' }] },
@@ -87,7 +87,7 @@ export default function App() {
   const [language, setLanguage] = useState('en');
   const [activeCategory, setActiveCategory] = useState('clinical');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState({});
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [sliderValue, setSliderValue] = useState(null);
@@ -100,11 +100,11 @@ export default function App() {
   useEffect(() => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
     if (currentQuestion.type === 'slider') {
-        const initialValue = answers[currentQuestionIndex] || currentQuestion.min;
+        const initialValue = answers[currentQuestion.id] || currentQuestion.min;
         setSliderValue(initialValue);
-        const newAnswers = [...answers];
-        if (newAnswers[currentQuestionIndex] === undefined) {
-             newAnswers[currentQuestionIndex] = initialValue;
+        const newAnswers = {...answers};
+        if (newAnswers[currentQuestion.id] === undefined) {
+             newAnswers[currentQuestion.id] = initialValue;
              setAnswers(newAnswers);
         }
         setIsAnswered(true);
@@ -120,24 +120,26 @@ export default function App() {
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
     setCurrentQuestionIndex(0);
-    setAnswers([]);
+    setAnswers({});
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
   };
 
   const handleAnswerOptionClick = (answerText, index) => {
+    const currentQuestion = activeQuestions[currentQuestionIndex];
     setSelectedAnswerIndex(index);
-    const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = index;
+    const newAnswers = {...answers};
+    newAnswers[currentQuestion.id] = index;
     setAnswers(newAnswers);
     if (!isAnswered) setIsAnswered(true);
   };
 
   const handleSliderChange = (e) => {
+    const currentQuestion = activeQuestions[currentQuestionIndex];
     const value = parseInt(e.target.value, 10);
     setSliderValue(value);
-    const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = value;
+    const newAnswers = {...answers};
+    newAnswers[currentQuestion.id] = value;
     setAnswers(newAnswers);
   };
   
