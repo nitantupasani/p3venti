@@ -68,7 +68,7 @@ const AnalysisRow = ({ title, score1, score2, texts }) => {
             </div>
             {/* Dials column - made wider to prevent overlap */}
             <div className="md:col-span-4 flex justify-around">
-                <Dial value={score1} label="Impact on values" />
+                <Dial value={score1} label="Values" />
                 <Dial value={score2} label="Risk of exposure" />
             </div>
             {/* Recommendations columns - made narrower */}
