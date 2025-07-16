@@ -127,6 +127,7 @@ const dashboardLayout = [
 
 // --- Recommendation Data ---
 const recommendations = {
+    en: {
     'self_isolate' : [
         ["If people can and will self-isolate or take preventive measures, the risk of exposure decreases", "Isolation will reduce quality of life by increasing anxiety and loneliness in addition to possible health struggles. Quality of life will likely not be impacted as much if people can and like to be on their own.", "Prepare residents with the plan so they are prepared when a new pandemic hits. "],
         ["If people can or will not stick to the measures, risk of exposure increases" , "Isolation will reduce quality of life by increasing anxiety and loneliness in addition to possible health struggles. This will be stronger if people need to self-isolate when they do not want to. Autonomy will be reduced and can lead to ethical discussions.", "Prepare a personalised plan and alternatives to stay safe around a person who cannot self-isolate."],
@@ -182,6 +183,64 @@ const recommendations = {
         ["Not increasing safety measures poses an increased risk of exposure.", "Not being able to invest in measures (e.g. PPE, ventilation, extra employees) decreases quality of work, comfort, sense of safety, health.", "Look at ways to increase or save budget to invest in safety measures when necessary."],
         ["If this is unknown, that is a risk in itself. ", "", "Achieve to find out so that it is known when a new pandemic hits."]
     ],
+},
+nl: {
+    'self_isolate' : [
+        ["Als mensen zich kunnen en willen isoleren of preventieve maatregelen nemen, neemt het risico op blootstelling af", "Isolatie zal de kwaliteit van leven verminderen door angst en eenzaamheid te vergroten, naast mogelijke gezondheidsproblemen. De kwaliteit van leven wordt waarschijnlijk minder beïnvloed als mensen alleen kunnen en willen zijn.", "Bereid bewoners voor op het plan, zodat ze voorbereid zijn wanneer een nieuwe pandemie toeslaat."],
+        ["Als mensen zich niet aan de maatregelen kunnen of willen houden, neemt het risico op blootstelling toe" , "Isolatie zal de kwaliteit van leven verminderen door angst en eenzaamheid te vergroten, naast mogelijke gezondheidsproblemen. Dit zal sterker zijn als mensen zich moeten isoleren terwijl ze dat niet willen. De autonomie zal worden verminderd en kan leiden tot ethische discussies.", "Stel een persoonlijk plan en alternatieven op om veilig te blijven in de buurt van een persoon die zich niet kan isoleren."],
+        ["","","Probeer dit per bewoner te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."],
+        ["","",""]
+    ],
+    'cognitive_level' : [
+        ["Als mensen de situatie begrijpen en de maatregelen kunnen onthouden, is de kans groter dat ze zich eraan houden, waardoor het risico op blootstelling wordt verkleind. Ze zijn waarschijnlijk ook minder bang voor medewerkers in beschermende kleding, waardoor ze hun werk veilig kunnen doen en het risico op blootstelling wordt verkleind.", "Mensen met een hoog cognitief niveau begrijpen de situatie beter en onthouden de maatregelen beter. Dit is positief voor waarden als kwaliteit van leven, autonomie, gevoel van veiligheid en gezondheid.", "Bereid bewoners voor door het actieplan met hen te delen voor wanneer een nieuwe pandemie toeslaat, zodat dit bekend is." ],
+        ["Als mensen moeite hebben de situatie te begrijpen en de maatregelen te onthouden, is de kans klein dat ze zich eraan houden, waardoor het risico op blootstelling toeneemt. Als ze bang zijn voor medewerkers in beschermende kleding, zou dit het voor hen moeilijk maken om hun werk veilig te doen, waardoor het risico op blootstelling toeneemt.","Mensen met cognitieve moeilijkheden begrijpen de situatie of de maatregelen misschien niet volledig. Dit kan een negatieve invloed hebben op waarden als kwaliteit van leven, autonomie, gevoel van veiligheid en gezondheid.", "Verhoog de sanitaire maatregelen op dagelijkse basis, zodat het voor de bewoners meer routine wordt. Gebruik vereenvoudigde berichtgeving (pictogrammen) om het begrip te vergroten."],
+        ["Als mensen de situatie niet kunnen begrijpen en de maatregelen niet kunnen onthouden, is de kans klein dat ze zich eraan houden, waardoor het risico op blootstelling toeneemt. Als ze bang zijn voor medewerkers in beschermende kleding, zou dit het voor hen moeilijk maken om hun werk veilig te doen, waardoor het risico op blootstelling toeneemt.", "Mensen met grote cognitieve beperkingen zullen de situatie of de maatregelen waarschijnlijk niet volledig begrijpen. Dit kan een negatieve invloed hebben op waarden als kwaliteit van leven, autonomie, gevoel van veiligheid en gezondheid.", "Verhoog de sanitaire maatregelen op dagelijkse basis, zodat het meer routine wordt. Hang posters op met vereenvoudigde berichtgeving (pictogrammen) om mensen aan de maatregelen te herinneren. Betrek bekende personen bij de communicatie (bijv. familie)."],
+        ["","","Probeer dit per bewoner te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'ventilation_status': [
+        ["Goede luchtventilatie verlaagt het risico op blootstelling.", "Goede luchtventilatiesystemen verhogen de gezondheid, het gevoel van veiligheid, de kwaliteit van leven en de kwaliteit van het werk.", "Zorg voor regelmatig onderhoud. Doe regelmatig controles."],
+        ["Slechte luchtventilatie verhoogt het risico op blootstelling.", "Slechte luchtventilatiesystemen kunnen de gezondheid, het gevoel van veiligheid, de kwaliteit van leven en de kwaliteit van het werk verminderen.", "Verhoog het onderhoud om ervoor te zorgen dat het goed functioneert."],
+        ["Geen luchtventilatie verhoogt het risico op blootstelling.", "Geen ventilatiesysteem verlaagt de gezondheid, het gevoel van veiligheid, de kwaliteit van leven en de kwaliteit van het werk.", "Installeer een ventilatiesysteem en zorg ervoor dat het goed functioneert."],
+        ["", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'air_quality': [
+        ["Goede luchtkwaliteit verlaagt het risico op blootstelling.", "Goede luchtkwaliteit verhoogt de gezondheid, het gevoel van veiligheid, de kwaliteit van leven en de kwaliteit van het werk.", "Doe regelmatig controles. Doe regelmatig ventilatiecontroles om precies te weten hoe uw systeem functioneert en hoe het kan worden aangepast om tijdens een pandemie te functioneren."],
+        ["Twijfelachtige luchtkwaliteit verhoogt het risico op blootstelling.", "Slechte luchtkwaliteit kan de gezondheid, het gevoel van veiligheid, de kwaliteit van leven en de kwaliteit van het werk verminderen.", "Repareer het ventilatiesysteem. Zorg ervoor dat het goed functioneert. Doe regelmatig ventilatiecontroles om precies te weten hoe uw systeem functioneert en hoe het kan worden aangepast om tijdens een pandemie te functioneren."],
+        ["Slechte luchtkwaliteit verhoogt het risico op blootstelling.", "Slechte luchtkwaliteit kan de gezondheid, het gevoel van veiligheid, de kwaliteit van leven en de kwaliteit van het werk verminderen.", "Repareer het ventilatiesysteem. Zorg ervoor dat het goed functioneert. Doe regelmatig ventilatiecontroles om precies te weten hoe uw systeem functioneert en hoe het kan worden aangepast om tijdens een pandemie te functioneren."],
+        ["", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'ventilation_effects': [
+        ["Als er geen klachten zijn, kan de ventilatie zonder problemen worden verhoogd. Dit verkleint de kans op blootstelling.", "Verhoogde ventilatie zal de gezondheid en de kwaliteit van het werk verbeteren. Als bewoners geen verhoogde ventilatie opmerken, zal dit waarschijnlijk geen invloed hebben op waarden als comfort.", "Informeer de bewoners en medewerkers over de positieve effecten van verhoogde ventilatie."],
+        ["Als er geen klachten zijn, kan de ventilatie zonder problemen worden verhoogd. Dit verkleint de kans op blootstelling.", "Verhoogde ventilatie zal de gezondheid en de kwaliteit van het werk verbeteren. Als bewoners de positieve effecten van ventilatie voelen, is dat een extra reden om de ventilatie te verhogen. Dit verhoogt het gevoel van veiligheid.", "Geen actie vereist."],
+        ["Als er klachten zijn, kan de ventilatie niet zo veel/vaak worden verhoogd als gewenst en dit verhoogt het risico op blootstelling. Als de positieve effecten echter ook worden opgemerkt, kan de ventilatie een beetje worden opgevoerd, wat het risico op blootstelling verkleint.","Verhoogde ventilatie zal de gezondheid en de kwaliteit van het werk verbeteren. Als bewoners het echter koud krijgen en een stijve nek krijgen als de ventilatie wordt verhoogd, gaat hun comfortniveau sterk omlaag. Ze zullen waarschijnlijk klagen en het wordt elke keer een 'gevecht' met de medewerkers. Als bewoners echter de positieve effecten van ventilatie voelen, is dat een extra reden om de ventilatie te verhogen. Dit verhoogt het gevoel van veiligheid.", "Informeer de bewoners en medewerkers over de positieve effecten van verhoogde ventilatie. Zoek oplossingen voor de negatieve effecten van verhoogde ventilatie. Vermijd bijvoorbeeld tocht in zitgedeeltes."],
+        ["Als er veel klachten zijn, kan de ventilatie niet zo veel/vaak worden verhoogd als gewenst en dit verhoogt het risico op blootstelling.", "Verhoogde ventilatie zal de gezondheid en de kwaliteit van het werk verbeteren. Als bewoners het echter koud krijgen en een stijve nek krijgen als de ventilatie wordt verhoogd, gaat hun comfortniveau sterk omlaag. Ze zullen waarschijnlijk klagen en het wordt elke keer een 'gevecht' met de medewerkers.", "Informeer de bewoners en medewerkers over de positieve effecten van verhoogde ventilatie. Zoek oplossingen voor de negatieve effecten van verhoogde ventilatie. Vermijd bijvoorbeeld tocht in zitgedeeltes."],
+        ["", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'ppe_stock': [
+        ["Voldoende PBM hebben om te gebruiken wanneer dat nodig is, verkleint het risico op blootstelling.", "Voldoende PBM verhoogt het gevoel van veiligheid, gezondheid, kwaliteit van het werk op het gebied van veiligheid en erkenning. De PBM zelf kan de kwaliteit van het werk op het gebied van comfort verminderen.", "Zorg ervoor dat de PBM niet verouderd zijn. Zo ja, zorg ervoor dat u op tijd nieuwe artikelen bestelt."],
+        ["Voldoende PBM hebben om te gebruiken wanneer dat nodig is, verkleint het risico op blootstelling. Er moet echter voldoende zijn voor een langere periode", "Het hebben van enige PBM verhoogt op korte termijn het gevoel van veiligheid, gezondheid, kwaliteit van het werk op het gebied van veiligheid en erkenning. Om dit op de langere termijn te garanderen, moet er voldoende op voorraad zijn. De PBM zelf kan de kwaliteit van het werk op het gebied van comfort verminderen.", "Controleer of de PBM niet verlopen zijn. Zorg er ook voor dat de voorraad wordt aangevuld."],
+        ["Onvoldoende PBM hebben om te gebruiken wanneer dat nodig is, verhoogt het risico op blootstelling.", "Onvoldoende PBM verlaagt het gevoel van veiligheid, gezondheid, kwaliteit van het werk op het gebied van veiligheid en erkenning.", "Bestel voldoende PBM om de voorraad aan te vullen. Zorg ervoor dat deze niet verouderd zijn."],
+        ["", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'care_safety': [
+        ["Geen invloed op het risico op blootstelling.", "Geen invloed op waarden.", "Doe regelmatig controles."],
+        ["Het niet veilig ontvangen van alle zorg die een persoon nodig heeft, kan het risico op blootstelling tijdens de contactmomenten verhogen. Dit kan ook de algemene gezondheid verminderen, wat leidt tot een risico op grotere gevolgen als men wordt blootgesteld aan het virus.", "Impact op de waarde van gezondheidszorg en kwaliteit van leven.", "Zorg ervoor dat mensen alle zorg die ze nodig hebben op een veilige manier kunnen ontvangen."],
+        ["Het stopzetten van de zorg kan het aantal interacties verminderen, wat het risico op blootstelling verkleint. Het zal echter ook de algehele conditie verminderen, wat leidt tot een risico op grotere gevolgen als men wordt blootgesteld aan het virus.", "Dit heeft grote gevolgen voor waarden als gezondheidszorg, kwaliteit van leven en comfort. Zal leiden tot ethische dilemma's.", "Zorg ervoor dat mensen alle zorg die ze nodig hebben op een veilige manier kunnen ontvangen. Bespreek voorspelde ethische dilemma's van tevoren."],
+        ["", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'staff_capacity': [
+        ["Het verhogen van de maatregelen zonder het aantal mensen in het gebouw te verhogen, is positief in termen van risico op blootstelling.", "Let erop dat de werkdruk niet te veel toeneemt, zodat dit een negatieve invloed heeft op de kwaliteit van het werk, wat op zijn beurt de kwaliteit van leven en de gezondheidszorg kan beïnvloeden.", "Bereid systemen en personeel voor, zodat bekend is hoe taken zullen worden uitgevoerd en de capaciteit kan worden verhoogd wanneer dat nodig is."],
+        ["Het kunnen verhogen van de capaciteit maakt andere veilige manieren van werken mogelijk (bijv. cohorten), wat het risico op blootstelling verkleint. Anderzijds zijn er nu meer mensen in het gebouw, wat kan leiden tot meer interacties, wat het risico op blootstelling verhoogt.", "Het hebben van capaciteit om het aantal medewerkers te verhogen wanneer dat nodig is, verhoogt waarden als kwaliteit van het werk, comfort, kwaliteit van leven en gezondheid & zorg.", "Bereid systemen en personeel voor, zodat bekend is hoe de capaciteit zal worden verhoogd wanneer dat nodig is."],
+        ["Het niet kunnen verhogen van de capaciteit leidt tot het verleggen van grenzen, overwerk en haast, wat allemaal risico's zijn voor fouten en/of naleving en dus het risico op blootstelling verhoogt.", "Geen tempo hebben om de capaciteit te verhogen wanneer dat nodig is, verlaagt waarden als kwaliteit van het werk, comfort, kwaliteit van leven en gezondheid & zorg.", "Probeer meer capaciteit te creëren, zodat er ruimte is om de capaciteit te verhogen wanneer dat nodig is. Bereid systemen en personeel voor, zodat bekend is hoe de capaciteit kan worden verhoogd wanneer dat nodig is."],
+        ["", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+    'budget_status': [
+        ["Het verhogen van de veiligheidsmaatregelen verlaagt het risico op blootstelling.", "Kunnen investeren in maatregelen (bijv. PBM, ventilatie, extra medewerkers) verhoogt de kwaliteit van het werk, het comfort, het gevoel van veiligheid en de gezondheid.", "Geen actie vereist. Zorg ervoor dat het budget beschikbaar blijft om te investeren in veiligheidsmaatregelen wanneer dat nodig is."],
+        ["Het verhogen van de veiligheidsmaatregelen verlaagt het risico op blootstelling.", "Kunnen investeren in maatregelen (bijv. PBM, ventilatie, extra medewerkers) verhoogt de kwaliteit van het werk, het comfort, het gevoel van veiligheid en de gezondheid. Maar niet in alles kunnen investeren, zet dit onder druk.", "Probeer het budget te verhogen om te kunnen investeren in veiligheidsmaatregelen wanneer dat nodig is. Er zijn mogelijk subsidies om te helpen."],
+        ["Het niet verhogen van de veiligheidsmaatregelen brengt een verhoogd risico op blootstelling met zich mee.", "Niet kunnen investeren in maatregelen (bijv. PBM, ventilatie, extra medewerkers) verlaagt de kwaliteit van het werk, het comfort, het gevoel van veiligheid en de gezondheid.", "Kijk naar manieren om het budget te verhogen of te besparen om te investeren in veiligheidsmaatregelen wanneer dat nodig is."],
+        ["Als dit onbekend is, is dat een risico op zich.", "", "Probeer dit te achterhalen, zodat dit bekend is wanneer een nieuwe pandemie toeslaat."]
+    ],
+}
 };
 
 // --- Scoring Rules ---
@@ -228,13 +287,16 @@ const scoringRules = {
 export default function Dashboard() {
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const { answers, content } = location.state || { answers: {}, content: {} };
+
+    // Determine the current language based on the content object
+    const language = content.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en';
+    const langRecommendations = recommendations[language];
 
     const handleRestart = () => {
         navigate('/');
     };
-    
     // --- Scoring Logic ---
     const normalizeScore = (score) => (score / 5) * 100;
 
@@ -284,7 +346,7 @@ export default function Dashboard() {
             title: row.title,
             score1: avgValueScore,
             score2: avgRiskScore,
-            texts: recommendations[recommendationId] ? recommendations[recommendationId][recommendationAnswerIndex] : ["", "", ""]
+            texts: langRecommendations[recommendationId] ? langRecommendations[recommendationId][recommendationAnswerIndex] : ["", "", ""]
         };
     });
 
