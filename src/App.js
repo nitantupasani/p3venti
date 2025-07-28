@@ -4,9 +4,13 @@ import CustomSlider from './CustomSlider';
 
 // --- Style Definitions ---
 const STYLES = {
-    languageSelect: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
+    // FIX: Adjusted language select styles for both mobile (full-width) and desktop (auto-width)
+    languageSelect: {
+      menu: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full',
+      header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors'
+    },
     categoryButton: {
-        base: 'px-6 py-3 rounded-full text-base font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap',
+        base: 'px-6 py-3 rounded-full text-base font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap w-full text-center',
         get active() { return `${this.base} bg-indigo-600 text-white shadow-lg`; },
         get inactive() { return `${this.base} bg-white text-slate-700 hover:bg-slate-100 border-2 border-slate-300`; },
     },
@@ -119,7 +123,7 @@ export default function App() {
   const [answers, setAnswers] = useState({});
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  // --- FIX: Removed unused sliderValue state ---
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // --- Dynamic Content Variables ---
   const content = translations[language];
@@ -131,7 +135,7 @@ export default function App() {
     const answer = answers[currentQuestion.id];
 
     if (currentQuestion.type === 'slider') {
-        const initialValue = answer ?? currentQuestion.min; // Use ?? for concise check
+        const initialValue = answer ?? currentQuestion.min;
         if (answer === undefined) {
             setAnswers(prev => ({...prev, [currentQuestion.id]: initialValue}));
         }
@@ -140,7 +144,7 @@ export default function App() {
         setSelectedAnswerIndex(null);
         setIsAnswered(answer && answer.length > 0);
     } else {
-        setSelectedAnswerIndex(answer ?? null); // Use ?? for concise check
+        setSelectedAnswerIndex(answer ?? null);
         setIsAnswered(answer !== undefined);
     }
   }, [currentQuestionIndex, activeCategory, activeQuestions, answers]);
@@ -149,6 +153,7 @@ export default function App() {
   // --- Event Handlers ---
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
+    setIsMenuOpen(false); // Close menu on selection
   };
 
   const handleCategoryChange = (category) => {
@@ -157,6 +162,7 @@ export default function App() {
     setAnswers({});
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
+    setIsMenuOpen(false); // Close menu on selection
   };
 
   const handleAnswerOptionClick = (answerText, index) => {
@@ -195,7 +201,7 @@ export default function App() {
 
   const handleSliderChange = (e) => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
-    const value = parseFloat(e.target.value); // Use parseFloat for step values
+    const value = parseFloat(e.target.value);
     setAnswers(prev => ({...prev, [currentQuestion.id]: value}));
   };
   
@@ -223,45 +229,99 @@ export default function App() {
     }
   };
   const currentQuestion = activeQuestions[currentQuestionIndex];
+
+  // --- Reusable Menu Content for Mobile ---
+  const MobileMenuContent = () => (
+    <>
+      <button
+        onClick={() => handleCategoryChange('clinical')}
+        className={activeCategory === 'clinical' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive}
+      >
+        {content.categoryOrganization}
+      </button>
+      <button
+        onClick={() => handleCategoryChange('operational')}
+        className={activeCategory === 'operational' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive}
+      >
+        {content.categoryPersonal}
+      </button>
+      <div className="pt-2">
+        <select 
+            onChange={handleLanguageChange} 
+            value={language}
+            className={STYLES.languageSelect.menu}
+        >
+            <option value="en">English</option>
+            <option value="nl">Nederlands</option>
+        </select>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 sm:p-8">
       <div className="w-full max-w-7xl mx-auto">
         
-        <header className="grid grid-cols-3 items-center mb-12">
-            <div className="flex justify-start items-center space-x-4">
-                <button
-                    onClick={() => handleCategoryChange('clinical')}
-                    className={activeCategory === 'clinical' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive}
-                >
-                    {content.categoryOrganization}
-                </button>
-                <button
-                    onClick={() => handleCategoryChange('operational')}
-                    className={activeCategory === 'operational' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive}
-                >
-                    {content.categoryPersonal}
-                </button>
-            </div>
-            
-            <div className="text-center">
-                <div className="flex justify-center items-center gap-x-3">
-                  <img src="/p3venti.png" alt="P3Venti Logo" className="h-14" />
-                  <h1 className="text-5xl font-extrabold text-indigo-600">P3Venti</h1>
-                </div>
-                <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
-            </div>
+        {/* --- FIX: Final Responsive Header --- */}
+        <header className="relative flex justify-between items-center lg:grid lg:grid-cols-3 lg:gap-4 mb-12">
+          {/* Column 1: Action Buttons (Desktop) */}
+          <div className="hidden lg:flex items-center gap-4">
+            <button
+              onClick={() => handleCategoryChange('clinical')}
+              // Use inactive style and remove full-width
+              className={`${activeCategory === 'clinical' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive} w-auto`}
+            >
+              {content.categoryOrganization}
+            </button>
+            <button
+              onClick={() => handleCategoryChange('operational')}
+              className={`${activeCategory === 'operational' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive} w-auto`}
+            >
+              {content.categoryPersonal}
+            </button>
+          </div>
 
-            <div className="flex justify-end">
-                <select 
-                    onChange={handleLanguageChange} 
-                    value={language}
-                    className={STYLES.languageSelect}
-                >
-                    <option value="en">English</option>
-                    <option value="nl">Nederlands</option>
-                </select>
+          {/* Column 2: Title (Center) */}
+          <div className="lg:text-center">
+              <div className="flex justify-center items-center gap-x-3">
+                <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
+                <h1 className="text-4xl lg:text-5xl font-extrabold text-indigo-600">P3Venti</h1>
+              </div>
+              <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
+          </div>
+
+          {/* Column 3: Controls (Right) */}
+          <div className="flex justify-end items-center">
+            {/* Hamburger Menu Button (Mobile) */}
+            <div className="lg:hidden">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
+                {isMenuOpen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                )}
+              </button>
             </div>
+            {/* Language Dropdown (Desktop) */}
+            <div className="hidden lg:block">
+              <select
+                  onChange={handleLanguageChange}
+                  value={language}
+                  className={STYLES.languageSelect.header}
+              >
+                  <option value="en">English</option>
+                  <option value="nl">Nederlands</option>
+              </select>
+            </div>
+          </div>
         </header>
+
+        {/* --- Mobile Menu Panel --- */}
+        {isMenuOpen && (
+          <div className="lg:hidden bg-white rounded-lg shadow-xl p-4 mb-8 space-y-4">
+            <MobileMenuContent />
+          </div>
+        )}
         
         <main className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 transition-all duration-500 max-w-3xl mx-auto">
             <div className="mb-12">
