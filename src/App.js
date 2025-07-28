@@ -16,6 +16,7 @@ const STYLES = {
         get selected() { return `${this.base} bg-indigo-600 border-indigo-600 cursor-default`; },
     },
     nextButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg',
+    previousButton: 'bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg',
     restartButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg',
 };
 
@@ -30,6 +31,7 @@ const translations = {
         summaryTitle: 'Action Plan Summary',
         summarySubtitle: 'The following priorities have been selected:',
         startOver: 'Start Over',
+        previousStep: 'Previous Step',
         nextStep: 'Next Step',
         viewSummary: 'View Summary',
         questionSets: {
@@ -46,7 +48,7 @@ const translations = {
               { id: "q10", questionText: "How many windows and doors that open to the outside are present?", type: "slider", min: 0, max: 10, unit: "items" },
               { id: "q11", questionText: "How many ventilation grilles to the outside are present?", type: "slider", min: 0, max: 10, unit: "grilles" },
               { id: "q12", questionText: "Is air recirculated through the building?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
-              { id: "q13", questionText: "Which air quality sensors are present in the room? (Multiple choice)", answerOptions: [{ answerText: "CO2 meter (carbon dioxide in the air)" }, { answerText: "Relative humidity" }, { answerText: "VOC meter (volatile organic compounds in the air)" }, { answerText: "TVOC (total volatile organic compounds in the air)" }, { answerText: "PM2.5 (particulate matter smaller than 2.5 micrometers)" }, { answerText: "PM10 (particulate matter smaller than 10 micrometers)" }, { answerText: "No sensors present" }] },
+              { id: "q13", questionText: "Which air quality sensors are present in the room? (Multiple choice)",multiple: true, answerOptions: [{ answerText: "CO2 meter (carbon dioxide in the air)" }, { answerText: "Relative humidity" }, { answerText: "VOC meter (volatile organic compounds in the air)" }, { answerText: "TVOC (total volatile organic compounds in the air)" }, { answerText: "PM2.5 (particulate matter smaller than 2.5 micrometers)" }, { answerText: "PM10 (particulate matter smaller than 10 micrometers)" }, { answerText: "No sensors present" }] },
               { id: "q14", questionText: "What is the status of the ventilation system?", answerOptions: [{ answerText: "Maintenance is up to date" }, { answerText: "Maintenance is not up to date" }, { answerText: "There is no ventilation system" }] },
               { id: "q15", questionText: "How good is the air quality normally?", answerOptions: [{ answerText: "Good air quality" }, { answerText: "Sometimes good, sometimes bad (e.g., occasional complaints of dry skin, eyes, nose, throat, or respiratory issues)" }, { answerText: "Poor air quality (e.g., frequent complaints of dry skin, eyes, nose, throat, or respiratory issues)" }] },
               { id: "q16", questionText: "Do residents feel the effects of increased ventilation? Positive effects can include more fresh air, fewer breathing problems, or the elimination of unpleasant odors. Negative effects include drafts, cold, and a stiff neck.", answerOptions: [{ answerText: "Residents feel no effects of increased ventilation (positive or negative)" }, { answerText: "Residents feel only the positive effects of increased ventilation" }, { answerText: "Residents feel only the negative effects of increased ventilation" }, { answerText: "Residents feel both the positive and negative effects of increased ventilation" }] },
@@ -71,6 +73,7 @@ const translations = {
         summaryTitle: 'Overzicht Actieplan',
         summarySubtitle: 'De volgende prioriteiten zijn geselecteerd:',
         startOver: 'Opnieuw Beginnen',
+        previousStep: 'Vorige Stap',
         nextStep: 'Volgende Stap',
         viewSummary: 'Bekijk Overzicht',
         questionSets: {
@@ -87,7 +90,7 @@ const translations = {
               { id: "q10", questionText: "Hoeveel ramen en deuren zijn er aanwezig die open kunnen naar de buitenlucht?", type: "slider", min: 0, max: 10, unit: "items" },
               { id: "q11", questionText: "Hoeveel ventilatieroosters zijn er aanwezig naar buiten?", type: "slider", min: 0, max: 10, unit: "roosters" },
               { id: "q12", questionText: "Wordt er lucht gerecirculeerd door het gebouw?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
-              { id: "q13", questionText: "Welke er luchtkwaliteitsensoren zijn aanwezig in de ruimte? (Meerdere keuzes mogelijk)", answerOptions: [{ answerText: "CO2 meter (koolstofdioxide in de lucht)" }, { answerText: "Relatieve luchtvochtigheid" }, { answerText: "VOC meter (vluchtige organische stoffen in de lucht)" }, { answerText: "TVOC (totale vluchtige organische stoffen in de lucht)" }, { answerText: "PM2.5 (fijnstofdeeltjes kleiner dan 2,5 micrometer)" }, { answerText: "PM10 (fijnstofdeeltjes kleiner dan 10 micrometer)" }, { answerText: "Geen sensoren aanwezig" }] },
+              { id: "q13", questionText: "Welke er luchtkwaliteitsensoren zijn aanwezig in de ruimte? (Meerdere keuzes mogelijk)",multiple: true,  answerOptions: [{ answerText: "CO2 meter (koolstofdioxide in de lucht)" }, { answerText: "Relatieve luchtvochtigheid" }, { answerText: "VOC meter (vluchtige organische stoffen in de lucht)" }, { answerText: "TVOC (totale vluchtige organische stoffen in de lucht)" }, { answerText: "PM2.5 (fijnstofdeeltjes kleiner dan 2,5 micrometer)" }, { answerText: "PM10 (fijnstofdeeltjes kleiner dan 10 micrometer)" }, { answerText: "Geen sensoren aanwezig" }] },
               { id: "q14", questionText: "Wat is de status van het ventilatiesysteem?", answerOptions: [{ answerText: "Onderhoud is op orde" }, { answerText: "Onderhoud is niet op orde" }, { answerText: "Er is geen ventilatiesysteem" }] },
               { id: "q15", questionText: "Hoe goed is de luchtkwaliteit normaalgesproken?", answerOptions: [{ answerText: "Goede luchtkwaliteit" }, { answerText: "Soms goed, soms slecht (bijvoorbeeld soms klachten over droge huid, ogen, neus, keel of ademhalingsklachten)" }, { answerText: "Slechte luchtkwaliteit (bijvoorbeeld vaak klachten over droge huid, ogen, neus, keel of ademhalingsklachten)" }] },
               { id: "q16", questionText: "Voelen de bewoners de effecten van toegenomen ventilatie? Positieve effecten kunnen zijn bijvoorbeeld meer frisse lucht, minder ademhalingsproblemen of onaangename geuren verwijderen. Negatieve effecten zijn bijvoorbeeld tocht, kou, een stijve nek.", answerOptions: [{ answerText: "Bewoners voelen geen effecten van verhoogde ventilatie (positief of negatief)" }, { answerText: "Bewoners voelen alleen de positieve effecten van verhoogde ventilatie" }, { answerText: "Bewoners voelen alleen de negatieve effecten van verhoogde ventilatie" }, { answerText: "Bewoners voelen zowel de positieve als de negatieve effecten van verhoogde ventilatie" }] },
@@ -122,17 +125,23 @@ export default function App() {
   const activeQuestions = content.questionSets[activeCategory];
 
   // --- Effect for slider initialization ---
-  useEffect(() => {
+useEffect(() => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
+    const answer = answers[currentQuestion.id];
+
     if (currentQuestion.type === 'slider') {
-        const initialValue = answers[currentQuestion.id] || currentQuestion.min;
+        const initialValue = answer || currentQuestion.min;
         setSliderValue(initialValue);
-        const newAnswers = {...answers};
-        if (newAnswers[currentQuestion.id] === undefined) {
-             newAnswers[currentQuestion.id] = initialValue;
-             setAnswers(newAnswers);
+        if (answer === undefined) {
+            setAnswers(prev => ({...prev, [currentQuestion.id]: initialValue}));
         }
         setIsAnswered(true);
+    } else if (currentQuestion.multiple) {
+        setSelectedAnswerIndex(null);
+        setIsAnswered(answer && answer.length > 0);
+    } else {
+        setSelectedAnswerIndex(answer !== undefined ? answer : null);
+        setIsAnswered(answer !== undefined);
     }
   }, [currentQuestionIndex, activeCategory, activeQuestions, answers]);
 
@@ -150,13 +159,38 @@ export default function App() {
     setIsAnswered(false);
   };
 
-  const handleAnswerOptionClick = (answerText, index) => {
+const handleAnswerOptionClick = (answerText, index) => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
-    setSelectedAnswerIndex(index);
-    const newAnswers = {...answers};
-    newAnswers[currentQuestion.id] = index;
-    setAnswers(newAnswers);
-    if (!isAnswered) setIsAnswered(true);
+    const newAnswers = { ...answers };
+
+    if (currentQuestion.multiple) {
+      let selectedAnswers = newAnswers[currentQuestion.id] || [];
+      const noSensorsIndex = currentQuestion.answerOptions.length - 1;
+
+      if (index === noSensorsIndex) {
+        selectedAnswers = selectedAnswers.includes(noSensorsIndex) ? [] : [noSensorsIndex];
+      } else {
+        const answerIndex = selectedAnswers.indexOf(index);
+        if (answerIndex > -1) {
+            selectedAnswers.splice(answerIndex, 1);
+        } else {
+            selectedAnswers.push(index);
+        }
+        const noSensorsInList = selectedAnswers.indexOf(noSensorsIndex);
+        if (noSensorsInList > -1) {
+            selectedAnswers.splice(noSensorsInList, 1);
+        }
+      }
+
+      newAnswers[currentQuestion.id] = selectedAnswers;
+      setAnswers(newAnswers);
+      setIsAnswered(selectedAnswers.length > 0);
+    } else {
+      newAnswers[currentQuestion.id] = index;
+      setAnswers(newAnswers);
+      setSelectedAnswerIndex(index);
+      setIsAnswered(true);
+    }
   };
 
   const handleSliderChange = (e) => {
@@ -187,6 +221,13 @@ export default function App() {
         });
     }
   }
+
+const handlePreviousQuestion = () => {
+    const prevQuestionIndex = currentQuestionIndex - 1;
+    if (prevQuestionIndex >= 0) {
+      setCurrentQuestionIndex(prevQuestionIndex);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 pt-10 sm:pt-12 font-sans">
@@ -254,7 +295,10 @@ export default function App() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   {activeQuestions[currentQuestionIndex].answerOptions.map((option, index) => {
-                    const isSelected = index === selectedAnswerIndex;
+                    const currentQuestion = activeQuestions[currentQuestionIndex];
+                const isSelected = currentQuestion.multiple
+                  ? (answers[currentQuestion.id] || []).includes(index)
+                  : index === selectedAnswerIndex;
                     return (
                       <button
                         key={index}
@@ -270,13 +314,18 @@ export default function App() {
                 </div>
               )}
               
-              {isAnswered && (
-                  <div className="flex justify-end mt-8">
-                      <button onClick={handleNextQuestion} className={STYLES.nextButton}>
-                          {currentQuestionIndex < activeQuestions.length - 1 ? content.nextStep : content.viewSummary}
-                      </button>
-                  </div>
-              )}
+              <div className="flex justify-between mt-8">
+                {currentQuestionIndex > 0 && (
+                  <button onClick={handlePreviousQuestion} className={STYLES.previousButton}>
+                    {content.previousStep}
+                  </button>
+                )}
+                {isAnswered && (
+                  <button onClick={handleNextQuestion} className={`${STYLES.nextButton} ${currentQuestionIndex === 0 ? 'ml-auto' : ''}`}>
+                    {currentQuestionIndex < activeQuestions.length - 1 ? content.nextStep : content.viewSummary}
+                  </button>
+                )}
+              </div>
             </>
         </div>
       </div>
