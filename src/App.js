@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CustomSlider from './CustomSlider';
 
 // --- Style Definitions ---
 const STYLES = {
-    languageSelect: 'bg-white border border-slate-300 rounded-md py-2 px-3 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500',
+    languageSelect: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
     categoryButton: {
-        // Added whitespace-nowrap to prevent text wrapping and increased padding
-        base: 'px-8 py-2 rounded-full text-base font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap',
-        get active() { return `${this.base} bg-indigo-600 text-white shadow-md`; },
-        get inactive() { return `${this.base} bg-white text-slate-600 hover:bg-slate-100 border border-slate-300`; },
+        base: 'px-6 py-3 rounded-full text-base font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap',
+        get active() { return `${this.base} bg-indigo-600 text-white shadow-lg`; },
+        get inactive() { return `${this.base} bg-white text-slate-700 hover:bg-slate-100 border-2 border-slate-300`; },
     },
     answerButton: {
-        base: 'p-4 rounded-lg text-left text-base font-medium transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-        get default() { return `${this.base} bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 cursor-pointer`; },
-        get selected() { return `${this.base} bg-indigo-600 border-indigo-600 cursor-default`; },
+        base: 'p-5 rounded-xl text-left text-base font-semibold transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+        get default() { return `${this.base} bg-white hover:bg-indigo-50 border-2 border-slate-300 hover:border-indigo-400 cursor-pointer`; },
+        get selected() { return `${this.base} bg-indigo-600 text-white border-2 border-indigo-600 cursor-default`; },
     },
-    nextButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg',
-    previousButton: 'bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg',
-    restartButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg',
+    navButton: 'font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg hover:shadow-xl',
+    get nextButton() { return `${this.navButton} bg-indigo-600 hover:bg-indigo-700 text-white`; },
+    get previousButton() { return `${this.navButton} bg-slate-500 hover:bg-slate-600 text-white`; },
 };
 
-// --- Multi-language Content ---
+// --- Multi-language Content (unchanged) ---
 const translations = {
     en: {
         pageSubtitle: 'Care Home Action Plan',
@@ -36,15 +36,15 @@ const translations = {
         viewSummary: 'View Summary',
         questionSets: {
             clinical: [
-              { id: "q1", questionText: "How many people live in this residential group?", type: "slider", min: 0, max: 30, unit: "people" },
-              { id: "q2", questionText: "On average, how many employees are present in the living room during the day? (This includes all employees: caregivers, cleaners, etc. Please provide an average as this may vary.)", type: "slider", min: 0, max: 30, unit: "employees" },
-              { id: "q3", questionText: "On average, how many visitors are present in the living room on a given day? (Please provide an average as this may vary.)", type: "slider", min: 0, max: 30, unit: "visitors" },
+              { id: "q1", questionText: "How many people live in this residential group?", type: "slider", min: 0, max: 50, unit: "people" },
+              { id: "q2", questionText: "On average, how many employees are present in the living room during the day? (This includes all employees: caregivers, cleaners, etc. Please provide an average as this may vary.)", type: "slider", min: 0, max: 50, unit: "employees" },
+              { id: "q3", questionText: "On average, how many visitors are present in the living room on a given day? (This includes all employees: caregivers, cleaners, etc. Please provide an average as this may vary.)", type: "slider", min: 0, max: 50, unit: "visitors" },
               { id: "q4", questionText: "Can the residents self-isolate?", answerOptions: [{ answerText: "Yes, they can all self-isolate" }, { answerText: "No, not everyone can self-isolate (e.g., due to wandering, aggression, loneliness, etc.)" }] },
               { id: "q5", questionText: "What is the cognitive level of the residents?", answerOptions: [{ answerText: "No one has cognitive problems" }, { answerText: "Some cognitive decline" }, { answerText: "Major cognitive problems" }] },
               { id: "q6", questionText: "Does everyone have sufficient knowledge of infection prevention measures?", answerOptions: [{ answerText: "Yes, there is sufficient knowledge of infection prevention measures" }, { answerText: "No, there is not enough knowledge of infection prevention measures" }] },
               { id: "q7", questionText: "What is the area of the living room in square meters?", type: "slider", min: 0, max: 200, unit: "m²" },
               { id: "q8", questionText: "What is the shape of the living room?", answerOptions: [{ answerText: "Rectangle" }, { answerText: "Circle" }, { answerText: "Oval" }, { answerText: "L-shape" }] },
-              { id: "q9", questionText: "How much space should be between people (in meters)?", type: "slider", min: 0, max: 5, unit: "meters" },
+              { id: "q9", questionText: "How much space should be between people (in meters)?", type: "slider", min: 0, max: 5, unit: "meters", step: 0.5 },
               { id: "q10", questionText: "How many windows and doors that open to the outside are present?", type: "slider", min: 0, max: 10, unit: "items" },
               { id: "q11", questionText: "How many ventilation grilles to the outside are present?", type: "slider", min: 0, max: 10, unit: "grilles" },
               { id: "q12", questionText: "Is air recirculated through the building?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
@@ -78,15 +78,15 @@ const translations = {
         viewSummary: 'Bekijk Overzicht',
         questionSets: {
             clinical: [
-              { id: "q1", questionText: "Hoeveel mensen wonen in deze woongroep?", type: "slider", min: 0, max: 30, unit: "mensen" },
-              { id: "q2", questionText: "Hoeveel medewerkers zijn gemiddeld aanwezig in de woonkamer in de loop van een dag? Hieronder vallen alle medewerkers (zorgverleners, schoonmakers, etc.). Dit kan varieren over de dag. Graag een gemiddelde geven.", type: "slider", min: 0, max: 30, unit: "medewerkers" },
-              { id: "q3", questionText: "Hoeveel bezoekers zijn gemiddeld aanwezig in de woonkamer op een dag? Dit kan varieren over de dag. Graag een gemiddelde geven.", type: "slider", min: 0, max: 30, unit: "bezoekers" },
+              { id: "q1", questionText: "Hoeveel mensen wonen in deze woongroep?", type: "slider", min: 0, max: 50, unit: "mensen" },
+              { id: "q2", questionText: "Hoeveel medewerkers zijn gemiddeld aanwezig in de woonkamer in de loop van een dag? Hieronder vallen alle medewerkers (zorgverleners, schoonmakers, etc.). Dit kan varieren over de dag. Graag een gemiddelde geven.", type: "slider", min: 0, max: 50, unit: "medewerkers" },
+              { id: "q3", questionText: "Hoeveel bezoekers zijn gemiddeld aanwezig in de woonkamer op een dag? Dit kan varieren over de dag. Graag een gemiddelde geven.", type: "slider", min: 0, max: 50, unit: "bezoekers" },
               { id: "q4", questionText: "Kunnen de bewoners zichzelf isoleren?", answerOptions: [{ answerText: "Ja, ze kunnen zichzelf allemaal isoleren" }, { answerText: "Nee, niet iedereen kan zichzelf isoleren (bijvoorbeeld door loopdrang, agressie, eenzaamheid, etc.)" }] },
               { id: "q5", questionText: "Wat is het cognitief niveau van de bewoners?", answerOptions: [{ answerText: "Niemand heeft cognitieve problemen" }, { answerText: "Wat cognitieve achteruitgang" }, { answerText: "Grote cognitieve problemen" }] },
               { id: "q6", questionText: "Is er bij iedereen genoeg kennis over infectiepreventiemaatregelen?", answerOptions: [{ answerText: "Ja, er is genoeg kennis over infectiepreventiemaatregelen" }, { answerText: "Nee, er is niet genoeg kennis over infectiepreventiemaatregelen" }] },
               { id: "q7", questionText: "Wat is het oppervlakte van de woonkamer in vierkante meters?", type: "slider", min: 0, max: 200, unit: "m²" },
               { id: "q8", questionText: "Wat is de vorm van de woonkamer?", answerOptions: [{ answerText: "Rechthoek" }, { answerText: "Cirkel" }, { answerText: "Ovaal" }, { answerText: "L-vorm" }] },
-              { id: "q9", questionText: "Hoeveel ruimte moet er tussen mensen zitten in meters?", type: "slider", min: 0, max: 5, unit: "meters" },
+              { id: "q9", questionText: "Hoeveel ruimte moet er tussen mensen zitten in meters?", type: "slider", min: 0, max: 5, unit: "meters", step: 0.5 },
               { id: "q10", questionText: "Hoeveel ramen en deuren zijn er aanwezig die open kunnen naar de buitenlucht?", type: "slider", min: 0, max: 10, unit: "items" },
               { id: "q11", questionText: "Hoeveel ventilatieroosters zijn er aanwezig naar buiten?", type: "slider", min: 0, max: 10, unit: "roosters" },
               { id: "q12", questionText: "Wordt er lucht gerecirculeerd door het gebouw?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
@@ -108,6 +108,7 @@ const translations = {
     }
 };
 
+
 // --- Main Application Component ---
 export default function App() {
   // --- State Management ---
@@ -118,7 +119,7 @@ export default function App() {
   const [answers, setAnswers] = useState({});
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [sliderValue, setSliderValue] = useState(null);
+  // --- FIX: Removed unused sliderValue state ---
 
   // --- Dynamic Content Variables ---
   const content = translations[language];
@@ -130,8 +131,7 @@ export default function App() {
     const answer = answers[currentQuestion.id];
 
     if (currentQuestion.type === 'slider') {
-        const initialValue = answer || currentQuestion.min;
-        setSliderValue(initialValue);
+        const initialValue = answer ?? currentQuestion.min; // Use ?? for concise check
         if (answer === undefined) {
             setAnswers(prev => ({...prev, [currentQuestion.id]: initialValue}));
         }
@@ -140,7 +140,7 @@ export default function App() {
         setSelectedAnswerIndex(null);
         setIsAnswered(answer && answer.length > 0);
     } else {
-        setSelectedAnswerIndex(answer !== undefined ? answer : null);
+        setSelectedAnswerIndex(answer ?? null); // Use ?? for concise check
         setIsAnswered(answer !== undefined);
     }
   }, [currentQuestionIndex, activeCategory, activeQuestions, answers]);
@@ -195,11 +195,8 @@ export default function App() {
 
   const handleSliderChange = (e) => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
-    const value = parseInt(e.target.value, 10);
-    setSliderValue(value);
-    const newAnswers = {...answers};
-    newAnswers[currentQuestion.id] = value;
-    setAnswers(newAnswers);
+    const value = parseFloat(e.target.value); // Use parseFloat for step values
+    setAnswers(prev => ({...prev, [currentQuestion.id]: value}));
   };
   
   const handleNextQuestion = () => {
@@ -208,9 +205,6 @@ export default function App() {
         setCurrentQuestionIndex(nextQuestion);
         setSelectedAnswerIndex(null);
         setIsAnswered(false);
-        if (activeQuestions[nextQuestion].type !== 'slider') {
-            setSliderValue(null);
-        }
     } else {
         navigate('/summary', { 
             state: { 
@@ -228,12 +222,12 @@ export default function App() {
       setCurrentQuestionIndex(prevQuestionIndex);
     }
   };
-  
+  const currentQuestion = activeQuestions[currentQuestionIndex];
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 pt-10 sm:pt-12 font-sans">
-      <div className="w-full max-w-8xl mx-auto">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 sm:p-8">
+      <div className="w-full max-w-7xl mx-auto">
         
-        <div className="grid grid-cols-3 items-center mb-12">
+        <header className="grid grid-cols-3 items-center mb-12">
             <div className="flex justify-start items-center space-x-4">
                 <button
                     onClick={() => handleCategoryChange('clinical')}
@@ -250,12 +244,12 @@ export default function App() {
             </div>
             
             <div className="text-center">
-    <div className="flex justify-center items-center gap-x-4">
-        <img src="/p3venti.png" alt="P3Venti Logo" className="h-12" />
-        <h1 className="text-4xl font-bold text-indigo-600">P3Venti</h1>
-    </div>
-    <p className="text-slate-500 mt-1 text-lg">{content.pageSubtitle}</p>
-</div>
+                <div className="flex justify-center items-center gap-x-3">
+                  <img src="/p3venti.png" alt="P3Venti Logo" className="h-14" />
+                  <h1 className="text-5xl font-extrabold text-indigo-600">P3Venti</h1>
+                </div>
+                <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
+            </div>
 
             <div className="flex justify-end">
                 <select 
@@ -267,70 +261,65 @@ export default function App() {
                     <option value="nl">Nederlands</option>
                 </select>
             </div>
-        </div>
+        </header>
         
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 transition-all duration-500 max-w-2xl mx-auto">
-            <>
-              <div className="mb-8">
-                <h2 className="text-sm font-semibold text-slate-500 mb-2 tracking-wide uppercase">
-                  {content.step} {currentQuestionIndex + 1} {content.of} {activeQuestions.length}
-                </h2>
-                <p className="text-2xl font-bold text-slate-900">
-                  {activeQuestions[currentQuestionIndex].questionText}
-                </p>
-              </div>
+        <main className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 transition-all duration-500 max-w-3xl mx-auto">
+            <div className="mb-12">
+              <h2 className="text-base font-bold text-indigo-600 mb-2 tracking-wider uppercase">
+                {content.step} {currentQuestionIndex + 1} {content.of} {activeQuestions.length}
+              </h2>
+              <p className="text-2xl font-bold text-slate-900 leading-snug">
+                {activeQuestions[currentQuestionIndex].questionText}
+              </p>
+            </div>
 
-              {activeQuestions[currentQuestionIndex].type === 'slider' ? (
-                <div className="mt-8">
-                    <input
-                        type="range"
-                        min={activeQuestions[currentQuestionIndex].min}
-                        max={activeQuestions[currentQuestionIndex].max}
-                        step={activeQuestions[currentQuestionIndex].step}
-                        value={sliderValue || activeQuestions[currentQuestionIndex].min}
-                        onChange={handleSliderChange}
-                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="text-center text-xl font-semibold text-indigo-600 mt-4">
-                        {sliderValue} {activeQuestions[currentQuestionIndex].unit}
-                    </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
-                  {activeQuestions[currentQuestionIndex].answerOptions.map((option, index) => {
-                    const currentQuestion = activeQuestions[currentQuestionIndex];
-                    const isSelected = currentQuestion.multiple
-                      ? (answers[currentQuestion.id] || []).includes(index)
-                      : index === selectedAnswerIndex;
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleAnswerOptionClick(option.answerText, index)}
-                        className={isSelected ? STYLES.answerButton.selected : STYLES.answerButton.default}
-                      >
-                        <span className={isSelected ? 'text-white' : 'text-slate-700'}>
-                          {option.answerText}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              
-              <div className="flex justify-between mt-8">
+            {currentQuestion.type === 'slider' ? (
+              <CustomSlider
+                min={currentQuestion.min}
+                max={currentQuestion.max}
+                step={currentQuestion.step}
+                value={answers[currentQuestion.id] || currentQuestion.min}
+                onChange={handleSliderChange}
+                unit={currentQuestion.unit}
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {activeQuestions[currentQuestionIndex].answerOptions.map((option, index) => {
+                  const isSelected = currentQuestion.multiple
+                    ? (answers[currentQuestion.id] || []).includes(index)
+                    : index === selectedAnswerIndex;
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleAnswerOptionClick(option.answerText, index)}
+                      className={isSelected ? STYLES.answerButton.selected : STYLES.answerButton.default}
+                    >
+                      <span className={isSelected ? 'text-white' : 'text-slate-800'}>
+                        {option.answerText}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            
+            <footer className="flex justify-between items-center mt-16">
+              <div>
                 {currentQuestionIndex > 0 && (
                   <button onClick={handlePreviousQuestion} className={STYLES.previousButton}>
                     {content.previousStep}
                   </button>
                 )}
+              </div>
+              <div>
                 {isAnswered && (
-                  <button onClick={handleNextQuestion} className={`${STYLES.nextButton} ${currentQuestionIndex === 0 ? 'ml-auto' : ''}`}>
+                  <button onClick={handleNextQuestion} className={STYLES.nextButton}>
                     {currentQuestionIndex < activeQuestions.length - 1 ? content.nextStep : content.viewSummary}
                   </button>
                 )}
               </div>
-            </>
-        </div>
+            </footer>
+        </main>
       </div>
     </div>
   );
