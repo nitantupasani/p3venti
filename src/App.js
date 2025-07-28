@@ -4,7 +4,6 @@ import CustomSlider from './CustomSlider';
 
 // --- Style Definitions ---
 const STYLES = {
-    // FIX: Adjusted language select styles for both mobile (full-width) and desktop (auto-width)
     languageSelect: {
       menu: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full',
       header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors'
@@ -19,7 +18,8 @@ const STYLES = {
         get default() { return `${this.base} bg-white hover:bg-indigo-50 border-2 border-slate-300 hover:border-indigo-400 cursor-pointer`; },
         get selected() { return `${this.base} bg-indigo-600 text-white border-2 border-indigo-600 cursor-default`; },
     },
-    navButton: 'font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg hover:shadow-xl',
+    // FIX: Added responsive padding and font size for nav buttons
+    navButton: 'font-bold py-2 px-5 sm:py-3 sm:px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base',
     get nextButton() { return `${this.navButton} bg-indigo-600 hover:bg-indigo-700 text-white`; },
     get previousButton() { return `${this.navButton} bg-slate-500 hover:bg-slate-600 text-white`; },
 };
@@ -153,7 +153,7 @@ export default function App() {
   // --- Event Handlers ---
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
-    setIsMenuOpen(false); // Close menu on selection
+    setIsMenuOpen(false);
   };
 
   const handleCategoryChange = (category) => {
@@ -162,7 +162,7 @@ export default function App() {
     setAnswers({});
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
-    setIsMenuOpen(false); // Close menu on selection
+    setIsMenuOpen(false);
   };
 
   const handleAnswerOptionClick = (answerText, index) => {
@@ -230,7 +230,6 @@ export default function App() {
   };
   const currentQuestion = activeQuestions[currentQuestionIndex];
 
-  // --- Reusable Menu Content for Mobile ---
   const MobileMenuContent = () => (
     <>
       <button
@@ -262,13 +261,10 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center p-4 sm:p-8">
       <div className="w-full max-w-7xl mx-auto">
         
-        {/* --- FIX: Final Responsive Header --- */}
         <header className="relative flex justify-between items-center lg:grid lg:grid-cols-3 lg:gap-4 mb-12">
-          {/* Column 1: Action Buttons (Desktop) */}
           <div className="hidden lg:flex items-center gap-4">
             <button
               onClick={() => handleCategoryChange('clinical')}
-              // Use inactive style and remove full-width
               className={`${activeCategory === 'clinical' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive} w-auto`}
             >
               {content.categoryOrganization}
@@ -281,7 +277,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* Column 2: Title (Center) */}
           <div className="lg:text-center">
               <div className="flex justify-center items-center gap-x-3">
                 <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
@@ -290,9 +285,7 @@ export default function App() {
               <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
           </div>
 
-          {/* Column 3: Controls (Right) */}
           <div className="flex justify-end items-center">
-            {/* Hamburger Menu Button (Mobile) */}
             <div className="lg:hidden">
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
                 {isMenuOpen ? (
@@ -302,7 +295,6 @@ export default function App() {
                 )}
               </button>
             </div>
-            {/* Language Dropdown (Desktop) */}
             <div className="hidden lg:block">
               <select
                   onChange={handleLanguageChange}
@@ -316,14 +308,13 @@ export default function App() {
           </div>
         </header>
 
-        {/* --- Mobile Menu Panel --- */}
         {isMenuOpen && (
           <div className="lg:hidden bg-white rounded-lg shadow-xl p-4 mb-8 space-y-4">
             <MobileMenuContent />
           </div>
         )}
         
-        <main className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 transition-all duration-500 max-w-3xl mx-auto">
+        <main className="bg-white rounded-2xl shadow-xl p-6 sm:p-10 transition-all duration-500 max-w-3xl mx-auto">
             <div className="mb-12">
               <h2 className="text-base font-bold text-indigo-600 mb-2 tracking-wider uppercase">
                 {content.step} {currentQuestionIndex + 1} {content.of} {activeQuestions.length}
@@ -363,17 +354,18 @@ export default function App() {
               </div>
             )}
             
-            <footer className="flex justify-between items-center mt-16">
-              <div>
+            {/* FIX: Use flex-col and gap on mobile, row and justify-between on desktop */}
+            <footer className="flex flex-col-reverse sm:flex-row sm:justify-between items-center mt-16 gap-4 sm:gap-0">
+              <div className="w-full sm:w-auto">
                 {currentQuestionIndex > 0 && (
-                  <button onClick={handlePreviousQuestion} className={STYLES.previousButton}>
+                  <button onClick={handlePreviousQuestion} className={`${STYLES.previousButton} w-full sm:w-auto`}>
                     {content.previousStep}
                   </button>
                 )}
               </div>
-              <div>
+              <div className="w-full sm:w-auto">
                 {isAnswered && (
-                  <button onClick={handleNextQuestion} className={STYLES.nextButton}>
+                  <button onClick={handleNextQuestion} className={`${STYLES.nextButton} w-full sm:w-auto`}>
                     {currentQuestionIndex < activeQuestions.length - 1 ? content.nextStep : content.viewSummary}
                   </button>
                 )}
