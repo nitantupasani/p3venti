@@ -349,8 +349,8 @@ export default function App() {
         )}
       </div>
 
-      <div className="w-full flex items-center justify-center">
-          <aside className="hidden lg:flex flex-col gap-4 mr-8">
+      <div className="w-full flex items-start justify-center">
+          <aside className="hidden lg:flex flex-col gap-4 mt-16 mr-8">
               <button
                 onClick={() => handleCategoryChange('personal')}
                 className={stepsCompleted.personal ? STYLES.categoryButton.completed : (activeCategory === 'personal' ? STYLES.categoryButton.active : STYLES.categoryButton.inactive)}
@@ -431,6 +431,17 @@ export default function App() {
               </footer>
           </main>
       </div>
+
+      <footer className="w-full max-w-7xl mx-auto flex justify-end mt-16 px-4 sm:px-8">
+          <div className="flex items-center gap-4">
+              <a href="https://www.tno.nl" target="_blank" rel="noopener noreferrer">
+                <img src="/tue.svg" alt="TNO Logo" className="h-12" />
+              </a>
+              <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
+                <img src="/tno.svg" alt="TUE Logo" className="h-10" />
+              </a>
+          </div>
+      </footer>
     </div>
   );
 }
