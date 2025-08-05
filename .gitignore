@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# PDF Service dependencies and build output
+/p3venti-pdf-service/node_modules
+/p3venti-pdf-service/dist
