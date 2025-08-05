@@ -434,11 +434,11 @@ export default function App() {
 
       <footer className="w-full max-w-7xl mx-auto flex justify-end mt-16 px-4 sm:px-8">
           <div className="flex items-center gap-4">
-              <a href="https://www.tno.nl" target="_blank" rel="noopener noreferrer">
-                <img src="/tue.svg" alt="TNO Logo" className="h-12" />
-              </a>
               <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
-                <img src="/tno.svg" alt="TUE Logo" className="h-10" />
+                <img src="/tue.svg" alt="TU/e Logo" className="h-14" />
+              </a>
+              <a href="https://www.tno.nl" target="_blank" rel="noopener noreferrer">
+                <img src="/tno.svg" alt="TNO Logo" className="h-10" />
               </a>
           </div>
       </footer>
