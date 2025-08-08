@@ -1,12 +1,176 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+// --- SafeSpace Calculator Helper Functions ---
+// const calcArea = (shape, d) => {
+//     if (shape === 'Rectangle') return d.length * d.width;
+//     if (shape === 'Circle') return Math.PI * (d.diameter / 2) ** 2;
+//     if (shape === 'Oval') return Math.PI * (d.major_axis / 2) * (d.minor_axis / 2);
+//     if (shape === 'L-Shape') return (d.l1_len * d.l1_wid) + (d.l2_len * d.l2_wid);
+//     return 0;
+// };
+
+const getPositionsAndTheoreticalMax = (shape, d, social_d) => {
+    const positions = [];
+    const spacing = social_d;
+    const r_person = social_d / 2;
+
+    if (shape === 'Rectangle') {
+        const { length: l, width: w } = d;
+        const nx = Math.floor(l / spacing);
+        const ny = Math.floor(w / spacing);
+        for (let i = 0; i < nx; i++) {
+            for (let j = 0; j < ny; j++) {
+                positions.push({ x: (i + 0.5) * spacing, y: (j + 0.5) * spacing });
+            }
+        }
+    } else if (shape === 'Circle') {
+        const { diameter } = d;
+        const radius = diameter / 2;
+        const center = { x: radius, y: radius };
+        const nx = Math.floor(diameter / spacing) + 1;
+        const ny = Math.floor(diameter / spacing) + 1;
+        for (let i = 0; i < nx; i++) {
+            for (let j = 0; j < ny; j++) {
+                const pos = { x: (i + 0.5) * spacing, y: (j + 0.5) * spacing };
+                const dist = Math.hypot(pos.x - center.x, pos.y - center.y);
+                if (dist <= radius - r_person) {
+                    positions.push(pos);
+                }
+            }
+        }
+    } else if (shape === 'Oval') {
+        const { major_axis: maj, minor_axis: minn } = d;
+        const h = maj / 2;
+        const k = minn / 2;
+        const center = { x: h, y: k };
+        const nx = Math.floor(maj / spacing) + 1;
+        const ny = Math.floor(minn / spacing) + 1;
+        for (let i = 0; i < nx; i++) {
+            for (let j = 0; j < ny; j++) {
+                const pos = { x: (i + 0.5) * spacing, y: (j + 0.5) * spacing };
+                const dx = pos.x - center.x;
+                const dy = pos.y - center.y;
+                if ((dx / h) ** 2 + (dy / k) ** 2 <= 1 - (r_person / Math.min(h, k)) ** 2) {
+                    positions.push(pos);
+                }
+            }
+        }
+    } else if (shape === 'L-Shape') {
+        const { l1_len, l1_wid, l2_len, l2_wid } = d;
+        const nx1 = Math.floor(l1_len / spacing);
+        const ny1 = Math.floor(l1_wid / spacing);
+        for (let i = 0; i < nx1; i++) {
+            for (let j = 0; j < ny1; j++) {
+                positions.push({ x: (i + 0.5) * spacing, y: (j + 0.5) * spacing });
+            }
+        }
+        const nx2 = Math.floor(l2_wid / spacing);
+        const ny2 = Math.floor(l2_len / spacing);
+        for (let i = 0; i < nx2; i++) {
+            for (let j = 0; j < ny2; j++) {
+                 positions.push({ x: (i + 0.5) * spacing, y: l1_wid + (j + 0.5) * spacing });
+            }
+        }
+    }
+    return { positions, fullTheoretical: positions.length };
+};
+
+
+
+// --- Spacing Diagram Component (Reliable SVG Icon Version) ---
+const SpacingDiagram = ({ shape, dims, people, socialDistance, color }) => {
+    // Basic validation to prevent crashes if dims are missing
+    if (!dims || (!dims.length && !dims.diameter && !dims.major_axis && !dims.l1_len)) {
+        return <div className="p-4 text-center">Loading diagram data...</div>;
+    }
+
+    const personRadius = socialDistance / 2;
+    let viewBoxWidth = 10;
+    let viewBoxHeight = 10;
+    let shapeElement = null;
+
+    try {
+        if (shape === 'Rectangle') {
+            viewBoxWidth = dims.length;
+            viewBoxHeight = dims.width;
+            shapeElement = <rect x="0" y="0" width={dims.length} height={dims.width} />;
+        } else if (shape === 'Circle') {
+            viewBoxWidth = dims.diameter;
+            viewBoxHeight = dims.diameter;
+            shapeElement = <circle cx={dims.diameter / 2} cy={dims.diameter / 2} r={dims.diameter / 2} />;
+        } else if (shape === 'Oval') {
+            viewBoxWidth = dims.major_axis;
+            viewBoxHeight = dims.minor_axis;
+            shapeElement = <ellipse cx={dims.major_axis / 2} cy={dims.minor_axis / 2} rx={dims.major_axis / 2} ry={dims.minor_axis / 2} />;
+        } else if (shape === 'L-Shape') {
+            viewBoxWidth = Math.max(dims.l1_len, dims.l2_wid);
+            viewBoxHeight = dims.l1_wid + dims.l2_len;
+            shapeElement = (
+                <path d={`M0,0 H${dims.l1_len} V${dims.l1_wid} H${dims.l2_wid} V${viewBoxHeight} H0 V0 Z`} />
+            );
+        }
+    } catch (error) {
+        console.error("Error calculating diagram dimensions:", error);
+        return <div>Error displaying diagram. Please check the survey inputs.</div>;
+    }
+
+    const padding = 2;
+
+    // SVG path for a full-body person icon. This will render consistently everywhere.
+    const personIconPath = "M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z";
+    const iconScale = (personRadius * 1) / 512;
+
+    return (
+        <div className="p-4 bg-white rounded-lg shadow">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">Room Occupancy Visualization</h3>
+            <style>
+                {`
+                    .room-wall { stroke: #57534e; stroke-width: 1; fill: none; } /* Darker wall outline */
+                    .room-floor { fill: url(#floorPattern); stroke: #a8a29e; stroke-width: 0; }
+                    .diagram-container { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 1rem; border-radius: 8px; }
+                    .no-people-text { font-size: 1.5px; fill: #475569; font-weight: bold; }
+                `}
+            </style>
+            <div className="diagram-container">
+                <svg viewBox={`${-padding} ${-padding} ${viewBoxWidth + (padding * 2)} ${viewBoxHeight + (padding * 2)}`} preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        {/* More subtle floor texture pattern */}
+                        <pattern id="floorPattern" patternUnits="userSpaceOnUse" width="0.5" height="0.5">
+    <rect width="0.5" height="0.5" fill="#f7f7f7" /> {/* Off-white base */}
+    <circle cx="0.25" cy="0.25" r="0.03" fill="#d4d4d8" /> {/* Subtle dots */}
+</pattern>
+                    </defs>
+                    
+                    {/* Render a copy of the shape with a thick stroke to act as the wall */}
+                    {React.cloneElement(shapeElement, { className: 'room-wall' })}
+                    
+                    {/* Render the floor shape on top */}
+                    {React.cloneElement(shapeElement, { className: 'room-floor' })}
+                    
+                    {/* People icons */}
+                    {people.map((pos, index) => (
+                        <g key={index} transform={`translate(${pos.x}, ${pos.y})`}>
+                            <circle cx="0" cy="0" r={personRadius} fill={color} opacity="0.6" />
+                            <g transform={`scale(${iconScale}) translate(-224, -256)`}>
+                                <path d={personIconPath} fill="white" />
+                            </g>
+                        </g>
+                    ))}
+                    {people.length === 0 && (
+                         <text x={viewBoxWidth / 2} y={viewBoxHeight / 2} textAnchor="middle" alignmentBaseline="middle" className="no-people-text">
+                            No people fit
+                        </text>
+                    )}
+                </svg>
+            </div>
+        </div>
+    );
+};
 
 // --- Reusable SVG Dial Component ---
 const Dial = ({ value, label }) => {
-    // Convert a 0-100 value to a -90 to 90 degree rotation
     const rotation = (value / 100) * 180 - 90;
-
-    // Determine if the color scheme should be reversed based on the label
     const isReversed = label.includes("Risk of exposure");
 
     const getColor = (val) => {
@@ -20,33 +184,23 @@ const Dial = ({ value, label }) => {
             return "#ef4444"; // Low value is red
         }
     };
-    
     const needleColor = getColor(value);
-    
-    // Define arc colors based on the normal or reversed scheme
     const lowColor = isReversed ? "#22c55e" : "#ef4444";
     const mediumColor = "#f59e0b";
     const highColor = isReversed ? "#ef4444" : "#22c55e";
-
-    // Define points for the 3 segments of the arc
-    const p1 = { x: 30, y: 15.3 }; // Point at 120 degrees
-    const p2 = { x: 70, y: 15.3 }; // Point at 60 degrees
+    const p1 = { x: 30, y: 15.3 };
+    const p2 = { x: 70, y: 15.3 };
 
     return (
         <div className="relative flex flex-col items-center">
             <svg viewBox="0 0 100 60" className="w-40 h-auto">
-                {/* Background Arcs - using distinct paths for each color */}
                 <path d={`M 10 50 A 40 40 0 0 1 ${p1.x} ${p1.y}`} stroke={lowColor} strokeWidth="10" fill="none" />
                 <path d={`M ${p1.x} ${p1.y} A 40 40 0 0 1 ${p2.x} ${p2.y}`} stroke={mediumColor} strokeWidth="10" fill="none" />
                 <path d={`M ${p2.x} ${p2.y} A 40 40 0 0 1 90 50`} stroke={highColor} strokeWidth="10" fill="none" />
-                
-                {/* Needle */}
                 <g transform={`rotate(${rotation} 50 50)`}>
                     <path d="M 50 50 L 50 15" stroke={needleColor} strokeWidth="3" />
                     <circle cx="50" cy="50" r="5" fill={needleColor} />
                 </g>
-                
-                {/* Labels */}
                 <text x="10" y="58" fontSize="8" fill="#64748b" textAnchor="middle">LOW</text>
                 <text x="50" y="5.5" fontSize="8" fill="#64748b" textAnchor="middle">MEDIUM</text>
                 <text x="90" y="58" fontSize="8" fill="#64748b" textAnchor="middle">HIGH</text>
@@ -60,15 +214,12 @@ const Dial = ({ value, label }) => {
 // --- Reusable Analysis Row Component ---
 const AnalysisRow = ({ title, score1, score2, recommendations }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-
     return (
         <div className="p-4 bg-white rounded-lg shadow">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-                {/* Title column */}
                 <div className="md:col-span-2">
                     <h3 className="text-lg font-bold text-slate-800">{title}</h3>
                 </div>
-                {/* Dials column */}
                 <div className="md:col-span-4 flex justify-around">
                     <Dial value={score1} label="Values" />
                     <Dial value={score2} label="Risk of exposure" />
@@ -106,8 +257,8 @@ const TotalScoreBar = ({ label, value, colorClass }) => {
         <div className="bg-white p-4 rounded-lg shadow">
             <h3 className="text-lg font-bold text-slate-800 mb-2">{label}</h3>
             <div className="w-full bg-slate-200 rounded-full h-6">
-                <div 
-                    className={`${colorClass} h-6 rounded-full transition-all duration-1000`} 
+                <div
+                    className={`${colorClass} h-6 rounded-full transition-all duration-1000`}
                     style={{ width: `${value}%` }}
                 ></div>
             </div>
@@ -115,23 +266,13 @@ const TotalScoreBar = ({ label, value, colorClass }) => {
     );
 };
 
-// --- Dashboard Layout Configuration ---
+// --- Dashboard Layout, Recommendation Data and Scoring Rules ---
 const dashboardLayout = [
-    {
-        title: "Personal",
-        questionIds: ['q4', 'q5', 'q6']
-    },
-    {
-        title: "Interaction",
-        questionIds: ['q12', 'q14', 'q15', 'q16']
-    },
-    {
-        title: "Organizational",
-        questionIds: ['q17', 'q18', 'q19', 'q20']
-    },
+    { title: "Personal", questionIds: ['q4', 'q5', 'q6'] },
+    { title: "Interaction", questionIds: ['q12', 'q14', 'q15', 'q16'] },
+    { title: "Organizational", questionIds: ['q17', 'q18', 'q19', 'q20'] },
 ];
 
-// --- Recommendation Data ---
 const recommendations = {
     en: {
         'q4': [
@@ -268,63 +409,106 @@ export default function Dashboard() {
 
     const { answers, content } = location.state || { answers: {}, content: {} };
 
-    // Determine the current language based on the content object
     const language = content.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en';
-    const langRecommendations = recommendations[language];
+    const langRecommendations = useMemo(() => recommendations[language] || {}, [language]);
 
-    const handleRestart = () => {
-        navigate('/');
-    };
-    // --- Scoring Logic ---
-    const normalizeScore = (score) => (score / 5) * 100;
+    const handleRestart = () => navigate('/');
 
-    const getValuesScore = (questionId, answerIndex) => {
-        const rule = scoringRules[questionId];
-        if (rule && rule.values && answerIndex < rule.values.length) {
-            return rule.values[answerIndex];
+    const safeSpaceData = useMemo(() => {
+        const shapeMap = { 0: 'Rectangle', 1: 'Circle', 2: 'Oval', 3: 'L-Shape' };
+        const shape = shapeMap[answers['q8']] || 'Rectangle';
+        const area = answers['q7'] || 50;
+        let dims = {};
+
+        switch (shape) {
+            case 'Circle':
+                const radius = Math.sqrt(area / Math.PI);
+                dims = { diameter: radius * 2 };
+                break;
+            case 'Oval':
+                 const minor_axis = Math.sqrt(area / (2 * Math.PI));
+                 dims = { major_axis: 2 * minor_axis, minor_axis: minor_axis };
+                 break;
+            case 'L-Shape':
+                 const legArea = area / 2;
+                 const legWidth = Math.sqrt(legArea / 2);
+                 dims = { l1_len: legWidth * 2, l1_wid: legWidth, l2_len: legWidth * 2, l2_wid: legWidth };
+                 break;
+            default:
+                 const side_length = Math.sqrt(area);
+                 dims = { length: side_length, width: side_length };
         }
-        return 0; // Default score if no rule is found
-    };
 
-    const getRiskScore = (questionId, answerIndex) => {
-        const rule = scoringRules[questionId];
-        if (rule && rule.risk && answerIndex < rule.risk.length) {
-            return rule.risk[answerIndex];
-        }
-        return 0; // Default score if no rule is found
-    };
-    
-    // --- Category Data Processing ---
-    const analysisData = dashboardLayout.map(row => {
-        let totalValueScore = 0;
-        let totalRiskScore = 0;
-        let recommendations = [];
+        const socialDistance = answers['q9'] || 1.5;
+        const windowsDoors = answers['q10'] || 2;
+        const ventGrates = answers['q11'] || 1;
+        const airRecirc = (answers['q12'] === 0);
+        const usablePercent = 75;
 
-        row.questionIds.forEach(id => {
-            const answerIndex = answers[id];
-            if (answerIndex !== undefined) {
-                totalValueScore += getValuesScore(id, answerIndex);
-                totalRiskScore += getRiskScore(id, answerIndex);
-                if (langRecommendations[id] && langRecommendations[id][answerIndex]) {
-                    recommendations.push(langRecommendations[id][answerIndex]);
-                }
+        const { positions, fullTheoretical } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
+        const theoretical = Math.floor(fullTheoretical * usablePercent / 100);
+
+        const ventScore = Math.min((windowsDoors + ventGrates) / 20, 1);
+        const recircPen = airRecirc ? 0.2 : 0;
+        const riskPct = (1 - ventScore) * 50 + recircPen * 50;
+        const adjustedMax = Math.floor(theoretical * (1 - riskPct / 100 * 0.3));
+
+        let color = 'green';
+        if (riskPct >= 66) color = 'red';
+        else if (riskPct >= 33) color = 'orange';
+
+        const shuffledPositions = [...positions].sort(() => 0.5 - Math.random());
+        const peopleToDraw = shuffledPositions.slice(0, Math.min(adjustedMax, positions.length));
+
+        return { shape, dims, people: peopleToDraw, socialDistance, color };
+    }, [answers]);
+
+    const analysisData = useMemo(() => {
+        const normalizeScore = (score) => (score / 5) * 100;
+        const getScore = (type, qId, aIdx) => {
+            if (scoringRules[qId] && scoringRules[qId][type] && aIdx < scoringRules[qId][type].length) {
+                return scoringRules[qId][type][aIdx];
             }
-        });
-
-        const avgValueScore = row.questionIds.length > 0 ? totalValueScore / row.questionIds.length : 0;
-        const avgRiskScore = row.questionIds.length > 0 ? totalRiskScore / row.questionIds.length : 0;
-
-        return {
-            title: row.title,
-            score1: avgValueScore,
-            score2: avgRiskScore,
-            recommendations: recommendations
+            return 0;
         };
-    });
 
-    const totalScoreValues = normalizeScore(analysisData.reduce((acc, item) => acc + item.score1, 0) / analysisData.length);
-    const totalScoreExposure = normalizeScore(analysisData.reduce((acc, item) => acc + item.score2, 0) / analysisData.length);
-    
+        return dashboardLayout.map(row => {
+            let totalValueScore = 0;
+            let totalRiskScore = 0;
+            let recommendations = [];
+
+            row.questionIds.forEach(id => {
+                const answerIndex = answers[id];
+                if (answerIndex !== undefined) {
+                    totalValueScore += getScore('values', id, answerIndex);
+                    totalRiskScore += getScore('risk', id, answerIndex);
+                    if (langRecommendations[id] && langRecommendations[id][answerIndex]) {
+                        recommendations.push(langRecommendations[id][answerIndex]);
+                    }
+                }
+            });
+
+            const avgValueScore = row.questionIds.length > 0 ? totalValueScore / row.questionIds.length : 0;
+            const avgRiskScore = row.questionIds.length > 0 ? totalRiskScore / row.questionIds.length : 0;
+
+            return {
+                title: row.title,
+                score1: normalizeScore(avgValueScore),
+                score2: normalizeScore(avgRiskScore),
+                recommendations: recommendations
+            };
+        });
+    }, [answers, langRecommendations]);
+
+    const { totalScoreValues, totalScoreExposure } = useMemo(() => {
+        if (analysisData.length === 0) return { totalScoreValues: 0, totalScoreExposure: 0 };
+        
+        const totalValuesRaw = analysisData.reduce((acc, item) => acc + item.score1, 0) / analysisData.length;
+        const totalExposureRaw = analysisData.reduce((acc, item) => acc + item.score2, 0) / analysisData.length;
+
+        return { totalScoreValues: totalValuesRaw, totalScoreExposure: totalExposureRaw };
+    }, [analysisData]);
+
 
     if (!Object.keys(answers).length || !Object.keys(content).length) {
         return (
@@ -339,33 +523,34 @@ export default function Dashboard() {
             </div>
         );
     }
-    
+
     return (
         <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
              <div className="max-w-9xl mx-auto">
-                <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">Analysis per Categories</h1>
-                
-                {/* Analysis Rows */}
+                <div className="mb-12">
+                    <SpacingDiagram {...safeSpaceData} />
+                </div>
+
+                <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">Analysis per Category</h1>
+
                 <div className="space-y-6 mb-12">
                     {analysisData.map(data => (
-                        <AnalysisRow 
+                        <AnalysisRow
                             key={data.title}
                             title={data.title}
-                            score1={normalizeScore(data.score1)}
-                            score2={normalizeScore(data.score2)}
+                            score1={data.score1}
+                            score2={data.score2}
                             recommendations={data.recommendations}
                         />
                     ))}
                 </div>
 
-                {/* Total Scores */}
                 <div className="max-w-4xl mx-auto space-y-6">
                     <h2 className="text-2xl font-bold text-slate-800 mb-4 text-center">Total Scores of Analysis</h2>
                     <TotalScoreBar label="Total Score of Protection against Exposure" value={totalScoreExposure} colorClass="bg-green-500" />
                     <TotalScoreBar label="Total Score of Values" value={totalScoreValues} colorClass="bg-blue-500" />
                 </div>
-                
-                 {/* Restart Button */}
+
                 <div className="text-center mt-12">
                     <button onClick={handleRestart} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">
                         {content.startOver || "Start Over"}
