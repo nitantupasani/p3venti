@@ -133,7 +133,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta }) =>
 }
 
 return { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape };
-  }, [shape, dims, socialDistance, personRadius]);
+  }, [shape, dims, personRadius]);
 
   // Draw: directly mutate <g transform> (no React state per frame)
   const drawFrame = useCallback(() => {
@@ -341,7 +341,9 @@ return { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape }
   socialDistance,
   isInsideShape,
   viewBoxWidth,
-  viewBoxHeight
+  viewBoxHeight,
+  stepPhysics,
+  drawFrame
 ]);
 
 
@@ -626,7 +628,6 @@ export default function Dashboard() {
   const { answers, content } = location.state || { answers: {}, content: {} };
 
   const language = content.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en';
-  const langRecommendations = useMemo(() => recommendations[language] || {}, [language]);
 
   const handleRestart = () => navigate('/');
 
