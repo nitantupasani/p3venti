@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram';
 import { AnalysisRow, TotalScoreBar, recommendations, scoringRules } from './recommendations';
