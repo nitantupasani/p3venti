@@ -28,7 +28,7 @@ const STYLES = {
 // --- Multi-language Content ---
 const translations = {
     en: {
-        pageSubtitle: 'Care Home Action Plan',
+        pageSubtitle: 'For location managers in long-term care.',
         categoryPersonal: 'Stage 1: Personal',
         categoryInteraction: 'Stage 2: Interaction',
         categoryOrganizational: 'Stage 3: Organizational',
@@ -314,7 +314,7 @@ export default function App() {
           <div className="flex-1 text-center">
               <div className="flex justify-center items-center gap-x-3">
                 <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-                <h1 className="text-4xl lg:text-5xl font-extrabold text-indigo-600">P3Venti</h1>
+                <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
               </div>
               <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
           </div>

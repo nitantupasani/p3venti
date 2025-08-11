@@ -35,7 +35,7 @@ export default function Dashboard() {
         break;
       }
       case 'Oval': {
-        const minor_axis = Math.sqrt(area / (2 * Math.PI));
+        const minor_axis = Math.sqrt((2 * area) / Math.PI);
         dims = { major_axis: 2 * minor_axis, minor_axis: minor_axis };
         break;
       }
