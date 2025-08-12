@@ -224,10 +224,10 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta }) =>
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
     }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame]);
 
-    const padding = 2;
+    const padding = 1.5;
     return (
         <div className="p-4 bg-white rounded-lg shadow">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">Living Room Occupancy Visualization</h3>
+            <h1 className="text-3xl font-bold text-slate-800 mt-8 text-center">Living Room Occupancy Visualization</h1>
             <style>{`
                 .room-wall { fill: none; stroke: #1f2937; stroke-linejoin: round; }
                 .room-wall-filled { fill: #1f2937; stroke: #1f2937; stroke-width: 1; stroke-linejoin: round; }
@@ -237,7 +237,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta }) =>
                 .caption-box { width: 260px; }
             `}</style>
             <div className="diagram-container">
-                <div className="diagram-row flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 mx-auto">
+                <div className="diagram-row flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mx-auto">
                     <div className="svg-wrap">
                         <svg className="w-full h-auto overflow-visible" viewBox={`${-padding} ${-padding} ${viewBoxWidth + 2 * padding} ${viewBoxHeight + 2 * padding}`} preserveAspectRatio="xMidYMid meet">
                             <defs>

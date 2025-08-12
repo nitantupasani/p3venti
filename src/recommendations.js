@@ -178,16 +178,91 @@ const AnalysisRow = ({ title, score1, score2, recommendations }) => {
     );
   };
 
-const TotalScoreBar = ({ label, value, colorClass }) => {
-    return (
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-bold text-slate-800 mb-2">{label}</h3>
-        <div className="w-full bg-slate-200 rounded-full h-6">
-          <div className={`${colorClass} h-6 rounded-full transition-all duration-1000`} style={{ width: `${value}%` }}></div>
+const clamp01 = (x) => Math.max(0, Math.min(100, x));
+const toPct = (raw) => {
+  let x = typeof raw === "number" ? raw : Number(raw) || 0;
+  if (x <= 1) x *= 100;          // 0–1 -> %
+  else if (x <= 5) x = (x/5)*100; // 1–5 -> %
+  return Math.round(clamp01(x));
+};
+const lerp = (a,b,t) => Math.round(a + (b-a)*t);
+const hexToRgb = (h) => {
+  const s = h.replace("#",""); const m = s.length===3 ? s.split("").map(c=>c+c).join("") : s;
+  return { r:parseInt(m.slice(0,2),16), g:parseInt(m.slice(2,4),16), b:parseInt(m.slice(4,6),16) };
+};
+const rgbToHex = ({r,g,b}) => `#${[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("")}`;
+const lerpHex = (c1,c2,t) => {
+  const a=hexToRgb(c1), b=hexToRgb(c2);
+  return rgbToHex({ r:lerp(a.r,b.r,t), g:lerp(a.g,b.g,t), b:lerp(a.b,b.b,t) });
+};
+const gradientAt = (stops, t) => {
+  if (t <= stops[0][0]) return stops[0][1];
+  if (t >= stops[stops.length-1][0]) return stops[stops.length-1][1];
+  for (let i=0;i<stops.length-1;i++){
+    const [p1,c1]=stops[i], [p2,c2]=stops[i+1];
+    if (t>=p1 && t<=p2) return lerpHex(c1,c2,(t-p1)/(p2-p1));
+  }
+  return stops[stops.length-1][1];
+};
+
+const TotalScoreBar = ({ label, value }) => {
+  const isProtection = /protection/i.test(label);
+
+  // Normalize input
+  const inputPct = toPct(value);
+
+  // IMPORTANT: For protection, VALUE IS RISK. Display protection = 100 - risk.
+  const pct = isProtection ? clamp01(100 - inputPct) : inputPct;
+
+  // Color schemes
+  const PROTECTION_STOPS = [
+    [0.0, "#ef4444"], // low protection -> red
+    [0.5, "#f59e0b"], // mid -> amber
+    [1.0, "#22c55e"], // high -> green
+  ];
+  const VALUES_STOPS = [
+    [0.0, "#94a3b8"], // neutral slate
+    [0.5, "#38bdf8"], // improving sky
+    [1.0, "#10b981"], // strong emerald
+  ];
+  const t = pct / 100;
+  const fillColor = isProtection ? gradientAt(PROTECTION_STOPS, t) : gradientAt(VALUES_STOPS, t);
+  const bgColor   = isProtection ? "#fee2e2" : "#e2e8f0"; // subtle context
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-bold text-slate-800">{label}</h3>
+        <span className="text-sm font-semibold text-slate-700">{pct}%</span>
+      </div>
+
+      <div className="flex justify-between text-[11px] text-slate-500 mb-1">
+        <span>{isProtection ? "Low protection" : "Lower values score"}</span>
+        <span>{isProtection ? "High protection" : "Higher values score"}</span>
+      </div>
+
+      <div
+        className="relative w-full h-6 rounded-full overflow-hidden"
+        style={{ backgroundColor: bgColor }}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+        aria-label={`${label} ${pct} percent`}
+      >
+        <div
+          className="h-6 rounded-full transition-[width] duration-700 ease-out"
+          style={{ width: `${pct}%`, background: fillColor }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-xs font-semibold text-slate-800">{pct}%</span>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
+
+
 
 export const recommendations = {
     en: {
