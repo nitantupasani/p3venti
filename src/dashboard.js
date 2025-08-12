@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram';
 import { AnalysisRow, TotalScoreBar, recommendations, scoringRules } from './recommendations';
@@ -9,6 +9,36 @@ const dashboardLayout = [
   { title: "Organizational", questionIds: ['q17', 'q18', 'q19', 'q20'] },
 ];
 
+const translations = {
+    en: {
+        pageTitle: 'P3 Venti',
+        pageSubtitle: 'For location managers in long-term care.',
+        analysisTitle: 'Analysis per Category',
+        totalScoresTitle: 'Total Scores of Analysis',
+        totalExposureScoreLabel: 'Total Score of Protection against Exposure',
+        totalValuesScoreLabel: 'Total Score of Values',
+        visualizationTitle: 'Living Room Occupancy Visualization',
+        startOver: 'Start Over',
+        noSummaryTitle: 'No summary to display.',
+        noSummaryText: 'Please start the action plan first.',
+        goToStart: 'Go to Start'
+    },
+    nl: {
+        pageTitle: 'P3 Venti',
+        pageSubtitle: 'Zorghuis Actieplan',
+        analysisTitle: 'Analyse per Categorie',
+        totalScoresTitle: 'Totale Scores van Analyse',
+        totalExposureScoreLabel: 'Totaalscore Bescherming tegen Blootstelling',
+        totalValuesScoreLabel: 'Totaalscore Waarden',
+        visualizationTitle: 'Visualisatie Bezetting Woonkamer',
+        startOver: 'Opnieuw Beginnen',
+        noSummaryTitle: 'Geen overzicht om weer te geven.',
+        noSummaryText: 'Start eerst het actieplan.',
+        goToStart: 'Ga naar Start'
+    }
+}
+
+
 // (Your full recommendations and translations — unchanged)
 
 /* -------------------------------- Dashboard --------------------------------- */
@@ -16,11 +46,19 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { answers, content } = location.state || { answers: {}, content: {} };
+  const { answers, content: initialContent } = location.state || { answers: {}, content: {} };
+  const [language, setLanguage] = useState(initialContent.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en');
 
-  const language = content.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en';
+  const content = translations[language];
+
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+  };
 
   const handleRestart = () => navigate('/');
+    const handleHomeClick = () => {
+    navigate('/');
+  };
 
   const safeSpaceData = useMemo(() => {
     const shapeMap = { 0: 'Rectangle', 1: 'Circle', 2: 'Oval', 3: 'L-Shape' };
@@ -140,14 +178,14 @@ export default function Dashboard() {
     return { totalScoreValues: totalValuesRaw, totalScoreExposure: totalExposureRaw };
   }, [analysisData]);
 
-  if (!Object.keys(answers).length || !Object.keys(content).length) {
+  if (!Object.keys(answers).length || !Object.keys(initialContent).length) {
     return (
       <div className="min-h-screen bg-slate-100 text-slate-800 flex justify-center items-center p-4">
         <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-semibold mb-4 text-indigo-700">No summary to display.</h2>
-          <p className="text-lg text-slate-600 mb-6">Please start the action plan first.</p>
+          <h2 className="text-2xl font-semibold mb-4 text-indigo-700">{content.noSummaryTitle}</h2>
+          <p className="text-lg text-slate-600 mb-6">{content.noSummaryText}</p>
           <button onClick={handleRestart} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg">
-            Go to Start
+            {content.goToStart}
           </button>
         </div>
       </div>
@@ -156,12 +194,45 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
+        <div className="max-w-7xl mx-auto mb-16">
+            <header className="relative flex justify-between items-center w-full mb-8">
+              <div className="flex justify-start" style={{ flex: 1 }}>
+                <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
+                  </svg>
+                  <span className="font-semibold">Home</span>
+                </button>
+              </div>
+
+              <div className="text-center" style={{ flex: 3 }}>
+                  <div className="flex justify-center items-center gap-x-3">
+                    <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
+                    <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
+                  </div>
+                  <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
+              </div>
+
+              <div className="flex justify-end items-center" style={{ flex: 1 }}>
+                <div className="hidden lg:block">
+                  <select
+                      onChange={handleLanguageChange}
+                      value={language}
+                      className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                  >
+                      <option value="en">English</option>
+                      <option value="nl">Nederlands</option>
+                  </select>
+                </div>
+              </div>
+            </header>
+        </div>
       <div className="max-w-9xl mx-auto">
 
         {/* Visualization + caption */}
-        
 
-        <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">Analysis per Category</h1>
+
+        <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">{content.analysisTitle}</h1>
 
         <div className="space-y-6 mb-12">
           {analysisData.map(data => (
@@ -176,12 +247,12 @@ export default function Dashboard() {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4 text-center">Total Scores of Analysis</h2>
-          <TotalScoreBar label="Total Score of Protection against Exposure" value={totalScoreExposure} colorClass="bg-green-500" />
-          <TotalScoreBar label="Total Score of Values" value={totalScoreValues} colorClass="bg-blue-500" />
+          <h2 className="text-2xl font-bold text-slate-800 mb-4 text-center">{content.totalScoresTitle}</h2>
+          <TotalScoreBar label={content.totalExposureScoreLabel} value={totalScoreExposure} colorClass="bg-green-500" />
+          <TotalScoreBar label={content.totalValuesScoreLabel} value={totalScoreValues} colorClass="bg-blue-500" />
         </div>
         <div className="mt-12">
-          <SpacingDiagram {...safeSpaceData} />
+          <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle}/>
         </div>
         <div className="text-center mt-12">
           <button onClick={() => navigate('/')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">

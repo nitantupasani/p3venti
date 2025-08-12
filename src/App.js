@@ -302,7 +302,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center p-4 sm:p-8">
       <div className="w-full max-w-7xl mx-auto">
         <header className="relative flex justify-between items-center w-full mb-8">
-          <div className="flex-1 flex justify-start">
+          <div className="flex justify-start" style={{ flex: 1 }}>
             <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
@@ -311,7 +311,7 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex-1 text-center">
+          <div className="text-center" style={{ flex: 3 }}>
               <div className="flex justify-center items-center gap-x-3">
                 <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
                 <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
@@ -319,7 +319,7 @@ export default function App() {
               <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
           </div>
           
-          <div className="flex-1 flex justify-end items-center">
+          <div className="flex justify-end items-center" style={{ flex: 1 }}>
             <div className="lg:hidden">
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
                 {isMenuOpen ? (

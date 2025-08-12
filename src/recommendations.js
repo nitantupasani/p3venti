@@ -1,45 +1,144 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-const Dial = ({ value, label }) => {
-    const rotation = (value / 100) * 180 - 90;
-    const isReversed = label.includes("Risk of exposure");
-  
-    const getColor = (val) => {
-      if (isReversed) {
-        if (val > 66) return "#ef4444";
-        if (val > 33) return "#f59e0b";
-        return "#22c55e";
-      } else {
-        if (val > 66) return "#22c55e";
-        if (val > 33) return "#f59e0b";
-        return "#ef4444";
-      }
-    };
-    const needleColor = getColor(value);
-    const lowColor = isReversed ? "#22c55e" : "#ef4444";
-    const mediumColor = "#f59e0b";
-    const highColor = isReversed ? "#ef4444" : "#22c55e";
-    const p1 = { x: 30, y: 15.3 };
-    const p2 = { x: 70, y: 15.3 };
-  
-    return (
-      <div className="relative flex flex-col items-center">
-        <svg viewBox="0 0 100 60" className="w-40 h-auto">
-          <path d={`M 10 50 A 40 40 0 0 1 ${p1.x} ${p1.y}`} stroke={lowColor} strokeWidth="10" fill="none" />
-          <path d={`M ${p1.x} ${p1.y} A 40 40 0 0 1 ${p2.x} ${p2.y}`} stroke={mediumColor} strokeWidth="10" fill="none" />
-          <path d={`M ${p2.x} ${p2.y} A 40 40 0 0 1 90 50`} stroke={highColor} strokeWidth="10" fill="none" />
-          <g transform={`rotate(${rotation} 50 50)`}>
-            <path d="M 50 50 L 50 15" stroke={needleColor} strokeWidth="3" />
-            <circle cx="50" cy="50" r="5" fill={needleColor} />
-          </g>
-          <text x="10" y="58" fontSize="8" fill="#64748b" textAnchor="middle">LOW</text>
-          <text x="50" y="5.5" fontSize="8" fill="#64748b" textAnchor="middle">MEDIUM</text>
-          <text x="90" y="58" fontSize="8" fill="#64748b" textAnchor="middle">HIGH</text>
-        </svg>
-        <span className="mt-1 text-sm font-semibold text-slate-600">{label}</span>
-      </div>
-    );
+const Dial = ({ value = 0, label = '' }) => {
+  // Normalize to 0–100
+  const raw = typeof value === 'number' ? value : Number(value) || 0;
+  const v = raw <= 1 ? Math.round(raw * 100) : raw <= 5 ? Math.round((raw / 5) * 100) : Math.round(Math.max(0, Math.min(100, raw)));
+
+  const isRisk = /risk/i.test(label);
+
+  // Opposite color logic
+  const getColor = (val) => {
+    if (isRisk) {
+      if (val > 66) return '#ef4444'; // High risk = red
+      if (val > 33) return '#f59e0b'; // Medium = amber
+      return '#22c55e';               // Low risk = green
+    } else {
+      if (val > 66) return '#22c55e'; // High values = green
+      if (val > 33) return '#f59e0b'; // Medium = amber
+      return '#ef4444';               // Low values = red
+    }
   };
+
+  const band  = v <= 33 ? 'LOW' : v <= 66 ? 'MEDIUM' : 'HIGH';
+  const color = getColor(v);
+
+  // Unique gradient id per instance
+  const uid    = React.useMemo(() => Math.random().toString(36).slice(2), []);
+  const gradId = `grad-${uid}`;
+
+  // Arc geometry
+  const trackRef = React.useRef(null);
+  const [arcLen, setArcLen] = React.useState(1);
+  React.useEffect(() => {
+    if (trackRef.current) setArcLen(trackRef.current.getTotalLength());
+  }, []);
+  const progressLen      = (v / 100) * arcLen;
+  const strokeDasharray  = `${arcLen} ${arcLen}`;
+  const strokeDashoffset = arcLen - progressLen;
+
+  // Ticks
+  const ticks = React.useMemo(() => {
+    return Array.from({ length: 11 }).map((_, i) => {
+      const t = i / 10;
+      const angle = -90 + t * 180;
+      const rad = (angle * Math.PI) / 180;
+      const cx = 50, cy = 50;
+      const rOuter = 44;
+      const rInner = i % 5 === 0 ? 38 : 40;
+      return {
+        key: i,
+        x1: cx + rOuter * Math.cos(rad),
+        y1: cy + rOuter * Math.sin(rad),
+        x2: cx + rInner * Math.cos(rad),
+        y2: cy + rInner * Math.sin(rad)
+      };
+    });
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center select-none">
+      <svg viewBox="0 0 100 70" className="w-44 h-auto">
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="1" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.85" />
+          </linearGradient>
+        </defs>
+
+        {/* Track */}
+        <path
+          ref={trackRef}
+          d="M 10 50 A 40 40 0 0 1 90 50"
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth="10"
+          strokeLinecap="round"
+          opacity="0.9"
+        />
+
+        {/* Ticks */}
+        <g opacity="0.65">
+          {ticks.map(t => (
+            <line
+              key={t.key}
+              x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+              stroke="#cbd5e1"
+              strokeWidth={t.key % 5 === 0 ? 1.6 : 1}
+              strokeLinecap="round"
+            />
+          ))}
+        </g>
+
+        {/* Progress (no head dot) */}
+        <path
+          d="M 10 50 A 40 40 0 0 1 90 50"
+          fill="none"
+          stroke={`url(#${gradId})`}
+          strokeWidth="10"
+          strokeLinecap="round"
+          style={{
+            strokeDasharray,
+            strokeDashoffset,
+            transition: 'stroke-dashoffset 700ms cubic-bezier(.22,.61,.36,1)'
+          }}
+        />
+
+        {/* Percent */}
+        <text
+          x="50" y="45"
+          textAnchor="middle"
+          fontSize="16"
+          fontWeight="700"
+          fill="#0f172a"
+        >
+          {v}%
+        </text>
+
+        {/* Band chip */}
+        <rect x="35" y="52" rx="4" ry="4" width="30" height="12" fill="#f8fafc" stroke="#e2e8f0" />
+        <text
+          x="50" y="61"
+          textAnchor="middle"
+          fontSize="7.5"
+          fontWeight="600"
+          fill="#334155"
+        >
+          {band}
+        </text>
+      </svg>
+
+      <div className="mt-1 text-sm font-semibold text-slate-700 text-center">
+        {label}
+      </div>
+    </div>
+  );
+};
+
+
+
+export default Dial;
+
 
 const AnalysisRow = ({ title, score1, score2, recommendations }) => {
     const [isExpanded, setIsExpanded] = useState(false);
