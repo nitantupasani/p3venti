@@ -105,8 +105,6 @@ export default function Dashboard() {
     const ventilationDerate = 1 - (riskPct / 100) * 0.3;
     const ventilationCapacity = Math.max(1, Math.floor(geometricCapacity * ventilationDerate));
 
-    // If you want to skip ventilation cutoff: capacityMax = geometricCapacity.
-    // If you want it: Math.min(geometricCapacity, ventilationCapacity)
     const capacityMax = geometricCapacity;
     const limiting = 'geometry';
 
@@ -134,6 +132,17 @@ export default function Dashboard() {
 
   const analysisData = useMemo(() => {
     const normalizeScore = (score) => (score / 5) * 100;
+
+    // If no answers are provided (e.g., direct navigation), return all scores as 0.
+    if (Object.keys(answers).length === 0) {
+        return dashboardLayout.map(row => ({
+            title: row.title,
+            score1: 0,
+            score2: 0,
+            recommendations: []
+        }));
+    }
+
     const getScore = (type, qId, aIdx) => {
       if (scoringRules[qId] && scoringRules[qId][type] && aIdx < scoringRules[qId][type].length) {
         return scoringRules[qId][type][aIdx];
@@ -154,13 +163,6 @@ export default function Dashboard() {
           if (recommendations[language][id] && recommendations[language][id][answerIndex]) {
             recommendationsList.push(recommendations[language][id][answerIndex]);
           }
-        } else {
-            // Provide default values if no answer is present
-            totalValueScore += getScore('values', id, 0);
-            totalRiskScore += getScore('risk', id, 0);
-            if (recommendations[language][id] && recommendations[language][id][0]) {
-                recommendationsList.push(recommendations[language][id][0]);
-            }
         }
       });
 
@@ -219,10 +221,6 @@ export default function Dashboard() {
             </header>
         </div>
       <div className="max-w-9xl mx-auto">
-
-        {/* Visualization + caption */}
-
-
         <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">{content.analysisTitle}</h1>
 
         <div className="space-y-6 mb-12">
