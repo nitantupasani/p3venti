@@ -38,15 +38,13 @@ const translations = {
     }
 }
 
-
-// (Your full recommendations and translations — unchanged)
-
 /* -------------------------------- Dashboard --------------------------------- */
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { answers, content: initialContent } = location.state || { answers: {}, content: {} };
+  // Provide default empty objects if location.state is null or undefined
+  const { answers = {}, content: initialContent = {} } = location.state || {};
   const [language, setLanguage] = useState(initialContent.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en');
 
   const content = translations[language];
@@ -55,8 +53,8 @@ export default function Dashboard() {
     setLanguage(e.target.value);
   };
 
-  const handleRestart = () => navigate('/');
-    const handleHomeClick = () => {
+  const handleRestart = () => navigate('/tool');
+  const handleHomeClick = () => {
     navigate('/');
   };
 
@@ -156,6 +154,13 @@ export default function Dashboard() {
           if (recommendations[language][id] && recommendations[language][id][answerIndex]) {
             recommendationsList.push(recommendations[language][id][answerIndex]);
           }
+        } else {
+            // Provide default values if no answer is present
+            totalValueScore += getScore('values', id, 0);
+            totalRiskScore += getScore('risk', id, 0);
+            if (recommendations[language][id] && recommendations[language][id][0]) {
+                recommendationsList.push(recommendations[language][id][0]);
+            }
         }
       });
 
@@ -177,20 +182,6 @@ export default function Dashboard() {
     const totalExposureRaw = analysisData.reduce((acc, item) => acc + item.score2, 0) / analysisData.length;
     return { totalScoreValues: totalValuesRaw, totalScoreExposure: totalExposureRaw };
   }, [analysisData]);
-
-  if (!Object.keys(answers).length || !Object.keys(initialContent).length) {
-    return (
-      <div className="min-h-screen bg-slate-100 text-slate-800 flex justify-center items-center p-4">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-semibold mb-4 text-indigo-700">{content.noSummaryTitle}</h2>
-          <p className="text-lg text-slate-600 mb-6">{content.noSummaryText}</p>
-          <button onClick={handleRestart} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg">
-            {content.goToStart}
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
@@ -255,7 +246,7 @@ export default function Dashboard() {
           <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle}/>
         </div>
         <div className="text-center mt-12">
-          <button onClick={() => navigate('/')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">
+          <button onClick={handleRestart} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">
             {content.startOver || "Start Over"}
           </button>
         </div>
