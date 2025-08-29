@@ -124,11 +124,11 @@ export default function ParaatHome() {
             <div className="w-full max-w-4xl mx-auto">
                 <main className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+                        <h2 className="text-3xl sm:text-3xl font-bold text-slate-900 mb-6">
                             {content.welcomeTitle}
                         </h2>
                         
-                        <div className="space-y-6 text-base sm:text-lg text-slate-700 leading-relaxed text-justify">
+                        <div className="space-y-6 text-base sm:text-base text-slate-700 leading-relaxed text-justify">
                             <p>{content.description1}</p>
                             <p>{content.description2}</p>
                             <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-r-lg text-left">
