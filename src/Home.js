@@ -34,7 +34,8 @@ const translations = {
 
 const STYLES = {
     languageSelect: {
-      header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors'
+      header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
+      menu: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full'
     },
     getStartedButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
     featureCard: 'bg-slate-50 border border-slate-200 rounded-lg p-4 text-slate-700'
@@ -42,11 +43,13 @@ const STYLES = {
 
 export default function ParaatHome() {
     const [language, setLanguage] = useState('en');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
     const content = translations[language];
 
     const handleLanguageChange = (e) => {
         setLanguage(e.target.value);
+        setIsMenuOpen(false);
     };
 
     const handleGetStarted = () => {
@@ -54,14 +57,13 @@ export default function ParaatHome() {
     };
 
     const handleHomeClick = () => {
-        // Already on home page, maybe refresh state
         setLanguage('en');
     };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center p-4 sm:p-8">
             <div className="w-full max-w-7xl mx-auto">
-                <header className="relative flex justify-between items-center w-full mb-12">
+                <header className="relative flex justify-between items-center w-full mb-8">
                     <div className="flex justify-start" style={{ flex: 1 }}>
                         <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
@@ -79,20 +81,44 @@ export default function ParaatHome() {
                                 <span className="hidden sm:inline">Pandemic Readiness Assessment & Action Tool (PARAAT)</span>
                             </h1>
                         </div>
-                        <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium">{content.pageSubtitle}</p>
+                        <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium whitespace-nowrap">{content.pageSubtitle}</p>
                     </div>
                     
                     <div className="flex justify-end items-center" style={{ flex: 1 }}>
-                        <select
-                            onChange={handleLanguageChange}
-                            value={language}
-                            className={STYLES.languageSelect.header}
-                        >
-                            <option value="en">English</option>
-                            <option value="nl">Nederlands</option>
-                        </select>
+                        <div className="lg:hidden">
+                          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
+                            {isMenuOpen ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                            )}
+                          </button>
+                        </div>
+                        <div className="hidden lg:block">
+                            <select
+                                onChange={handleLanguageChange}
+                                value={language}
+                                className={STYLES.languageSelect.header}
+                            >
+                                <option value="en">English</option>
+                                <option value="nl">Nederlands</option>
+                            </select>
+                        </div>
                     </div>
                 </header>
+
+                {isMenuOpen && (
+                  <div className="lg:hidden bg-white rounded-lg shadow-xl p-4 mb-8">
+                    <select 
+                        onChange={handleLanguageChange} 
+                        value={language}
+                        className={STYLES.languageSelect.menu}
+                    >
+                        <option value="en">English</option>
+                        <option value="nl">Nederlands</option>
+                    </select>
+                  </div>
+                )}
             </div>
 
             <div className="w-full max-w-4xl mx-auto">

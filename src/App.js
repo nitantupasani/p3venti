@@ -115,8 +115,14 @@ const translations = {
 
 const categoryOrder = ['personal', 'interaction', 'organizational'];
 
+const App = () => {
+    return (
+        <Tool />
+    );
+};
+
 // --- Main Application Component ---
-export default function App() {
+const Tool = () => {
   // --- State Management ---
   const navigate = useNavigate();
   const [language, setLanguage] = useState('en');
@@ -307,16 +313,19 @@ export default function App() {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
               </svg>
-              <span className="font-semibold">Home</span>
+              <span className="font-semibold hidden sm:inline">Home</span>
             </button>
           </div>
 
           <div className="text-center" style={{ flex: 3 }}>
               <div className="flex justify-center items-center gap-x-3">
                 <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-                <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600">
+                    <span className="sm:hidden">PARAAT</span>
+                    <span className="hidden sm:inline">Pandemic Readiness Assessment & Action Tool (PARAAT)</span>
+                </h1>
               </div>
-              <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
+              <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium">{content.pageSubtitle}</p>
           </div>
           
           <div className="flex justify-end items-center" style={{ flex: 1 }}>
@@ -444,4 +453,6 @@ export default function App() {
       </footer>
     </div>
   );
-}
+};
+
+export default App;
