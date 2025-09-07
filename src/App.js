@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomSlider from './CustomSlider';
 
@@ -44,7 +45,7 @@ const translations = {
             personal: [
                 { id: "q1", questionText: "How many people are usually in the living room at the same time (residents + staff + visitors)?", type: "slider", min: 1, max: 50, unit: "people" },
                 { id: "q2", questionText: "Which group primarily uses this living room?", answerOptions: [{ answerText: "Psychogeriatrics" }, { answerText: "Somatics" }, { answerText: "Intellectual impairments" }, { answerText: "Mixed" }, { answerText: "I don't know" }] },
-                { id: "q3", questionText: "How long are residents in this room on average per day?", answerOptions: [{ answerText: "<1 hour" }, { answerText: "1-3 hour" }, { answerText: "> 3 hour" }, { answerText: "I don't know" }] },
+                { id: "q3", questionText: "How long are residents in this room on average per day?", answerOptions: [{ answerText: "<1 hour" }, { answerText: "1-3 hours" }, { answerText: "> 3 hours" }, { answerText: "I don't know" }] },
                 { id: "q4", questionText: "Can you temporarily isolate someone if they have symptoms?", answerOptions: [{ answerText: "Yes" }, { answerText: "Partly" }, { answerText: "No" }, { answerText: "I don't know" }] },
                 { id: "q5", questionText: "Do different departments/groups regularly mix here?", answerOptions: [{ answerText: "Often" }, { answerText: "Sometimes" }, { answerText: "Rarely" }, { answerText: "I don't know" }] },
             ],
@@ -54,10 +55,10 @@ const translations = {
               { id: "q8", questionText: "Can people maintain a distance of approximately 1.5 meters when sitting/doing activities?", answerOptions: [{ answerText: "Usually" }, { answerText: "Sometimes" }, { answerText: "Almost never" }, { answerText: "I don't know" }] },
               { id: "q9", questionText: "Can windows or an outside door be opened?", answerOptions: [{ answerText: "Yes, several" }, { answerText: "Yes, but limited" }, { answerText: "No" }, { answerText: "I don't know" }] },
               { id: "q10", questionText: "Are there ventilation grilles (above a window or in the wall)?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
-              { id: "q11", questionText: "Is indoor air (partially) recirculated in the building (reused/backflow)?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
-              { id: "q12", questionText: "Is there an air quality meter (e.g., CO₂) in this living room?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
-              { id: "q13", questionText: "What is the maximal CO₂ level during busy periods?", answerOptions: [{ answerText: "<800 ppm" }, { answerText: "800–1200 ppm" }, { answerText: ">1200 ppm" }, { answerText: "No meter" }] },
-              { id: "q14", questionText: "What type of ventilation system is installed?", answerOptions: [{ answerText: "Type A: Natural air supply + natural air exhaust" }, { answerText: "Type B: Mechanical air supply + natural air exhaust" }, { answerText: "Type C: Natural air supply + mechanical air exhaust" }, { answerText: "Type D: Mechanical air supply + mechanical air exhaust" }, { answerText: "I don't know" }] },
+              { id: "q11", questionText: "What type of ventilation system is installed?", answerOptions: [{ answerText: "Type A: Natural air supply + natural air exhaust" }, { answerText: "Type B: Mechanical air supply + natural air exhaust" }, { answerText: "Type C: Natural air supply + mechanical air exhaust" }, { answerText: "Type D: Mechanical air supply + mechanical air exhaust" }, { answerText: "I don't know" }] },
+              { id: "q12", questionText: "Is indoor air (partially) recirculated in the building (reused/backflow)?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
+              { id: "q13", questionText: "Is there an air quality meter (e.g., CO₂) in this living room?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
+              { id: "q14", questionText: "What is the maximal CO₂ level during busy periods?", answerOptions: [{ answerText: "<800 ppm" }, { answerText: "800–1200 ppm" }, { answerText: ">1200 ppm" }, { answerText: "No meter" }] },
               { id: "q15", questionText: "Has the ventilation system been inspected and maintained in the past 12 months?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
               { id: "q16", questionText: "Do residents experience discomfort (drafts/cold/noise) when you provide additional ventilation?", answerOptions: [{ answerText: "Often" }, { answerText: "Sometimes" }, { answerText: "Rarely/Never" }, { answerText: "I don't know" }] },
             ],
@@ -97,10 +98,10 @@ const translations = {
               { id: "q8", questionText: "Kunnen mensen ongeveer 1,5 meter afstand houden bij zitten/activiteiten?", answerOptions: [{ answerText: "Meestal" }, { answerText: "Soms" }, { answerText: "Bijna nooit" }, { answerText: "Weet ik niet" }] },
               { id: "q9", questionText: "Kunnen ramen of een buitendeur open?", answerOptions: [{ answerText: "Ja, meerdere" }, { answerText: "Ja, maar beperkt" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
               { id: "q10", questionText: "Zijn er ventilatieroosters (boven raam of in de muur)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
-              { id: "q11", questionText: "Wordt binnenlucht (deels) gerecirculeerd in het gebouw (hergebruikt/teruggeblazen)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
-              { id: "q12", questionText: "Is er een luchtkwaliteitsmeter (bijv. CO₂) in deze woonkamer?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
-              { id: "q13", questionText: "Wat is de maximale CO₂‑waarde tijdens drukte?", answerOptions: [{ answerText: "<800 ppm" }, { answerText: "800–1200 ppm" }, { answerText: ">1200 ppm" }, { answerText: "Geen meter" }] },
-              { id: "q14", questionText: "Welk type ventilatiesysteem is geinstalleerd?", answerOptions: [{ answerText: "Type A: Natuurlijke luchttoevoer + natuurlijke luchtafvoer" }, { answerText: "Type B: Mechanische luchttoevoer + natuurlijke luchtafvoer" }, { answerText: "Type C: Natuurlijke luchttoevoer + mechanische luchtafvoer" }, { answerText: "Type D: Mechanische luchttoevoer + mechanische luchtafvoer" }, { answerText: "Weet ik niet" }] },
+              { id: "q11", questionText: "Welk type ventilatiesysteem is geinstalleerd?", answerOptions: [{ answerText: "Type A: Natuurlijke luchttoevoer + natuurlijke luchtafvoer" }, { answerText: "Type B: Mechanische luchttoevoer + natuurlijke luchtafvoer" }, { answerText: "Type C: Natuurlijke luchttoevoer + mechanische luchtafvoer" }, { answerText: "Type D: Mechanische luchttoevoer + mechanische luchtafvoer" }, { answerText: "Weet ik niet" }] },
+              { id: "q12", questionText: "Wordt binnenlucht (deels) gerecirculeerd in het gebouw (hergebruikt/teruggeblazen)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
+              { id: "q13", questionText: "Is er een luchtkwaliteitsmeter (bijv. CO₂) in deze woonkamer?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
+              { id: "q14", questionText: "Wat is de maximale CO₂‑waarde tijdens drukte?", answerOptions: [{ answerText: "<800 ppm" }, { answerText: "800–1200 ppm" }, { answerText: ">1200 ppm" }, { answerText: "Geen meter" }] },
               { id: "q15", questionText: "Is het ventilatiesysteem in de afgelopen 12 maanden gecontroleerd en onderhouden?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
               { id: "q16", questionText: "Ervaren bewoners last (tocht/koud/geluid) als u extra ventileert?", answerOptions: [{ answerText: "Vaak" }, { answerText: "Soms" }, { answerText: "Zelden/nooit" }, { answerText: "Weet ik niet" }] },
             ],
