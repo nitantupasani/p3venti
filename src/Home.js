@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const translations = {
     en: {
         pageSubtitle: 'For location managers in long-term care.',
-        welcomeTitle: 'Welcome to this PARAAT scan!',
+        welcomeTitle: 'Welcome to the PARAAT scan!',
         description1: 'Are you a location manager of a long-term care facility? Then this web application can help you.',
         description2: 'This web application was developed based on the results of scientific research conducted for the P3Venti project. If you answer the questions about your care facility, you will receive advice on its resilience for the next pandemic. Suggestions are made on how your facility can best prepare. These are just suggestions; multiple and/or different solutions are possible. This information can help you make decisions within your organization.',
         instructions: 'The questions are about the living room as a communal space. Please complete the questions about one living room in your facility. If there are multiple living rooms, please complete the questions again for the other living rooms.',
