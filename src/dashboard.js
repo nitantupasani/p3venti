@@ -46,7 +46,10 @@ const translations = {
     card9Title: 'Knowledge',
     card9Back: 'It is important to continuously improve knowledge of infection prevention measures. Good information is essential.',
     card10Title: 'Legislation & Regulations',
-    card10Back: 'Monitor legislation and regulations within the field.'
+    card10Back: 'Monitor legislation and regulations within the field.',
+    emailLabel: 'Email the report to me!',
+    sendEmailButton: 'Send PDF to Email',
+    downloadPdfButton: 'Download PDF Report',
   },
   nl: {
     pageTitle: 'P3 Venti',
@@ -84,7 +87,10 @@ const translations = {
     card9Title: 'Kennis',
     card9Back: 'Het is belangrijk om de kennis van infectiepreventiemaatregelen voortdurend te verbeteren. Goede informatie is essentieel.',
     card10Title: 'Wet- & regelgeving',
-    card10Back: 'Monitor de wet- en regelgeving binnen het vakgebied.'
+    card10Back: 'Monitor de wet- en regelgeving binnen het vakgebied.',
+    emailLabel: 'Uw e-mail:',
+    sendEmailButton: 'Stuur PDF naar e-mail',
+    downloadPdfButton: 'Download PDF-rapport',
   }
 };
 
@@ -203,6 +209,7 @@ const ReliabilityScoreBar = ({ score, label }) => {
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [email, setEmail] = useState('');
 
   const { answers = {}, content: initialContent = {}, questions = {} } = location.state || {};
   const [language, setLanguage] = useState(initialContent.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en');
@@ -389,112 +396,148 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto mb-16">
-        <header className="relative flex justify-between items-center w-full mb-8">
-          <div className="flex justify-start" style={{ flex: 1 }}>
-            <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
-              </svg>
-              <span className="font-semibold">Home</span>
-            </button>
-          </div>
+        <div className="max-w-7xl mx-auto">
+            <header className="relative flex justify-between items-center w-full mb-8">
+                <div className="flex justify-start" style={{ flex: 1 }}>
+                    <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
+                        </svg>
+                        <span className="font-semibold">Home</span>
+                    </button>
+                </div>
 
-          <div className="text-center" style={{ flex: 3 }}>
-            <div className="flex justify-center items-center gap-x-3">
-              <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-              <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
+                <div className="text-center" style={{ flex: 3 }}>
+                    <div className="flex justify-center items-center gap-x-3">
+                        <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
+                        <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
+                    </div>
+                    <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
+                </div>
+
+                <div className="flex justify-end items-center" style={{ flex: 1 }}>
+                    <div className="hidden lg:block">
+                        <select
+                            onChange={e => setLanguage(e.target.value)}
+                            value={language}
+                            className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                        >
+                            <option value="en">English</option>
+                            <option value="nl">Nederlands</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <div className="flex flex-col items-center justify-center space-y-4 mb-8">
+  <div className="w-full max-w-md">
+    {/* Small title-style label on top */}
+    <label
+      htmlFor="email"
+      className="block text-s uppercase tracking-wide font-semibold text-slate-700 mb-1"
+    >
+      {content.emailLabel}
+    </label>
+
+    {/* Email input + compact send button on one row */}
+    <div className="flex items-center gap-2">
+      <input
+        type="email"
+        id="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+                   focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+        placeholder="Enter your email here"
+      />
+      <button
+        onClick={() => console.log('Send email to:', email)}
+        className="shrink-0 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+      >
+        {content.sendEmailButton}
+      </button>
+    </div>
+  </div>
+
+  {/* Download button under the row */}
+  <div className="w-full max-w-md">
+    <button
+      onClick={() => console.log('Downloading PDF...')}
+      className="text-sm px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white transition-colors"
+    >
+      {content.downloadPdfButton}
+    </button>
+  </div>
+</div>
+
+        </div>
+
+        <div className="max-w-9xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
+                <FancyParaatDial score={paraatScore} label={content.paraatScore} />
+                <div className="text-center max-w-sm p-6 bg-white rounded-2xl shadow-xl">
+                    <h3 className="text-xl font-bold text-slate-800 mb-3">{content.topRecommendationsTitle}</h3>
+                    <p className="text-slate-600 leading-relaxed">{content.topRecommendationsText}</p>
+                </div>
             </div>
-            <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
-          </div>
 
-          <div className="flex justify-end items-center" style={{ flex: 1 }}>
-            <div className="hidden lg:block">
-              <select
-                onChange={e => setLanguage(e.target.value)}
-                value={language}
-                className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
-              >
-                <option value="en">English</option>
-                <option value="nl">Nederlands</option>
-              </select>
+            <div className="flex justify-center mb-12">
+                <ReliabilityScoreBar score={reliabilityScore} label={content.reliabilityScore} />
             </div>
-          </div>
-        </header>
-      </div>
 
-      <div className="max-w-9xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
-          <FancyParaatDial score={paraatScore} label={content.paraatScore} />
-          <div className="text-center max-w-sm p-6 bg-white rounded-2xl shadow-xl">
-            <h3 className="text-xl font-bold text-slate-800 mb-3">{content.topRecommendationsTitle}</h3>
-            <p className="text-slate-600 leading-relaxed">{content.topRecommendationsText}</p>
-          </div>
-        </div>
-
-        <div className="flex justify-center mb-12">
-          <ReliabilityScoreBar score={reliabilityScore} label={content.reliabilityScore} />
-        </div>
-
-        {/* Flip Cards Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">{content.cardsTitle}</h2>
-          <div className="flex flex-col items-center gap-6">
-            {/* First Row */}
-            <div className="flex flex-wrap justify-center gap-6">
-              {[...Array(5)].map((_, i) => (
-                <FlipCard
-                  key={`card-${i + 1}`}
-                  id={i}
-                  frontContent={content[`card${i + 1}Title`]}
-                  backContent={content[`card${i + 1}Back`]}
-                  isFlipped={flippedCards[i]}
-                  onEnter={onCardEnter}
-                  onLeave={onCardLeave}
-                />
-              ))}
+            {/* Flip Cards Section */}
+            <div className="mb-12">
+                <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">{content.cardsTitle}</h2>
+                <div className="flex flex-col items-center gap-6">
+                    {/* First Row */}
+                    <div className="flex flex-wrap justify-center gap-6">
+                        {[...Array(5)].map((_, i) => (
+                            <FlipCard
+                                key={`card-${i + 1}`}
+                                id={i}
+                                frontContent={content[`card${i + 1}Title`]}
+                                backContent={content[`card${i + 1}Back`]}
+                                isFlipped={flippedCards[i]}
+                                onEnter={onCardEnter}
+                                onLeave={onCardLeave}
+                            />
+                        ))}
+                    </div>
+                    {/* Second Row */}
+                    <div className="flex flex-wrap justify-center gap-6">
+                        {[...Array(5)].map((_, i) => (
+                            <FlipCard
+                                key={`card-${i + 6}`}
+                                id={i + 5}
+                                frontContent={content[`card${i + 6}Title`]}
+                                backContent={content[`card${i + 6}Back`]}
+                                isFlipped={flippedCards[i + 5]}
+                                onEnter={onCardEnter}
+                                onLeave={onCardLeave}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
-            {/* Second Row */}
-            <div className="flex flex-wrap justify-center gap-6">
-              {[...Array(5)].map((_, i) => (
-                <FlipCard
-                  key={`card-${i + 6}`}
-                  id={i + 5}
-                  frontContent={content[`card${i + 6}Title`]}
-                  backContent={content[`card${i + 6}Back`]}
-                  isFlipped={flippedCards[i + 5]}
-                  onEnter={onCardEnter}
-                  onLeave={onCardLeave}
-                />
-              ))}
+
+            <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">{content.analysisTitle}</h1>
+
+            <div className="space-y-6 mb-12">
+                {analysisData.map(data => (
+                    <AnalysisRow key={data.title} title={data.title} score1={data.score1} score2={data.score2} recommendations={data.recommendations} />
+                ))}
             </div>
-          </div>
+
+            <div className="mt-12">
+                <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle} />
+            </div>
+
+            <div className="text-center mt-12">
+                <button onClick={handleRestart} className="bg-blue-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">
+                    {content.startOver || 'Start Over'}
+                </button>
+            </div>
         </div>
-
-        <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">{content.analysisTitle}</h1>
-
-        <div className="space-y-6 mb-12">
-          {analysisData.map(data => (
-            <AnalysisRow key={data.title} title={data.title} score1={data.score1} score2={data.score2} recommendations={data.recommendations} />
-          ))}
-        </div>
-
-        {/* <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4 text-center">{content.totalScoresTitle}</h2>
-          <TotalScoreBar label={content.totalExposureScoreLabel} value={totalScoreExposure} colorClass="bg-green-500" />
-          <TotalScoreBar label={content.totalValuesScoreLabel} value={totalScoreValues} colorClass="bg-blue-500" />
-        </div> */}
-
-        <div className="mt-12">
-          <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle} />
-        </div>
-
-        <div className="text-center mt-12">
-          <button onClick={handleRestart} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">
-            {content.startOver || 'Start Over'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
