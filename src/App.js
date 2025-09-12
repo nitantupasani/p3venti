@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomSlider from './CustomSlider';
@@ -128,7 +129,10 @@ const App = () => {
 const Tool = () => {
   // --- State Management ---
   const navigate = useNavigate();
-  const [language, setLanguage] = useState('en');
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const initialLang = params.get('lang') || 'nl';
+  const [language, setLanguage] = useState(initialLang);
   const [activeCategory, setActiveCategory] = useState('personal');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({'q1': 25});

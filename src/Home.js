@@ -42,7 +42,7 @@ const STYLES = {
 };
 
 export default function ParaatHome() {
-    const [language, setLanguage] = useState('en');
+    const [language, setLanguage] = useState('nl');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
     const content = translations[language];
@@ -53,11 +53,12 @@ export default function ParaatHome() {
     };
 
     const handleGetStarted = () => {
-        navigate('/tool');
-    };
+    navigate(`/tool?lang=${language}`);
+};
+
 
     const handleHomeClick = () => {
-        setLanguage('en');
+        setLanguage('nl');
     };
 
     return (
