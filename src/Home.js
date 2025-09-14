@@ -19,9 +19,9 @@ const translations = {
     nl: {
         pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
         welcomeTitle: 'Welkom bij deze PARAAT scan!',
-        description1: 'Ben je een locatiemanager van een langdurige zorgfaciliteit? Dan kan deze webapplicatie je helpen.',
-        description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek uitgevoerd voor het P3Venti project. Als je de vragen over je zorgfaciliteit beantwoordt, krijg je advies over de veerkracht voor de volgende pandemie. Er worden suggesties gedaan over hoe je faciliteit zich het beste kan voorbereiden. Dit zijn slechts suggesties; meerdere en/of verschillende oplossingen zijn mogelijk. Deze informatie kan je helpen bij het nemen van beslissingen binnen je organisatie.',
-        instructions: 'De vragen gaan over de woonkamer als gemeenschappelijke ruimte. Beantwoord de vragen voor één woonkamer in je faciliteit. Als er meerdere woonkamers zijn, beantwoord de vragen dan opnieuw voor de andere woonkamers.',
+        description1: 'Bent u locatiemanager van een langdurige zorginstelling? Dan kan deze webapplicatie u helpen .',
+        description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek dat gedaan is voor het project P3Venti (zie website). Als u de vragen in de vragen beantwoordt over uw zorginstelling, dan krijgt u een advies over hoe weerbaar uw zorginstelling is voor een volgende pandemie. Ook worden er voorstellen gedaan voor hoe uw zorginstelling zich het beste kan voorbereiden. Dit zijn slechts voorstellen, er zijn meerdere en/of andere oplossingen mogelijk. Deze informatie kan u helpen als u beslissingen gaat nemen in uw organisatie.',
+        instructions: 'De vragen die gesteld worden gaan over de woonkamer als gemeenschappelijke ruimte. Vul de vragen in over één woonkamer in uw instelling. Als er meerdere woonkamers zijn, vult u de vragen opnieuw in voor de andere woonkamers.',
         getStarted: 'Aan de slag',
         features: [
             'Beoordeel de paraatheid van je faciliteit voor pandemieën',
