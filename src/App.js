@@ -233,7 +233,7 @@ const Tool = () => {
             setActiveCategory(nextCategory);
             setCurrentQuestionIndex(0);
         } else {
-            navigate('/summary', { 
+            navigate(`/summary?lang=${language}`, { 
                 state: { 
                     questions: content.questionSets, 
                     answers: answers, 

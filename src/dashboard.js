@@ -53,7 +53,7 @@ const translations = {
   },
   nl: {
     pageTitle: 'P3 Venti',
-    pageSubtitle: 'Zorghuis Actieplan',
+    pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
     analysisTitle: 'Analyse per Categorie',
     totalScoresTitle: 'Totale Scores van Analyse',
     totalExposureScoreLabel: 'Totaalscore Bescherming tegen Blootstelling',
@@ -210,9 +210,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
+  const params = new URLSearchParams(location.search);
+  const initialLang = params.get('lang') || 'nl'; // Read lang from URL
+   const [language, setLanguage] = useState(initialLang);
 
-  const { answers = {}, content: initialContent = {}, questions = {} } = location.state || {};
-  const [language, setLanguage] = useState(initialContent.pageSubtitle === 'Zorghuis Actieplan' ? 'nl' : 'en');
+  const { answers = {}, content: questions = {} } = location.state || {};
 
   const [flippedCards, setFlippedCards] = useState(new Array(10).fill(false));
   const unflipTimers = useRef({}); // { [index]: timeoutId }
@@ -271,7 +273,7 @@ export default function Dashboard() {
     return () => tids.forEach(clearTimeout);
   }, []);
 
-  const handleRestart = () => navigate('/tool');
+  const handleRestart = () => navigate(`/tool?lang=${language}`);
   const handleHomeClick = () => navigate('/');
 
   const safeSpaceData = useMemo(() => {
