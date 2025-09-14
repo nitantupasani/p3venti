@@ -107,6 +107,55 @@ const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations }) 
 
 // --- Data ---
 
+export const topRecommendationsData = {
+    en: {
+        q14: "Improve ventilation to keep CO₂ levels below recommended limits (800 ppm for vulnerable groups).",
+        q12: "Adjust or replace the ventilation system to avoid recirculating indoor air.",
+        q15: "Ensure the ventilation system is regularly inspected and maintained (at least annually).",
+        q8: "Rearrange furniture and manage room capacity to ensure social distancing is possible.",
+        q4: "Establish a clear protocol for safely isolating individuals with infectious symptoms.",
+        q11: "Assess and upgrade the ventilation system to meet modern building codes (e.g., Type D).",
+        q1: "Manage group sizes in common areas to reduce transmission risk and improve quality of care.",
+        q3: "Schedule activities to limit the duration individuals spend in shared spaces, allowing for air exchange.",
+        q10: "Install and maintain ventilation grilles to improve natural airflow.",
+        q9: "Ensure windows can be opened to provide effective natural ventilation when needed.",
+        q20: "Implement a policy of working with fixed teams and groups to minimize cross-contamination.",
+        q5: "Limit the mixing of different resident groups or departments in common areas.",
+        q18: "Ensure a reliable supply of personal protective equipment (PPE) is always available.",
+        q16: "Address sources of ventilation discomfort (drafts, noise, cold) to ensure systems are used effectively.",
+        q19: "Improve staffing schedules to ensure all shifts are covered, maintaining quality of care and safety.",
+        q6: "Evaluate if the room size is adequate for the number of occupants and planned activities.",
+        q7: "Consider the room's shape and layout when planning activities to optimize safe occupancy.",
+        q13: "Install CO₂ meters in common areas to monitor air quality in real-time.",
+        q21: "Allocate a dedicated budget for pandemic preparedness, including ventilation and PPE.",
+        q17: "Provide clear, visible instructions for operating ventilation systems (windows, grilles, controls).",
+        q2: "Tailor communication and support strategies to the specific needs of the resident group (e.g., psychogeriatric).",
+    },
+    nl: {
+        q14: "Verbeter de ventilatie om de CO₂-niveaus onder de aanbevolen limieten te houden (800 ppm voor kwetsbare groepen).",
+        q12: "Pas het ventilatiesysteem aan of vervang het om recirculatie van binnenlucht te voorkomen.",
+        q15: "Zorg ervoor dat het ventilatiesysteem regelmatig wordt geïnspecteerd en onderhouden (minimaal jaarlijks).",
+        q8: "Herschik meubilair en beheer de capaciteit van de ruimte om social distancing mogelijk te maken.",
+        q4: "Stel een duidelijk protocol op voor het veilig isoleren van personen met besmettelijke symptomen.",
+        q11: "Beoordeel en upgrade het ventilatiesysteem om te voldoen aan moderne bouwnormen (bijv. Type D).",
+        q1: "Beheer de groepsgrootte in gemeenschappelijke ruimtes om het overdrachtsrisico te verkleinen en de zorgkwaliteit te verbeteren.",
+        q3: "Plan activiteiten zodanig dat de verblijfsduur in gedeelde ruimtes beperkt wordt, zodat luchtverversing mogelijk is.",
+        q10: "Installeer en onderhoud ventilatieroosters om de natuurlijke luchtstroom te verbeteren.",
+        q9: "Zorg ervoor dat ramen geopend kunnen worden voor effectieve natuurlijke ventilatie wanneer nodig.",
+        q20: "Implementeer een beleid van vaste teams en groepen om kruisbesmetting te minimaliseren.",
+        q5: "Beperk het mengen van verschillende bewonersgroepen of afdelingen in gemeenschappelijke ruimtes.",
+        q18: "Zorg voor een betrouwbare voorraad persoonlijke beschermingsmiddelen (PBM) die altijd beschikbaar is.",
+        q16: "Pak bronnen van ventilatieongemak (tocht, lawaai, kou) aan om ervoor te zorgen dat systemen effectief worden gebruikt.",
+        q19: "Verbeter de personeelsplanning om te zorgen dat alle diensten bezet zijn, wat de zorgkwaliteit en veiligheid ten goede komt.",
+        q6: "Evalueer of de grootte van de ruimte voldoende is voor het aantal bewoners en de geplande activiteiten.",
+        q7: "Houd rekening met de vorm en indeling van de kamer bij het plannen van activiteiten om een veilige bezetting te optimaliseren.",
+        q13: "Installeer CO₂-meters in gemeenschappelijke ruimtes om de luchtkwaliteit in real-time te monitoren.",
+        q21: "Wijs een specifiek budget toe voor pandemische paraatheid, inclusief ventilatie en PBM.",
+        q17: "Zorg voor duidelijke, zichtbare instructies voor de bediening van ventilatievoorzieningen (ramen, roosters, knoppen).",
+        q2: "Stem communicatie- en ondersteuningsstrategieën af op de specifieke behoeften van de bewonersgroep (bijv. psychogeriatrie).",
+    }
+};
+
 export const recommendations = {
     en: {
         q1: [

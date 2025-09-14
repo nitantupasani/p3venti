@@ -1,7 +1,6 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import CustomSlider from './CustomSlider';
 
 // --- Style Definitions ---
@@ -41,7 +40,7 @@ const translations = {
         startOver: 'Start Over',
         previousStep: 'Previous Step',
         nextStep: 'Next Step',
-        viewSummary: 'View Summary',
+        viewSummary: 'View Dashboard',
         questionSets: {
             personal: [
                 { id: "q1", questionText: "How many people are usually in the living room at the same time (residents + staff + visitors)?", type: "slider", min: 1, max: 50, unit: "people" },
@@ -84,7 +83,7 @@ const translations = {
         startOver: 'Opnieuw Beginnen',
         previousStep: 'Vorige Stap',
         nextStep: 'Volgende Stap',
-        viewSummary: 'Bekijk Overzicht',
+        viewSummary: 'Bekijk Dashboard',
         questionSets: {
             personal: [
               { id: "q1", questionText: "Hoeveel mensen zijn meestal tegelijk in de woonkamer (bewoners + medewerkers + bezoekers)?", type: "slider", min: 1, max: 50, unit: "mensen" },
@@ -119,15 +118,15 @@ const translations = {
 
 const categoryOrder = ['personal', 'interaction', 'organizational'];
 
+// --- Main Application Component ---
 const App = () => {
-    return (
-        <Tool />
-    );
+    // The routing is now managed entirely by the top-level router in index.js.
+    // The App component, rendered at the '/tool' path, should only contain the questionnaire tool.
+    return <Tool />;
 };
 
-// --- Main Application Component ---
+// --- Questionnaire Component ---
 const Tool = () => {
-  // --- State Management ---
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -141,11 +140,9 @@ const Tool = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [stepsCompleted, setStepsCompleted] = useState({ personal: false, interaction: false, organizational: false });
 
-  // --- Dynamic Content Variables ---
   const content = translations[language];
   const activeQuestions = content.questionSets[activeCategory];
 
-  // --- Effect for restoring state ---
   useEffect(() => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
     const answer = answers[currentQuestion.id];
@@ -165,8 +162,6 @@ const Tool = () => {
     }
   }, [currentQuestionIndex, activeCategory, activeQuestions, answers]);
 
-
-  // --- Event Handlers ---
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
     setIsMenuOpen(false);
@@ -175,7 +170,6 @@ const Tool = () => {
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
     setCurrentQuestionIndex(0);
-    // Note: We don't clear answers here to allow users to go back and change them
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
     setIsMenuOpen(false);
@@ -235,9 +229,8 @@ const Tool = () => {
         } else {
             navigate(`/summary?lang=${language}`, { 
                 state: { 
-                    questions: content.questionSets, 
-                    answers: answers, 
-                    content: content 
+                    answers: answers,
+                    content: content,
                 } 
             });
         }

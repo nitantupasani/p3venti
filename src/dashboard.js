@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram';
-import { AnalysisRow, recommendations, scoringRules } from './recommendations';
+import { AnalysisRow, recommendations, scoringRules, topRecommendationsData } from './recommendations';
 
 const dashboardLayout = [
   { title: "People & Use", questionIds: ['q1','q2','q3', 'q4', 'q5'], totalWeight: 0.22 },
@@ -26,6 +26,7 @@ const translations = {
     reliabilityScore: 'Reliability Score',
     topRecommendationsTitle: 'Top Recommendations',
     topRecommendationsText: 'Based on your results, focusing on improving ventilation and ensuring staff have up-to-date knowledge on infection prevention will have the highest impact on your pandemic readiness.',
+    noRecommendations: "No high-priority recommendations based on your answers.",
     cardsTitle: 'Always keep in mind these factors when making changes',
     card1Title: 'Quality of life resident',
     card1Back: 'Well-being of the resident. Consists of several components that are important for that person to give a valuable meaning to their life. This also includes humanity, autonomy and comfort. This should be priority.',
@@ -67,6 +68,7 @@ const translations = {
     reliabilityScore: 'Betrouwbaarheidsscore',
     topRecommendationsTitle: 'Topaanbevelingen',
     topRecommendationsText: 'Op basis van uw resultaten zal het focussen op het verbeteren van de ventilatie en het zorgen voor actuele kennis over infectiepreventie bij het personeel de grootste impact hebben op uw pandemische paraatheid.',
+    noRecommendations: "Geen aanbevelingen met hoge prioriteit op basis van uw antwoorden.",
     cardsTitle: 'Houd bij het maken van veranderingen altijd rekening met deze factoren',
     card1Title: 'Kwaliteit van leven bewoner',
     card1Back: 'Welzijn van de bewoner. Bestaat uit verschillende componenten die voor die persoon belangrijk zijn om een waardevolle invulling aan zijn leven te geven. Dit omvat ook menselijkheid, autonomie en comfort. Dit zou prioriteit moeten hebben.',
@@ -92,6 +94,57 @@ const translations = {
     sendEmailButton: 'Stuur PDF naar e-mail',
     downloadPdfButton: 'Download PDF-rapport',
   }
+};
+
+const PRIORITY_ARRAY = [
+  "q14", "q12", "q15", "q8",  "q4",  "q11", "q1",  "q3",  "q10",
+  "q9",  "q20", "q5",  "q18", "q16", "q19", "q6",  "q7",
+  "q13", "q21", "q17", "q2"
+];
+
+const TopRecommendations = ({ userAnswers, content, language }) => {
+    // 1. Define the conditions for removing questions from the priority queue.
+    const questionsToRemoveOnIndexZero = ["q4", "q8", "q14", "q15", "q18", "q19", "q21"];
+
+    // 2. Filter the PRIORITY_ARRAY based on the user's answers.
+    const remainingPriorityQueue = PRIORITY_ARRAY.filter(questionId => {
+        const answerIndex = userAnswers[questionId];
+
+        // Specific rule for q12. If answer is index 1 ("No"), it's a good answer, so remove it.
+        if (questionId === "q12" && answerIndex === 1) {
+            return false; // Remove from queue
+        }
+
+        // Rule for the general list of questions. If answer is index 0 (best answer), remove it.
+        if (questionsToRemoveOnIndexZero.includes(questionId) && answerIndex === 0) {
+            return false; // Remove from queue
+        }
+
+        // If no removal conditions are met, keep the question in the queue.
+        return true;
+    });
+
+    // 3. Get the top 5 question IDs from the filtered queue.
+    const top5QuestionIds = remainingPriorityQueue.slice(0, 5);
+
+    // 4. Retrieve the recommendation string for each of the top 5 questions.
+    const top5Recommendations = top5QuestionIds
+        .map(questionId => topRecommendationsData[language]?.[questionId])
+        .filter(Boolean); // Filter out any undefined recommendations
+
+    if (top5Recommendations.length > 0) {
+        return (
+            <ul className="list-decimal pl-5 space-y-3">
+                {top5Recommendations.map((rec, index) => (
+                    <li key={index} className="font-semibold text-slate-700">
+                        {rec}
+                    </li>
+                ))}
+            </ul>
+        );
+    }
+    
+    return <p className="text-slate-600 text-center">{content.noRecommendations}</p>;
 };
 
 const reliabilityWeights = {
@@ -211,7 +264,9 @@ export default function Dashboard() {
   const unflipTimers = useRef({});
 
   const content = translations[language];
-  
+  const userAnswers = location.state?.answers || {};
+
+
   const onCardEnter = (id) => {
     const t = unflipTimers.current[id];
     if (t) clearTimeout(t);
@@ -469,9 +524,9 @@ export default function Dashboard() {
         <div className="max-w-9xl mx-auto">
             <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
                 <FancyParaatDial score={overallParaatScore} label={content.paraatScore} />
-                <div className="text-center max-w-sm p-6 bg-white rounded-2xl shadow-xl">
-                    <h3 className="text-xl font-bold text-slate-800 mb-3">{content.topRecommendationsTitle}</h3>
-                    <p className="text-slate-600 leading-relaxed">{content.topRecommendationsText}</p>
+                <div className="w-full max-w-lg p-6 bg-white rounded-2xl shadow-xl">
+                    <h3 className="text-2xl font-bold text-slate-800 mb-4 text-center">{content.topRecommendationsTitle}</h3>
+                    <TopRecommendations userAnswers={userAnswers} content={content} language={language} />
                 </div>
             </div>
 
