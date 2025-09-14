@@ -4,9 +4,9 @@ import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram'
 import { AnalysisRow, recommendations, scoringRules } from './recommendations';
 
 const dashboardLayout = [
-  { title: "Personal", questionIds: ['q4', 'q5', 'q6'] },
-  { title: "Interaction", questionIds: ['q12', 'q14', 'q15', 'q16'] },
-  { title: "Organizational", questionIds: ['q17', 'q18', 'q19', 'q20'] },
+  { title: "People & Use", questionIds: ['q1','q2','q3', 'q4', 'q5'] },
+  { title: "Space & Air", questionIds: ['q6','q7','q8','q9','q10','q11','q12','q13', 'q14', 'q15', 'q16'] },
+  { title: "Agreements & Resources", questionIds: ['q17', 'q18', 'q19', 'q20', 'q21'] },
 ];
 
 const translations = {

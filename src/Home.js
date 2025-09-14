@@ -1,12 +1,27 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
+// put this near the top of your file (or in a separate utils file if you reuse it a lot)
+const markdownComponents = {
+  a: ({ node, ...props }) => (
+    <a
+      {...props}
+      className="text-indigo-600 hover:underline"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {props.children}
+    </a>
+  ),
+};
+
 
 const translations = {
     en: {
         pageSubtitle: 'For location managers in long-term care.',
         welcomeTitle: 'Welcome to the PARAAT scan!',
         description1: 'Are you a location manager of a long-term care facility? Then this web application can help you.',
-        description2: 'This web application was developed based on the results of scientific research conducted for the P3Venti project. If you answer the questions about your care facility, you will receive advice on its resilience for the next pandemic. Suggestions are made on how your facility can best prepare. These are just suggestions; multiple and/or different solutions are possible. This information can help you make decisions within your organization.',
+        description2: 'This web application was developed based on the results of scientific research conducted for the P3Venti project (see [website](https://www.p3venti.nl/)). If you answer the questions about your care facility, you will receive advice on its resilience for the next pandemic. Suggestions are made on how your facility can best prepare. These are just suggestions; multiple and/or different solutions are possible. This information can help you make decisions within your organization.',
         instructions: 'The questions are about the living room as a communal space. Please complete the questions about one living room in your facility. If there are multiple living rooms, please complete the questions again for the other living rooms.',
         getStarted: 'Get Started',
         features: [
@@ -20,7 +35,7 @@ const translations = {
         pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
         welcomeTitle: 'Welkom bij deze PARAAT scan!',
         description1: 'Bent u locatiemanager van een langdurige zorginstelling? Dan kan deze webapplicatie u helpen .',
-        description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek dat gedaan is voor het project P3Venti (zie website). Als u de vragen in de vragen beantwoordt over uw zorginstelling, dan krijgt u een advies over hoe weerbaar uw zorginstelling is voor een volgende pandemie. Ook worden er voorstellen gedaan voor hoe uw zorginstelling zich het beste kan voorbereiden. Dit zijn slechts voorstellen, er zijn meerdere en/of andere oplossingen mogelijk. Deze informatie kan u helpen als u beslissingen gaat nemen in uw organisatie.',
+        description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek dat gedaan is voor het project P3Venti (zie [website](https://www.p3venti.nl/)). Als u de vragen in de vragen beantwoordt over uw zorginstelling, dan krijgt u een advies over hoe weerbaar uw zorginstelling is voor een volgende pandemie. Ook worden er voorstellen gedaan voor hoe uw zorginstelling zich het beste kan voorbereiden. Dit zijn slechts voorstellen, er zijn meerdere en/of andere oplossingen mogelijk. Deze informatie kan u helpen als u beslissingen gaat nemen in uw organisatie.',
         instructions: 'De vragen die gesteld worden gaan over de woonkamer als gemeenschappelijke ruimte. Vul de vragen in over één woonkamer in uw instelling. Als er meerdere woonkamers zijn, vult u de vragen opnieuw in voor de andere woonkamers.',
         getStarted: 'Aan de slag',
         features: [
@@ -131,7 +146,9 @@ export default function ParaatHome() {
                         
                         <div className="space-y-6 text-base sm:text-base text-slate-700 leading-relaxed text-justify">
                             <p>{content.description1}</p>
-                            <p>{content.description2}</p>
+                            <ReactMarkdown components={markdownComponents}>
+  {content.description2}
+</ReactMarkdown>
                             <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-r-lg text-left">
                                 <p className="font-medium text-indigo-900">{content.instructions}</p>
                             </div>
