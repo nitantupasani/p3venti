@@ -291,7 +291,7 @@ export default function Dashboard() {
       return {
         title: row.title,
         paraatScore: isNaN(paraatScore) ? 0 : paraatScore,
-        reliabilityScore: isNaN(finalCategoryReliability) ? 100 : Math.max(0, finalCategoryReliability),
+        reliabilityScore: isNaN(finalCategoryReliability) ? 0 : Math.max(0, finalCategoryReliability),
         recommendations: recommendationsList
       };
     });

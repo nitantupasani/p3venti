@@ -17,8 +17,8 @@ const FancyParaatDial = ({ score, label }) => {
     const strokeDashoffset = arcLen - progressLen;
 
     return (
-        <div className="flex flex-col items-center select-none p-6 bg-white rounded-2xl shadow-xl">
-            <svg viewBox="0 0 100 60" className="w-80 h-auto">
+        <div className="flex flex-col items-center select-none p-6">
+            <svg viewBox="0 0 100 60" className="w-40 h-auto md:w-48">
                 <defs>
                     <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="#ef4444" />
@@ -36,11 +36,11 @@ const FancyParaatDial = ({ score, label }) => {
                     strokeLinecap="round"
                     style={{ strokeDasharray, strokeDashoffset, transition: 'stroke-dashoffset 700ms cubic-bezier(.22,.61,.36,1)' }}
                 />
-                <text x="50" y="40" textAnchor="middle" dominantBaseline="middle" fontSize="16" fontWeight="800" className="fill-slate-800">
+                <text x="50" y="40" textAnchor="middle" dominantBaseline="middle" fontSize="15" fontWeight="800" className="fill-slate-800">
                     {v}
                 </text>
             </svg>
-            <div className="mt-4 text-xl font-bold text-slate-800 text-center">{label}</div>
+            <div className="mt-2 text-base font-bold text-slate-800 text-center">{label}</div>
         </div>
     );
 };
@@ -52,12 +52,12 @@ const ReliabilityScoreBar = ({ score, label }) => {
     const gradientStyle = { background: 'linear-gradient(to right, #ef4444, #f59e0b, #22c55e)' };
 
     return (
-        <div className="w-full max-w-lg mx-auto p-4 bg-white rounded-2xl shadow-lg">
+        <div className="w-full max-w-xs mx-auto p-2 bg-white rounded-xl shadow-md">
             <div className="flex justify-between items-center mb-2">
-                <h3 className="text-base font-semibold text-slate-700">{label}</h3>
+                <h3 className="text-sm font-semibold text-slate-700">{label}</h3>
                 <span className={`text-lg font-bold ${scoreColorClass}`}>{v}%</span>
             </div>
-            <div className="relative w-full h-5 rounded-full overflow-hidden">
+            <div className="relative w-full h-4 rounded-full overflow-hidden">
                 <div className="absolute inset-0 w-full h-full opacity-25 rounded-full" style={gradientStyle}></div>
                 <div className="relative h-full rounded-full overflow-hidden" style={{ width: `${v}%`, transition: 'width 700ms cubic-bezier(.22,.61,.36,1)' }}>
                     <div className="absolute inset-0 h-full rounded-full" style={{ width: `${100 * 100 / Math.max(v, 1)}%`, ...gradientStyle }}></div>
@@ -75,9 +75,9 @@ const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations }) 
           <div className="md:col-span-3">
             <h3 className="text-xl font-bold text-slate-800">{title}</h3>
           </div>
-          <div className="md:col-span-5 flex flex-col gap-y-4 items-center">
-            <FancyParaatDial score={paraatScore} label="PARAAT Score" size="w-32" />
-            <ReliabilityScoreBar score={reliabilityScore} label="Reliability Score" />
+          <div className="md:col-span-5 flex flex-row items-center justify-center gap-6">
+            <FancyParaatDial score={paraatScore} label="PARAAT Score" />
+            <ReliabilityScoreBar score={reliabilityScore} label="Reliability Score" compact />
           </div>
           <div className="md:col-span-4 flex items-center justify-end">
             <svg className={`w-8 h-8 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
