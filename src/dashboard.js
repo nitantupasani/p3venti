@@ -4,11 +4,6 @@ import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram'
 import { AnalysisRow, recommendations, scoringRules, topRecommendationsData } from './recommendations';
 import { downloadDashboardFullPDF } from "./DownloadPDF";
 
-const dashboardLayout = [
-  { title: "People & Use", questionIds: ['q1','q2','q3', 'q4', 'q5'], totalWeight: 0.22 },
-  { title: "Space & Air", questionIds: ['q6','q7','q8','q9','q10','q11','q12','q13', 'q14', 'q15', 'q16'], totalWeight: 0.59 },
-  { title: "Agreements & Resources", questionIds: ['q17', 'q18', 'q19', 'q20', 'q21'], totalWeight: 0.19 },
-];
 
 const translations = {
   en: {
@@ -50,8 +45,23 @@ const translations = {
     card10Title: 'Legislation & Regulations',
     card10Back: 'Monitor legislation and regulations within the field.',
     emailLabel: 'Email the report to me!',
+    emailPlaceholder: 'Enter your email here',
     sendEmailButton: 'Send PDF to Email',
     downloadPdfButton: 'Download PDF Report',
+    categoryNames: {
+      personal: 'People & Use',
+      interaction: 'Space & Air',
+      organizational: 'Agreements & Resources'
+    },
+    recHeaderQuick: 'Quick to do',
+    recHeaderInvestment: 'Investment',
+    recHeaderInformation: 'Information',
+    maxPeopleLabel: 'Max people',
+    geometryLimitedLabel: 'Geometry-limited',
+    ventilationLimitedLabel: 'Ventilation-limited',
+    roomAreaLabel: 'Room area',
+    usableAreaLabel: 'Usable area (packing)',
+    socialDistanceLabel: 'Social distance',
   },
   nl: {
     pageTitle: 'P3 Venti',
@@ -60,8 +70,8 @@ const translations = {
     totalScoresTitle: 'Totale Scores van Analyse',
     totalExposureScoreLabel: 'Totaalscore Bescherming tegen Blootstelling',
     totalValuesScoreLabel: 'Totaalscore Waarden',
-    visualizationTitle: 'Visualisatie Bezetting Woonkamer',
-    startOver: 'Opnieuw Beginnen',
+    visualizationTitle: 'Bezetting van de woonkamer',
+    startOver: 'Opnieuw beginnen',
     noSummaryTitle: 'Geen overzicht om weer te geven.',
     noSummaryText: 'Start eerst het actieplan.',
     goToStart: 'Ga naar Start',
@@ -92,8 +102,23 @@ const translations = {
     card10Title: 'Wet- & regelgeving',
     card10Back: 'Monitor de wet- en regelgeving binnen het vakgebied.',
     emailLabel: 'Uw e-mail:',
+    emailPlaceholder: 'Vul hier uw e-mailadres in',
     sendEmailButton: 'Stuur PDF naar e-mail',
     downloadPdfButton: 'Download PDF-rapport',
+    categoryNames: {
+      personal: 'Mensen & gebruik',
+      interaction: 'Ruimte & lucht',
+      organizational: 'Afspraken & middelen'
+    },
+    recHeaderQuick: 'Snel te doen',
+    recHeaderInvestment: 'Investering',
+    recHeaderInformation: 'Informatie',
+    maxPeopleLabel: 'Maximum aantal mensen',
+    geometryLimitedLabel: 'Gebaseerd op beschikbare ruimte',
+    ventilationLimitedLabel: 'Gebaseerd op ventilatie',
+    roomAreaLabel: 'Grootte van de ruimte',
+    usableAreaLabel: 'Bruikbare ruimte',
+    socialDistanceLabel: 'Afstand tussen mensen',
   }
 };
 
@@ -265,6 +290,11 @@ export default function Dashboard() {
   const unflipTimers = useRef({});
 
   const content = translations[language];
+  const dashboardLayout = useMemo(() => [
+    { title: content.categoryNames.personal, questionIds: ['q1','q2','q3','q4','q5'], totalWeight: 0.22 },
+    { title: content.categoryNames.interaction, questionIds: ['q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','q16'], totalWeight: 0.59 },
+    { title: content.categoryNames.organizational, questionIds: ['q17','q18','q19','q20','q21'], totalWeight: 0.19 },
+  ], [content]);
   const userAnswers = location.state?.answers || {};
 
   // const handleDownloadPdf = async () => {
@@ -407,7 +437,7 @@ export default function Dashboard() {
         recommendations: recommendationsList
       };
     });
-  }, [answers, language, allQuestions]);
+  }, [answers, language, allQuestions, dashboardLayout]);
 
   const { totalScoreValues, totalScoreExposure } = useMemo(() => {
     const normalizeScore = (score) => (score / 5) * 100;
@@ -563,7 +593,7 @@ export default function Dashboard() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
                                 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        placeholder="Enter your email here"
+                        placeholder={content.emailPlaceholder}
                     />
                     <button
                         onClick={() => console.log('Send email to:', email)}
@@ -644,18 +674,31 @@ export default function Dashboard() {
 
             <div className="space-y-6 mb-12">
                 {analysisData.map(data => (
-                    <AnalysisRow 
-                        key={data.title} 
-                        title={data.title} 
-                        paraatScore={data.paraatScore} 
-                        reliabilityScore={data.reliabilityScore} 
-                        recommendations={data.recommendations} 
+                    <AnalysisRow
+                        key={data.title}
+                        title={data.title}
+                        paraatScore={data.paraatScore}
+                        reliabilityScore={data.reliabilityScore}
+                        recommendations={data.recommendations}
+                        reliabilityLabel={content.reliabilityScore}
+                        labels={{
+                            quick: content.recHeaderQuick,
+                            investment: content.recHeaderInvestment,
+                            information: content.recHeaderInformation,
+                        }} 
                     />
                 ))}
             </div>
 
             <div className="mt-12">
-                <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle} />
+                <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle} labels={{
+                    maxPeople: content.maxPeopleLabel,
+                    geometryLimited: content.geometryLimitedLabel,
+                    ventilationLimited: content.ventilationLimitedLabel,
+                    roomArea: content.roomAreaLabel,
+                    usableArea: content.usableAreaLabel,
+                    socialDistance: content.socialDistanceLabel,
+                }} />
             </div>
 
             <div className="text-center mt-12">

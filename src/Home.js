@@ -34,13 +34,13 @@ const translations = {
     nl: {
         pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
         welcomeTitle: 'Welkom bij deze PARAAT scan!',
-        description1: 'Bent u locatiemanager van een langdurige zorginstelling? Dan kan deze webapplicatie u helpen .',
+        description1: 'Bent u locatiemanager van een langdurige zorginstelling? Dan kan deze webapplicatie u helpen.',
         description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek dat gedaan is voor het project P3Venti (zie [website](https://www.p3venti.nl/)). Als u de vragen in de vragen beantwoordt over uw zorginstelling, dan krijgt u een advies over hoe weerbaar uw zorginstelling is voor een volgende pandemie. Ook worden er voorstellen gedaan voor hoe uw zorginstelling zich het beste kan voorbereiden. Dit zijn slechts voorstellen, er zijn meerdere en/of andere oplossingen mogelijk. Deze informatie kan u helpen als u beslissingen gaat nemen in uw organisatie.',
         instructions: 'De vragen die gesteld worden gaan over de woonkamer als gemeenschappelijke ruimte. Vul de vragen in over één woonkamer in uw instelling. Als er meerdere woonkamers zijn, vult u de vragen opnieuw in voor de andere woonkamers.',
         getStarted: 'Aan de slag',
         features: [
-            'Beoordeel de paraatheid van je faciliteit voor pandemieën',
-            'Ontvang gepersonaliseerde aanbevelingen',
+            'Beoordeel de pandemische paraatheid van uw faciliteit',
+            'Ontvang persoonlijk advies',
             'Evidence-based begeleiding uit P3Venti onderzoek',
             'Focus op gemeenschappelijke leefruimtes'
         ]

@@ -154,9 +154,9 @@ function buildPrintableHTML({
             ? `<table class="recs-table">
                 <thead>
                   <tr>
-                    <th>Quick to do</th>
-                    <th>Investment</th>
-                    <th>Information</th>
+                    <th>${content.recHeaderQuick}</th>
+                    <th>${content.recHeaderInvestment}</th>
+                    <th>${content.recHeaderInformation}</th>
                   </tr>
                 </thead>
                 <tbody>${recs}</tbody>

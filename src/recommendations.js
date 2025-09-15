@@ -67,7 +67,7 @@ const ReliabilityScoreBar = ({ score, label }) => {
     );
 };
 
-const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations }) => {
+const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations, reliabilityLabel = 'Reliability Score', labels = {} }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     return (
       <div className="p-4 bg-white rounded-lg shadow">
@@ -77,7 +77,7 @@ const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations }) 
           </div>
           <div className="md:col-span-5 flex flex-row items-center justify-center gap-6">
             <FancyParaatDial score={paraatScore} label="PARAAT Score" />
-            <ReliabilityScoreBar score={reliabilityScore} label="Reliability Score" compact />
+            <ReliabilityScoreBar score={reliabilityScore} label={reliabilityLabel} compact />
           </div>
           <div className="md:col-span-4 flex items-center justify-end">
             <svg className={`w-8 h-8 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,9 +88,9 @@ const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations }) 
         {isExpanded && (
           <div className="mt-6 pt-4 border-t border-slate-200">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-200">
-              <h4>Quick to do</h4>
-              <h4>Investment</h4>
-              <h4>Information</h4>
+              <h4>{labels.quick || 'Quick to do'}</h4>
+              <h4>{labels.investment || 'Investment'}</h4>
+              <h4>{labels.information || 'Information'}</h4>
             </div>
             {recommendations.map((rec, index) => (
               <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">

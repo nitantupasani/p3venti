@@ -71,7 +71,7 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
 
 
 /* -------------------------- Spacing Diagram + Physics ------------------------- */
-const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta }) => {
+const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {} }) => {
     const animationFrameId = useRef(null);
     const nodeRefs = useRef([]);
     const particlesRef = useRef([]);
@@ -227,7 +227,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta }) =>
     const padding = 1.5;
     return (
         <div className="p-4 bg-white rounded-lg shadow">
-            <h1 className="text-3xl font-bold text-slate-800 mt-8 text-center">Living Room Occupancy Visualization</h1>
+            <h1 className="text-3xl font-bold text-slate-800 mt-8 text-center">{visualizationTitle}</h1>
             <style>{`
                 .room-wall { fill: none; stroke: #1f2937; stroke-linejoin: round; }
                 .room-wall-filled { fill: #1f2937; stroke: #1f2937; stroke-width: 1; stroke-linejoin: round; }
@@ -260,19 +260,13 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta }) =>
                     </div>
                     {meta && (
                         <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 md:self-center">
-                            <div className="text-slate-900 font-bold text-xl leading-tight">Max people: {meta.capacityMax}</div>
-                            <div className="text-slate-600 text-sm mt-1">{meta.limiting === 'ventilation' ? 'Ventilation-limited' : 'Geometry-limited'}</div>
+                            <div className="text-slate-900 font-bold text-xl leading-tight">{labels.maxPeople || 'Max people'}: {meta.capacityMax}</div>
+                            <div className="text-slate-600 text-sm mt-1">{meta.limiting === 'ventilation' ? (labels.ventilationLimited || 'Ventilation-limited') : (labels.geometryLimited || 'Geometry-limited')}</div>
                             <div className="h-px bg-slate-200 my-3" />
                             <div className="space-y-1.5 text-slate-700 text-sm">
-                                <div>Room area: <span className="font-medium">{Number.isFinite(meta.roomArea) ? meta.roomArea.toFixed(1) : meta.roomArea} m²</span></div>
-                                <div>Usable area (packing): <span className="font-medium">{meta.usablePercent}%</span></div>
-                                <div>Geometric cap: <span className="font-medium">{meta.geometricCapacity}</span></div>
-                                <div>Social distance: <span className="font-medium">{socialDistance} m</span></div>
-                            </div>
-                            <div className="h-px bg-slate-200 my-3" />
-                            <div className="text-xs text-slate-500 space-y-1">
-                                <div><span className="font-semibold">Geometric cap</span> =<span> floor(theoretical grid × usable area%)</span></div>
-                                <div>(Usable area% defines how tightly we “pack” people on the grid.)</div>
+                                <div>{labels.roomArea || 'Room area'}: <span className="font-medium">{Number.isFinite(meta.roomArea) ? meta.roomArea.toFixed(1) : meta.roomArea} m²</span></div>
+                                <div>{labels.usableArea || 'Usable area (packing)'}: <span className="font-medium">{meta.usablePercent}%</span></div>
+                                <div>{labels.socialDistance || 'Social distance'}: <span className="font-medium">{socialDistance} m</span></div>
                             </div>
                         </div>
                     )}
