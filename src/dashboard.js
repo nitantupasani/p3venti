@@ -267,60 +267,60 @@ export default function Dashboard() {
   const content = translations[language];
   const userAnswers = location.state?.answers || {};
 
-  const handleDownloadPdf = async () => {
-    // 1. Prepare the data for the PDF
-    const pdfData = {
-      paraatScore: Math.round(overallParaatScore),
-      topRecommendations: new TopRecommendations({ userAnswers, content, language }).props.children.props.children.map(child => child.props.children),
-      factors: [
-        { title: content.card1Title, text: content.card1Back },
-        { title: content.card2Title, text: content.card2Back },
-        { title: content.card3Title, text: content.card3Back },
-        { title: content.card4Title, text: content.card4Back },
-        { title: content.card5Title, text: content.card5Back },
-        { title: content.card6Title, text: content.card6Back },
-        { title: content.card7Title, text: content.card7Back },
-        { title: content.card8Title, text: content.card8Back },
-        { title: content.card9Title, text: content.card9Back },
-        { title: content.card10Title, text: content.card10Back }
-      ],
-      categories: analysisData.map(category => ({
-        title: category.title,
-        score: Math.round(category.paraatScore),
-        reliability: Math.round(category.reliabilityScore)
-      }))
-    };
+  // const handleDownloadPdf = async () => {
+  //   // 1. Prepare the data for the PDF
+  //   const pdfData = {
+  //     paraatScore: Math.round(overallParaatScore),
+  //     topRecommendations: new TopRecommendations({ userAnswers, content, language }).props.children.props.children.map(child => child.props.children),
+  //     factors: [
+  //       { title: content.card1Title, text: content.card1Back },
+  //       { title: content.card2Title, text: content.card2Back },
+  //       { title: content.card3Title, text: content.card3Back },
+  //       { title: content.card4Title, text: content.card4Back },
+  //       { title: content.card5Title, text: content.card5Back },
+  //       { title: content.card6Title, text: content.card6Back },
+  //       { title: content.card7Title, text: content.card7Back },
+  //       { title: content.card8Title, text: content.card8Back },
+  //       { title: content.card9Title, text: content.card9Back },
+  //       { title: content.card10Title, text: content.card10Back }
+  //     ],
+  //     categories: analysisData.map(category => ({
+  //       title: category.title,
+  //       score: Math.round(category.paraatScore),
+  //       reliability: Math.round(category.reliabilityScore)
+  //     }))
+  //   };
 
-    try {
-      // 2. Send the data to your backend API
-      const response = await fetch('http://localhost:10000/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pdfData),
-      });
+  //   try {
+  //     // 2. Send the data to your backend API
+  //     const response = await fetch('http://localhost:10000/generate-pdf', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(pdfData),
+  //     });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
 
-      // 3. Handle the PDF response from the server
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = "PARAAT-Report.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+  //     // 3. Handle the PDF response from the server
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = "PARAAT-Report.pdf";
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
+  //     window.URL.revokeObjectURL(url);
 
-    } catch (error) {
-      console.error('Error downloading the PDF:', error);
-      // You could show an error message to the user here
-    }
-  };
+  //   } catch (error) {
+  //     console.error('Error downloading the PDF:', error);
+  //     // You could show an error message to the user here
+  //   }
+  // };
 
 
   const onCardEnter = (id) => {
