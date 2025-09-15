@@ -282,31 +282,27 @@ async function addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx = []) {
     // Keep width fit; height is proportional
     pdf.addImage(imgData, "PNG", 0, 0, pageWidth, sliceHeight * mmPerPx);
 
-    // Add logos to the bottom right of each page
-    // Add logos to the bottom-right of each page (vertically centered in a common band)
-const logoMargin = 10; // mm from page edges
-const logoGap = 5;     // mm gap between logos
+    if (i > 0) {
+      const logoMargin = 10; // mm from page edges
+      const logoGap = 5;     // mm gap between logos
 
-// Pick heights (in mm). Keep aspect-ish widths (≈TUE 2:1, TNO ~1:1).
-const tueLogoH = 18;
-const tnoLogoH = 12;
-const tueLogoW = 1.8 * tueLogoH; // ~2:1 for TU/e
-const tnoLogoW = 1.2 * tnoLogoH; // ~square for TNO
+      const tueLogoH = 18;
+      const tnoLogoH = 12;
+      const tueLogoW = 1.8 * tueLogoH;
+      const tnoLogoW = 1.2 * tnoLogoH;
 
-// Common band to center both logos vertically
-const logoBandH = Math.max(tueLogoH, tnoLogoH);
-const bandTopY = pageHeight - logoMargin - logoBandH;
+      const logoBandH = Math.max(tueLogoH, tnoLogoH);
+      const bandTopY = pageHeight - logoMargin - logoBandH;
 
-// Rightmost logo (TNO)
-const tnoX = pageWidth - logoMargin - tnoLogoW;
-const tnoY = bandTopY + (logoBandH - tnoLogoH) / 2;
+      const tnoX = pageWidth - logoMargin - tnoLogoW;
+      const tnoY = bandTopY + (logoBandH - tnoLogoH) / 2;
 
-// Left of TNO (TU/e)
-const tueX = tnoX - logoGap - tueLogoW;
-const tueY = bandTopY + (logoBandH - tueLogoH) / 2;
+      const tueX = tnoX - logoGap - tueLogoW;
+      const tueY = bandTopY + (logoBandH - tueLogoH) / 2;
 
-pdf.addImage(tnoLogoDataUrl, "PNG", tnoX, tnoY, tnoLogoW, tnoLogoH);
-pdf.addImage(tueLogoDataUrl, "PNG", tueX, tueY, tueLogoW, tueLogoH);
+      pdf.addImage(tnoLogoDataUrl, "PNG", tnoX, tnoY, tnoLogoW, tnoLogoH);
+      pdf.addImage(tueLogoDataUrl, "PNG", tueX, tueY, tueLogoW, tueLogoH);
+    }
 
     
     
