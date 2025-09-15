@@ -3,6 +3,9 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { topRecommendationsData } from "./recommendations";
 
+const tueLogoDataUrl = "/tue.png";
+const tnoLogoDataUrl = "/tno.png";
+
 /**
  * Build Top 5 recommendations based on the same priority logic used on the Dashboard.
  */
@@ -45,8 +48,8 @@ const buildFancyParaatDialHTML = (score, label, uid) => {
             <stop offset="100%" stop-color="#22c55e" />
           </linearGradient>
         </defs>
-        <path d="M 10 50 A 40 40 0 0 1 90 50" 
-              fill="none" stroke="url(#${gradId})" 
+        <path d="M 10 50 A 40 40 0 0 1 90 50"
+              fill="none" stroke="url(#${gradId})"
               stroke-width="12" stroke-linecap="round" opacity="0.3" />
         <path d="M 10 50 A 40 40 0 0 1 90 50"
               fill="none" stroke="url(#${gradId})"
@@ -116,6 +119,7 @@ function buildPrintableHTML({
   const analysisRows = (analysisData || [])
   .map((row, index) => {
     const recs = (row.recommendations || [])
+      .filter(r => r.some(cell => cell && cell.trim() !== '')) // Filter out empty rows
       .map(
         (r) => `
           <tr>
@@ -248,6 +252,7 @@ function buildPrintableHTML({
  */
 async function addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx = []) {
   const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
   const imgWidthPx = canvas.width;
   const imgHeightPx = canvas.height;
@@ -276,6 +281,35 @@ async function addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx = []) {
     if (i !== 0) pdf.addPage();
     // Keep width fit; height is proportional
     pdf.addImage(imgData, "PNG", 0, 0, pageWidth, sliceHeight * mmPerPx);
+
+    // Add logos to the bottom right of each page
+    // Add logos to the bottom-right of each page (vertically centered in a common band)
+const logoMargin = 10; // mm from page edges
+const logoGap = 5;     // mm gap between logos
+
+// Pick heights (in mm). Keep aspect-ish widths (≈TUE 2:1, TNO ~1:1).
+const tueLogoH = 18;
+const tnoLogoH = 12;
+const tueLogoW = 1.8 * tueLogoH; // ~2:1 for TU/e
+const tnoLogoW = 1.2 * tnoLogoH; // ~square for TNO
+
+// Common band to center both logos vertically
+const logoBandH = Math.max(tueLogoH, tnoLogoH);
+const bandTopY = pageHeight - logoMargin - logoBandH;
+
+// Rightmost logo (TNO)
+const tnoX = pageWidth - logoMargin - tnoLogoW;
+const tnoY = bandTopY + (logoBandH - tnoLogoH) / 2;
+
+// Left of TNO (TU/e)
+const tueX = tnoX - logoGap - tueLogoW;
+const tueY = bandTopY + (logoBandH - tueLogoH) / 2;
+
+pdf.addImage(tnoLogoDataUrl, "PNG", tnoX, tnoY, tnoLogoW, tnoLogoH);
+pdf.addImage(tueLogoDataUrl, "PNG", tueX, tueY, tueLogoW, tueLogoH);
+
+    
+    
   }
 }
 
