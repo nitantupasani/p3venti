@@ -266,6 +266,10 @@ const Tool = () => {
     navigate('/');
   };
 
+   const handleInfoClick = () => {
+    navigate(`/info?lang=${language}`);
+  };
+
   const currentQuestion = activeQuestions[currentQuestionIndex];
   const isLastQuestion = activeCategory === 'organizational' && currentQuestionIndex === activeQuestions.length - 1;
 
@@ -308,12 +312,18 @@ const Tool = () => {
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center p-4 sm:p-8">
       <div className="w-full max-w-7xl mx-auto">
         <header className="relative flex justify-between items-center w-full mb-8">
-          <div className="flex justify-start" style={{ flex: 1 }}>
+          <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
             <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
               </svg>
               <span className="font-semibold hidden sm:inline">Home</span>
+            </button>
+            <button onClick={handleInfoClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+              </svg>
+              <span className="font-semibold hidden sm:inline">Info</span>
             </button>
           </div>
 
