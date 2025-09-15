@@ -493,35 +493,41 @@ export default function Dashboard() {
   }, [answers, allQuestions]);
   
   const safeSpaceData = useMemo(() => {
-    const shapeMap = { 0: 'Rectangle', 1: 'Circle', 2: 'Oval', 3: 'L-Shape' };
-    const shape = shapeMap[answers['q8']] || 'Rectangle';
-    const area = answers['q7'] || 50;
+    const area = answers['q6'] || 50;
+    const shapeAnswer = answers['q7'];
+    let shape = 'Rectangle';
     let dims = {};
 
-    switch (shape) {
-      case 'Circle': {
-        const radius = Math.sqrt(area / Math.PI);
-        dims = { diameter: radius * 2 };
+    switch (shapeAnswer) {
+      case 0: { // Square
+        const side = Math.sqrt(area);
+        dims = { length: side, width: side };
         break;
       }
-      case 'Oval': {
-        const minor_axis = Math.sqrt((2 * area) / Math.PI);
-        dims = { major_axis: 2 * minor_axis, minor_axis: minor_axis };
+      case 1: { // Rectangle
+        const width = Math.sqrt(area / 1.5);
+        dims = { length: width * 1.5, width };
         break;
       }
-      case 'L-Shape': {
+      case 2: { // L-shaped
+        shape = 'L-Shape';
         const legArea = area / 2;
         const legWidth = Math.sqrt(legArea / 2);
         dims = { l1_len: legWidth * 2, l1_wid: legWidth, l2_len: legWidth * 2, l2_wid: legWidth };
         break;
       }
-      default: {
-        const side_length = Math.sqrt(area);
-        dims = { length: side_length, width: side_length };
+      case 3: { // Long and narrow (assume 4:1 ratio)
+        const width = Math.sqrt(area / 4);
+        dims = { length: width * 4, width };
+        break;
+      }
+      default: { // Other / I don't know
+        const side = Math.sqrt(area);
+        dims = { length: side, width: side };
       }
     }
 
-    const socialDistance = answers['q9'] || 1.5;
+    const socialDistance = 1.5;
     const { positions, fullTheoretical } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
     const usablePercent = 75;
     const geometricCapacity = Math.floor(fullTheoretical * usablePercent / 100);
@@ -532,7 +538,13 @@ export default function Dashboard() {
       people: positions.slice(0, Math.min(geometricCapacity, positions.length)),
       socialDistance,
       color: '#22c55e',
-      meta: { geometricCapacity, roomArea: area, usablePercent }
+      meta: {
+        capacityMax: geometricCapacity,
+        geometricCapacity,
+        limiting: 'geometry',
+        roomArea: area,
+        usablePercent,
+      },
     };
   }, [answers]);
 
