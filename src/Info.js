@@ -101,7 +101,7 @@ We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties
     start: 'Begin de PARAAT-scan',
   },
   en: {
-    title: 'Handleiding Pandemic Readiness Assessment & Action Tool (PARAAT)',
+    title: 'Manual - Pandemic Readiness Assessment & Action Tool (PARAAT)',
     sections: [
       {
         heading: 'Welcome!',
