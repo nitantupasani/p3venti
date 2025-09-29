@@ -2,53 +2,96 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 
-// Component for handling markdown links
+// Component for handling markdown links and custom styling
+// Component for handling markdown links and custom styling
 const markdownComponents = {
-  a: ({ node, ...props }) => (
+  a: ({ node, children, ...props }) => (
     <a
       {...props}
       className="text-indigo-600 hover:underline"
       target="_blank"
       rel="noopener noreferrer"
     >
-      {props.children}
+      {children}
     </a>
   ),
+  h3: ({ node, children, ...props }) => (
+    <h3 className="text-xl font-bold text-indigo-700 mt-8 mb-4" {...props}>
+      {children}
+    </h3>
+  ),
+  ul: ({ node, depth = 0, ...props }) => {
+    const padding = depth === 0 ? "pl-6" : depth === 1 ? "pl-10" : "pl-14";
+    return <ul className={`space-y-2 ${padding}`} {...props} />;
+  },
+  li: ({ node, children, ...props }) => {
+    const depth = node.position?.start?.column <= 4 ? 0 : node.position?.start?.column <= 6 ? 1 : 2;
+    let bullet;
+
+    if (depth === 0) {
+      bullet = <div className="w-2 h-2 bg-black rounded-full flex-shrink-0 mt-2"></div>;
+    } else if (depth === 1) {
+      bullet = <div className="w-2 h-2 border-2 border-black rounded-full flex-shrink-0 mt-2"></div>;
+    } else {
+      bullet = <div className="w-2 h-0.5 bg-black flex-shrink-0 mt-3"></div>;
+    }
+
+    return (
+      <li className="flex items-start gap-3" {...props}>
+        {bullet}
+        <div className="flex-1">{children}</div>
+      </li>
+    );
+  },
 };
+
 
 // Translations for the component
 const translations = {
     en: {
         pageSubtitle: 'For location managers in long-term care.',
-        welcomeTitle: 'Welcome to the PARAAT scan!',
+        welcomeTitle: 'Welcome to this PARAAT scan!',
         description1: 'Are you a location manager of a long-term care facility? Then this web application can help you.',
-        description2: 'This web application was developed based on the results of scientific research conducted for the P3Venti project (see [website](https://www.p3venti.nl/)). If you answer the questions about your care facility, you will receive advice on its resilience for the next pandemic. Suggestions are made on how your facility can best prepare. These are just suggestions; multiple and/or different solutions are possible. This information can help you make decisions within your organization.',
-        instructions: 'The questions are about the living room as a communal space. Please complete the questions about one living room in your facility. If there are multiple living rooms, please complete the questions again for the other living rooms.',
+        description2: 'This web application was developed based on the results of scientific research conducted for the P3Venti project (see [website](https://www.p3venti.nl/)). By answering questions about your care facility, you will receive advice on how resilient your facility is to a future pandemic. Suggestions are also provided on how your facility can become more prepared.',
+        instructions: 'The questions focus on the living room as a communal space. Please answer the questions for one living room in your facility. If there are multiple living rooms, you can repeat the scan for each one.',
         getStarted: 'Get Started',
-        features: [
-            'Assess your facility\'s pandemic readiness',
-            'Receive personalized recommendations',
-            'Evidence-based guidance from P3Venti research',
-            'Focus on communal living spaces'
-        ],
+        mainContent: `### What you do
+* Choose one room and answer 20 short questions about people & use, space & air, and agreements & resources.
+* Do you have multiple living rooms? Repeat the scan for each room.
+### What you get
+* An analysis of the pandemic preparedness of this living room. The higher the score, the better prepared you are.
+* Practical suggestions for preventive measures:
+    * Quick adjustments
+    * Long-term adjustments
+    * Information
+### Time & what’s useful to have on hand
+* Duration: ±10 minutes per room.
+* Useful to have: information about occupancy and technical aspects of the living room.`,
         footerText: 'Based on scientific research from the P3Venti project'
     },
     nl: {
         pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
-        welcomeTitle: 'Welkom bij deze PARAAT scan!',
+        welcomeTitle: 'Welkom bij deze PARAAT-scan!',
         description1: 'Bent u locatiemanager van een langdurige zorginstelling? Dan kan deze webapplicatie u helpen.',
-        description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek dat gedaan is voor het project P3Venti (zie [website](https://www.p3venti.nl/)). Als u de vragen in de vragen beantwoordt over uw zorginstelling, dan krijgt u een advies over hoe weerbaar uw zorginstelling is voor een volgende pandemie. Ook worden er voorstellen gedaan voor hoe uw zorginstelling zich het beste kan voorbereiden. Dit zijn slechts voorstellen, er zijn meerdere en/of andere oplossingen mogelijk. Deze informatie kan u helpen als u beslissingen gaat nemen in uw organisatie.',
+        description2: 'Deze webapplicatie is ontwikkeld op basis van de resultaten van wetenschappelijk onderzoek dat gedaan is voor het project P3Venti (zie [website](https://www.p3venti.nl/)). Als u de vragen beantwoordt over uw zorginstelling, dan krijgt u een advies over hoe weerbaar uw zorginstelling is voor een volgende pandemie. Ook worden er voorstellen gedaan voor hoe uw zorginstelling zich mogelijk kan voorbereiden.',
         instructions: 'De vragen die gesteld worden gaan over de woonkamer als gemeenschappelijke ruimte. Vul de vragen in over één woonkamer in uw instelling. Als er meerdere woonkamers zijn, vult u de vragen opnieuw in voor de andere woonkamers.',
         getStarted: 'Aan de slag',
-        features: [
-            'Beoordeel de pandemische paraatheid van uw faciliteit',
-            'Ontvang persoonlijk advies',
-            'Evidence-based begeleiding uit P3Venti onderzoek',
-            'Focus op gemeenschappelijke leefruimtes'
-        ],
+        mainContent: `### Wat u doet
+* Kies één ruimte en beantwoord 20 korte vragen over mensen & gebruik, ruimte & lucht, en afspraken & middelen.
+* Heeft u meerdere woonkamers? Herhaal de scan per ruimte.
+### Wat u krijgt
+* Een analyse van de pandemische paraatheid van deze woonkamer. Hoe hoger de score hoe beter voorbereid u bent. 
+* Praktische suggesties voor preventieve maatregelen:
+    * Snelle aanpassing
+    * Langetermijnaanpassing
+    * Informatie
+### Tijd & wat handig is om bij de hand te hebben
+* Duur: ±10 minuten per ruimte.
+* Handig om bij de hand te hebben: informatie over bezetting en technische aspecten van de woonkamer.`,
         footerText: 'Gebaseerd op wetenschappelijk onderzoek van het P3Venti project'
     }
 };
+
 
 // Styles for the component
 const STYLES = {
@@ -169,15 +212,10 @@ export default function ParaatHome() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-                        {content.features.map((feature, index) => (
-                            <div key={index} className={STYLES.featureCard}>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 bg-black rounded-full flex-shrink-0"></div>
-                                    <span className="font-medium text-sm sm:text-base">{feature}</span>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="text-left text-base sm:text-base text-slate-700 leading-relaxed my-12">
+                        <ReactMarkdown components={markdownComponents}>
+                            {content.mainContent}
+                        </ReactMarkdown>
                     </div>
 
                     <div className="text-center">
