@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram';
 import { AnalysisRow, recommendations, scoringRules, topRecommendationsData } from './recommendations';
@@ -181,32 +181,32 @@ const reliabilityWeights = {
   q21: 0.03
 };
 
-/* ------------------------------- FlipCard ---------------------------------- */
-const FlipCard = ({ id, frontContent, backContent, isFlipped, onEnter, onLeave }) => {
-  const handleMouseEnter = () => onEnter?.(id);
-  const handleMouseLeave = () => onLeave?.(id);
+const FactorCardButton = ({ id, label, isActive, onSelect }) => {
+  const handleSelect = () => onSelect?.(id);
 
   return (
-    <div
-      className="w-48 h-36 md:w-56 md:h-40 perspective-1000 cursor-pointer"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <button
+      type="button"
+      onClick={handleSelect}
+      className={`flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 text-center flex items-center justify-center px-3 uppercase text-[10px] sm:text-xs font-semibold tracking-wide transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 ${
+      isActive
+        ? 'bg-blue-500 text-white border-blue-500 shadow-2xl ring-4 ring-blue-200 scale-105'
+        : 'bg-white text-slate-700 border-slate-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-2xl hover:scale-105'}`}
+      aria-pressed={isActive}
     >
-      <div
-        className={`w-full h-full relative transition-transform duration-700 ease-in-out transform-style-preserve-3d rounded-xl shadow-lg ${
-          isFlipped ? 'rotate-y-180' : ''
-        }`}
-      >
-        <div className="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center rounded-xl p-4 text-center font-bold text-base">
-          {frontContent}
-        </div>
-        <div className="absolute w-full h-full backface-hidden bg-white text-slate-700 flex flex-col justify-center rounded-xl p-4 text-left text-sm rotate-y-180 border-t-4 border-indigo-500 overflow-hidden">
-          <p className="overflow-y-auto">{backContent}</p>
-        </div>
-      </div>
-    </div>
+      <span className="leading-tight">{label}</span>
+    </button>
   );
 };
+
+const ExpandedFactorCard = ({ title, description }) => (
+  <div className="w-full max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 md:p-8 transition-all duration-500">
+    <h3 className="text-2xl font-bold text-slate-800 uppercase tracking-wide text-center md:text-left">{title}</h3>
+    <p className="mt-4 text-slate-700 leading-relaxed text-sm md:text-base whitespace-pre-line">
+      {description}
+    </p>
+  </div>
+);
 
 /* ----------------------------- FancyParaatDial ----------------------------- */
 const FancyParaatDial = ({ score, label }) => {
@@ -224,7 +224,7 @@ const FancyParaatDial = ({ score, label }) => {
   const strokeDashoffset = arcLen - progressLen;
 
   return (
-    <div className="flex flex-col items-center select-none p-6 bg-white rounded-2xl shadow-xl">
+    <div className="flex flex-col items-center select-none">
       <svg viewBox="0 0 100 60" className="w-80 h-auto">
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
@@ -260,7 +260,7 @@ const ReliabilityScoreBar = ({ score, label }) => {
   const gradientStyle = { background: 'linear-gradient(to right, #ef4444, #f59e0b, #22c55e)' };
 
   return (
-    <div className="w-full max-w-lg mx-auto p-4 bg-white rounded-2xl shadow-lg">
+    <div className="w-80">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-base font-semibold text-slate-700">{label}</h3>
         <span className={`text-lg font-bold ${scoreColorClass}`}>{v}%</span>
@@ -286,91 +286,27 @@ export default function Dashboard() {
 
   const { answers = {}, content: questionsData = {} } = location.state || {};
 
-  const [flippedCards, setFlippedCards] = useState(new Array(10).fill(false));
-  const unflipTimers = useRef({});
+  const [activeCardIndex, setActiveCardIndex] = useState(null);
 
   const content = translations[language];
+  const factorCards = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, index) => ({
+        title: content[`card${index + 1}Title`],
+        description: content[`card${index + 1}Back`],
+      })),
+    [content]
+  );
+  const expandedCard = typeof activeCardIndex === 'number' ? factorCards[activeCardIndex] : null;
   const dashboardLayout = useMemo(() => [
     { title: content.categoryNames.personal, questionIds: ['q1','q2','q3','q4','q5'], totalWeight: 0.22 },
     { title: content.categoryNames.interaction, questionIds: ['q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','q16'], totalWeight: 0.59 },
     { title: content.categoryNames.organizational, questionIds: ['q17','q18','q19','q20','q21'], totalWeight: 0.19 },
   ], [content]);
   const userAnswers = location.state?.answers || {};
-
-  // const handleDownloadPdf = async () => {
-  //   // 1. Prepare the data for the PDF
-  //   const pdfData = {
-  //     paraatScore: Math.round(overallParaatScore),
-  //     topRecommendations: new TopRecommendations({ userAnswers, content, language }).props.children.props.children.map(child => child.props.children),
-  //     factors: [
-  //       { title: content.card1Title, text: content.card1Back },
-  //       { title: content.card2Title, text: content.card2Back },
-  //       { title: content.card3Title, text: content.card3Back },
-  //       { title: content.card4Title, text: content.card4Back },
-  //       { title: content.card5Title, text: content.card5Back },
-  //       { title: content.card6Title, text: content.card6Back },
-  //       { title: content.card7Title, text: content.card7Back },
-  //       { title: content.card8Title, text: content.card8Back },
-  //       { title: content.card9Title, text: content.card9Back },
-  //       { title: content.card10Title, text: content.card10Back }
-  //     ],
-  //     categories: analysisData.map(category => ({
-  //       title: category.title,
-  //       score: Math.round(category.paraatScore),
-  //       reliability: Math.round(category.reliabilityScore)
-  //     }))
-  //   };
-
-  //   try {
-  //     // 2. Send the data to your backend API
-  //     const response = await fetch('http://localhost:10000/generate-pdf', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(pdfData),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     // 3. Handle the PDF response from the server
-  //     const blob = await response.blob();
-  //     const url = window.URL.createObjectURL(blob);
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = "PARAAT-Report.pdf";
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     a.remove();
-  //     window.URL.revokeObjectURL(url);
-
-  //   } catch (error) {
-  //     console.error('Error downloading the PDF:', error);
-  //     // You could show an error message to the user here
-  //   }
-  // };
-
-
-  const onCardEnter = (id) => {
-    const t = unflipTimers.current[id];
-    if (t) clearTimeout(t);
-    delete unflipTimers.current[id];
-    setFlippedCards(prev => prev.map((_, idx) => idx === id));
-  };
-
-  const onCardLeave = (id) => {
-    const existing = unflipTimers.current[id];
-    if (existing) clearTimeout(existing);
-    unflipTimers.current[id] = setTimeout(() => {
-      setFlippedCards(prev => {
-        const next = [...prev];
-        next[id] = false;
-        return next;
-      });
-      delete unflipTimers.current[id];
-    }, 1000);
+  
+  const onCardSelect = (id) => {
+    setActiveCardIndex(prev => (prev === id ? null : id));
   };
   
   const handleRestart = () => navigate(`/tool?lang=${language}`);
@@ -580,7 +516,7 @@ export default function Dashboard() {
                         <select
                             onChange={e => setLanguage(e.target.value)}
                             value={language}
-                            className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                            className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
                         >
                             <option value="en">English</option>
                             <option value="nl">Nederlands</option>
@@ -589,95 +525,85 @@ export default function Dashboard() {
                 </div>
             </header>
 
-            <div className="flex flex-col items-center justify-center space-y-4 mb-8">
-                <div className="w-full max-w-md">
-                    <label
-                    htmlFor="email"
-                    className="block text-s uppercase tracking-wide font-semibold text-slate-700 mb-1"
-                    >
-                    {content.emailLabel}
-                    </label>
-                    <div className="flex items-center gap-2">
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                                focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        placeholder={content.emailPlaceholder}
-                    />
-                    <button
-                        onClick={() => console.log('Send email to:', email)}
-                        className="shrink-0 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
-                    >
-                        {content.sendEmailButton}
-                    </button>
-                    </div>
-                </div>
-                <div className="w-full max-w-md">
-                    <button
-  onClick={() =>
-    downloadDashboardFullPDF({
-      language,
-      content,
-      userAnswers,
-      overallParaatScore,
-      overallReliabilityScore,
-      analysisData,
-      safeSpaceData,
-      filename: "PARAAT_dashboard.pdf",
-    })
-  }
-  className="text-sm px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white transition-colors"
->
-  {content.downloadPdfButton}
-</button>
-                </div>
+            <div className="flex flex-row items-center justify-center gap-4 mb-8">
+              <div className="w-full max-w-md flex items-center gap-2">
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+                    focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  placeholder={content.emailPlaceholder}
+                />
+                <button
+                  onClick={() => console.log('Send email to:', email)}
+                  className="shrink-0 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+                >
+                  {content.sendEmailButton}
+                </button>
+              </div>
+              <button
+                onClick={() =>
+                  downloadDashboardFullPDF({
+                    language,
+                    content,
+                    userAnswers,
+                    overallParaatScore,
+                    overallReliabilityScore,
+                    analysisData,
+                    safeSpaceData,
+                    filename: "PARAAT_dashboard.pdf",
+                  })
+                }
+                className="text-sm px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white transition-colors"
+              >
+                {content.downloadPdfButton}
+              </button>
             </div>
         </div>
 
         <div className="max-w-9xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
-                <FancyParaatDial score={overallParaatScore} label={content.paraatScore} />
-                <div className="w-full max-w-lg p-6 bg-white rounded-2xl shadow-xl">
-                    <h3 className="text-2xl font-bold text-slate-800 mb-4 text-center">{content.topRecommendationsTitle}</h3>
-                    <TopRecommendations userAnswers={userAnswers} content={content} language={language} />
+            <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="md:w-1/2 flex flex-col justify-start items-center gap-8">
+                        <FancyParaatDial score={overallParaatScore} label={content.paraatScore} />
+                        <ReliabilityScoreBar score={overallReliabilityScore} label={content.reliabilityScore} />
+                    </div>
+                    <div className="w-full md:w-px h-px md:h-auto self-stretch bg-slate-200"></div>
+                    <div className="md:w-1/2">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-4 text-center">{content.topRecommendationsTitle}</h3>
+                        <TopRecommendations userAnswers={userAnswers} content={content} language={language} />
+                    </div>
                 </div>
             </div>
 
-            <div className="flex justify-center mb-12">
-                <ReliabilityScoreBar score={overallReliabilityScore} label={content.reliabilityScore} />
-            </div>
-
-            <div className="mb-12">
-                <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">{content.cardsTitle}</h2>
-                <div className="flex flex-col items-center gap-6">
-                    <div className="flex flex-wrap justify-center gap-6">
-                        {[...Array(5)].map((_, i) => (
-                            <FlipCard
-                                key={`card-${i + 1}`}
-                                id={i}
-                                frontContent={content[`card${i + 1}Title`]}
-                                backContent={content[`card${i + 1}Back`]}
-                                isFlipped={flippedCards[i]}
-                                onEnter={onCardEnter}
-                                onLeave={onCardLeave}
-                            />
-                        ))}
+            <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">{content.cardsTitle}</h2>
+            <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-12">
+                <div className="flex flex-col items-center space-y-6">
+                    <div className="w-full">
+              <div className="flex flex-wrap justify-center items-stretch gap-4 px-1">
+                            {factorCards.map((card, index) => (
+                                <FactorCardButton
+                                    key={`factor-card-${index}`}
+                                    id={index}
+                                    label={card.title}
+                                    isActive={activeCardIndex === index}
+                                    onSelect={onCardSelect}
+                                />
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-6">
-                        {[...Array(5)].map((_, i) => (
-                            <FlipCard
-                                key={`card-${i + 6}`}
-                                id={i + 5}
-                                frontContent={content[`card${i + 6}Title`]}
-                                backContent={content[`card${i + 6}Back`]}
-                                isFlipped={flippedCards[i + 5]}
-                                onEnter={onCardEnter}
-                                onLeave={onCardLeave}
-                            />
-                        ))}
+                    <div className="w-full mt-6">
+                        {expandedCard ? (
+                            <ExpandedFactorCard title={expandedCard.title} description={expandedCard.description} />
+                        ) : (
+                            <p className="text-sm text-slate-500 italic text-center">
+                                {language === 'nl'
+                                    ? 'Selecteer een kaart om de details te bekijken.'
+                                    : 'Select a card to view its details.'}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
