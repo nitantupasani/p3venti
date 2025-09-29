@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
-// put this near the top of your file (or in a separate utils file if you reuse it a lot)
+
+// Component for handling markdown links
 const markdownComponents = {
   a: ({ node, ...props }) => (
     <a
@@ -15,7 +16,7 @@ const markdownComponents = {
   ),
 };
 
-
+// Translations for the component
 const translations = {
     en: {
         pageSubtitle: 'For location managers in long-term care.',
@@ -29,7 +30,8 @@ const translations = {
             'Receive personalized recommendations',
             'Evidence-based guidance from P3Venti research',
             'Focus on communal living spaces'
-        ]
+        ],
+        footerText: 'Based on scientific research from the P3Venti project'
     },
     nl: {
         pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
@@ -43,17 +45,19 @@ const translations = {
             'Ontvang persoonlijk advies',
             'Evidence-based begeleiding uit P3Venti onderzoek',
             'Focus op gemeenschappelijke leefruimtes'
-        ]
+        ],
+        footerText: 'Gebaseerd op wetenschappelijk onderzoek van het P3Venti project'
     }
 };
 
+// Styles for the component
 const STYLES = {
     languageSelect: {
       header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
       menu: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full'
     },
     getStartedButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
-    featureCard: 'bg-slate-50 border border-slate-200 rounded-lg p-4 text-slate-700'
+    featureCard: 'bg-white border border-white rounded-lg p-4 text-slate-700 cursor-default select-none'
 };
 
 export default function ParaatHome() {
@@ -68,12 +72,12 @@ export default function ParaatHome() {
     };
 
     const handleGetStarted = () => {
-    navigate(`/tool?lang=${language}`);
-};
-
+        navigate(`/tool?lang=${language}`);
+    };
 
     const handleHomeClick = () => {
-        setLanguage('nl');
+        // Resets to the default language or could navigate to home
+        setLanguage('nl'); 
     };
 
     const handleInfoClick = () => {
@@ -149,7 +153,7 @@ export default function ParaatHome() {
 
             <div className="w-full max-w-4xl mx-auto">
                 <main className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-6">
                         <h2 className="text-3xl sm:text-3xl font-bold text-slate-900 mb-6">
                             {content.welcomeTitle}
                         </h2>
@@ -157,8 +161,8 @@ export default function ParaatHome() {
                         <div className="space-y-6 text-base sm:text-base text-slate-700 leading-relaxed text-justify">
                             <p>{content.description1}</p>
                             <ReactMarkdown components={markdownComponents}>
-  {content.description2}
-</ReactMarkdown>
+                                {content.description2}
+                            </ReactMarkdown>
                             <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-r-lg text-left">
                                 <p className="font-medium text-indigo-900">{content.instructions}</p>
                             </div>
@@ -169,11 +173,7 @@ export default function ParaatHome() {
                         {content.features.map((feature, index) => (
                             <div key={index} className={STYLES.featureCard}>
                                 <div className="flex items-center gap-3">
-                                    <div className="bg-indigo-600 rounded-full p-2 flex-shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-white">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                        </svg>
-                                    </div>
+                                    <div className="w-2 h-2 bg-black rounded-full flex-shrink-0"></div>
                                     <span className="font-medium text-sm sm:text-base">{feature}</span>
                                 </div>
                             </div>
@@ -192,7 +192,7 @@ export default function ParaatHome() {
                     <div className="mt-12 pt-8 border-t border-slate-200">
                         <div className="text-center text-slate-500">
                             <p className="text-sm">
-                                Based on scientific research from the P3Venti project
+                                {content.footerText}
                             </p>
                         </div>
                     </div>
