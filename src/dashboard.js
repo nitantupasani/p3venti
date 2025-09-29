@@ -563,7 +563,7 @@ export default function Dashboard() {
             </div>
         </div>
 
-        <div className="max-w-9xl mx-auto">
+        <div className="max-w-8xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
                     <div className="md:w-1/2 flex flex-col justify-start items-center gap-8">
