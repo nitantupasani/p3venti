@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SpacingDiagram, { getPositionsAndTheoreticalMax } from './spacingDiagram';
 import { AnalysisRow, recommendations, scoringRules, topRecommendationsData } from './recommendations';
 import { downloadDashboardFullPDF } from "./DownloadPDF";
-
+import { sendDashboardSummaryEmail } from "./emailService";
 
 const translations = {
   en: {
@@ -281,6 +281,7 @@ export default function Dashboard() {
   const location = useLocation();
   const [email, setEmail] = useState('');
   const params = new URLSearchParams(location.search);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const initialLang = params.get('lang') || 'nl';
   const [language, setLanguage] = useState(initialLang);
 
@@ -316,6 +317,33 @@ export default function Dashboard() {
   const allQuestions = useMemo(() => {
     return questionsData && questionsData.questionSets ? Object.values(questionsData.questionSets).flat() : [];
   }, [questionsData]);
+
+  const handleSendEmail = async () => {
+    if (!email || isSendingEmail) {
+      return;
+    }
+
+    setIsSendingEmail(true);
+
+    try {
+      await sendDashboardSummaryEmail({
+        email,
+        language,
+        filename: "PARAAT_dashboard.pdf",
+        content,
+        userAnswers,
+        overallParaatScore,
+        overallReliabilityScore,
+        analysisData
+      });
+      console.info(`Dashboard PDF emailed to ${email} (dummy API call).`);
+    } catch (err) {
+      console.error("Failed to send dashboard PDF email:", err);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
 
   const analysisData = useMemo(() => {
     const normalizeScore = (score) => (score / 5) * 100;
@@ -537,8 +565,9 @@ export default function Dashboard() {
                   placeholder={content.emailPlaceholder}
                 />
                 <button
-                  onClick={() => console.log('Send email to:', email)}
-                  className="shrink-0 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+                  onClick={handleSendEmail}
+                  disabled={isSendingEmail}
+                  className="shrink-0 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {content.sendEmailButton}
                 </button>

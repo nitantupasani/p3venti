@@ -280,7 +280,7 @@ async function addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx = []) {
     const imgData = pageCanvas.toDataURL("image/png");
     if (i !== 0) pdf.addPage();
     // Keep width fit; height is proportional
-    pdf.addImage(imgData, "PNG", 0, 0, pageWidth, sliceHeight * mmPerPx);
+    pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, sliceHeight * mmPerPx);
 
     if (i > 0) {
       const logoMargin = 10; // mm from page edges
@@ -310,17 +310,26 @@ async function addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx = []) {
 }
 
 /** Public API */
-export async function downloadDashboardFullPDF(params) {
-  const {
-    language = "nl",
-    content,
-    userAnswers,
-    overallParaatScore = 0,
-    overallReliabilityScore = 0,
-    analysisData = [],
-    filename = "dashboard.pdf"
-  } = params || {};
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
 
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary);
+}
+
+async function createDashboardPdf({
+  language = "nl",
+  content,
+  userAnswers,
+  overallParaatScore = 0,
+  overallReliabilityScore = 0,
+  analysisData = []
+} = {}) {
   // Create an offscreen container to render the printable HTML
   const holder = document.createElement("div");
   holder.style.position = "fixed";
@@ -367,11 +376,33 @@ export async function downloadDashboardFullPDF(params) {
     // 4) Build PDF honoring the breakpoints
     const pdf = new jsPDF("p", "mm", "a4");
     await addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx);
+    return pdf;
+  } finally {
+    document.body.removeChild(holder);
+  }
+}
+
+export async function downloadDashboardFullPDF(params) {
+  const { filename = "dashboard.pdf" } = params || {};
+
+  try {
+    const pdf = await createDashboardPdf(params);
     pdf.save(filename);
   } catch (err) {
     console.error("Error generating full dashboard PDF:", err);
-  } finally {
-    // Cleanup
-    document.body.removeChild(holder);
+  } 
+  }
+
+export async function generateDashboardPdfBase64(params) {
+  const { filename = "dashboard.pdf" } = params || {};
+
+  try {
+    const pdf = await createDashboardPdf(params);
+    const arrayBuffer = pdf.output("arraybuffer");
+    const base64 = arrayBufferToBase64(arrayBuffer);
+    return { base64, filename };
+  } catch (err) {
+    console.error("Error generating dashboard PDF base64:", err);
+    throw err;
   }
 }
