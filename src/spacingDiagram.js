@@ -196,6 +196,28 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return { point, normal: null };
     }, [isInsideShape]);
 
+    const randomPointInside = useCallback(() => {
+        if (!isInsideShape || !Number.isFinite(viewBoxWidth) || !Number.isFinite(viewBoxHeight)) {
+            return { x: 0, y: 0 };
+        }
+        const margin = personRadius;
+        for (let attempt = 0; attempt < 80; attempt++) {
+            const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
+            const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
+            if (isInsideShape(rx, ry)) {
+                return { x: rx, y: ry };
+            }
+        }
+        return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
+    }, [isInsideShape, viewBoxWidth, viewBoxHeight, personRadius]);
+
+    const assignNewTarget = useCallback((particle) => {
+        const destination = randomPointInside();
+        particle.targetX = destination.x;
+        particle.targetY = destination.y;
+        particle.targetTimer = 1.6 + Math.random() * 2.8;
+    }, [randomPointInside]);
+
     const drawFrame = useCallback(() => {
         const pts = particlesRef.current;
         const nodes = nodeRefs.current;
@@ -236,10 +258,46 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 }
             }
 
+            p1.targetTimer = Math.max(0, (p1.targetTimer ?? 0) - dt);
+            if (!Number.isFinite(p1.targetX) || !Number.isFinite(p1.targetY) || p1.targetTimer <= 0 || !isInsideShape(p1.targetX, p1.targetY)) {
+                assignNewTarget(p1);
+            }
+
+            let toTargetX = p1.targetX - p1.x;
+            let toTargetY = p1.targetY - p1.y;
+            let targetDist = Math.hypot(toTargetX, toTargetY);
+            if (targetDist < desired * 0.25) {
+                assignNewTarget(p1);
+                toTargetX = p1.targetX - p1.x;
+                toTargetY = p1.targetY - p1.y;
+                targetDist = Math.hypot(toTargetX, toTargetY);
+            }
+
+            const targetPull = desired * (p1.type === 'employee' ? 0.62 : 0.48);
+            if (targetDist > 1e-4) {
+                const eased = Math.min(targetDist, desired * 1.6) / Math.max(targetDist, 1e-4);
+                fx += toTargetX * eased * targetPull;
+                fy += toTargetY * eased * targetPull;
+            }
+
+            const wanderFreq = p1.type === 'employee' ? 0.95 : 0.75;
+            const wanderStrength = desired * (p1.type === 'employee' ? 0.24 : 0.16);
+            p1.px += dt * wanderFreq;
+            p1.py += dt * (wanderFreq * 0.77);
+            fx += Math.cos(p1.px) * wanderStrength;
+            fy += Math.sin(p1.py) * wanderStrength;
             const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
             const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
             p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
             p1.vy = (p1.vy + fy * timeScale * multiplier * dt) * damping;
+
+            const maxSpeed = socialDistance * 2.8;
+            const speed = Math.hypot(p1.vx, p1.vy);
+            if (speed > maxSpeed) {
+                const scale = maxSpeed / speed;
+                p1.vx *= scale;
+                p1.vy *= scale;
+            }
 
             let nx = p1.x + p1.vx * dt;
             let ny = p1.y + p1.vy * dt;
@@ -277,24 +335,13 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [shape, isInsideShape, socialDistance, viewBoxWidth, viewBoxHeight, dims, projectInside]);
+
+    }, [isInsideShape, socialDistance, projectInside, assignNewTarget]);
 
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
         const jitter = socialDistance * 0.04;
-        const margin = personRadius;
         let layoutIndex = 0;
-
-        const randomPointInside = () => {
-            for (let attempt = 0; attempt < 50; attempt++) {
-                const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
-                const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
-                if (isInsideShape(rx, ry)) {
-                    return { x: rx, y: ry };
-                }
-            }
-            return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
-        };
 
         particlesRef.current = occupantDescriptors.map((descriptor, i) => {
             let basePosition;
@@ -316,7 +363,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
 
             const speedMultiplier = descriptor.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
             const velocityRange = socialDistance * 0.12 * speedMultiplier;
-            return {
+            const particle = {
                 id: i,
                 type: descriptor.type,
                 x: basePosition.x,
@@ -326,7 +373,12 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 px: Math.random() * Math.PI * 2,
                 py: Math.random() * Math.PI * 2,
                 speedMultiplier,
+                targetX: basePosition.x,
+                targetY: basePosition.y,
+                targetTimer: 0,
             };
+            assignNewTarget(particle);
+            return particle;
         });
         startTimeRef.current = null;
         if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -344,7 +396,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             animationFrameId.current = requestAnimationFrame(loop);
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius]);
+
+    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget]);
 
     const padding = 1.5;
     return (
