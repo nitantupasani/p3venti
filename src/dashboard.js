@@ -170,6 +170,10 @@ const TopRecommendations = ({ userAnswers, content, language }) => {
     const remainingPriorityQueue = PRIORITY_ARRAY.filter(questionId => {
         const answerIndex = userAnswers[questionId];
 
+
+      if (questionId === "q11" && answerIndex === 3) {
+      return false;
+    }
         // Specific rule for q12. If answer is index 1 ("No"), it's a good answer, so remove it.
         if (questionId === "q12" && answerIndex === 1) {
             return false; // Remove from queue
