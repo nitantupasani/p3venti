@@ -70,7 +70,7 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
 };
 
 
-const EMPLOYEE_SPEED_MULTIPLIER = 1.2;/* -------------------------- Spacing Diagram + Physics ------------------------- */
+const EMPLOYEE_SPEED_MULTIPLIER = 1;/* -------------------------- Spacing Diagram + Physics ------------------------- */
 
 const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {} }) => {
     const animationFrameId = useRef(null);

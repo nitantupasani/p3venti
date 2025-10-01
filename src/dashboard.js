@@ -913,6 +913,16 @@ export default function Dashboard() {
                 </button>
             </div>
         </div>
+        <footer className="w-full max-w-7xl mx-auto flex justify-end mt-16 px-4 sm:px-8">
+          <div className="flex items-center gap-4">
+              <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
+                <img src="/tue.png" alt="TU/e Logo" className="h-20" />
+              </a>
+              <a href="https://www.tno.nl" target="_blank" rel="noopener noreferrer">
+                <img src="/tno.png" alt="TNO Logo" className="h-14" />
+              </a>
+          </div>
+      </footer>
     </div>
   );
 }
