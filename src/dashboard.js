@@ -326,7 +326,7 @@ export default function Dashboard() {
     setIsSendingEmail(true);
 
     try {
-      await sendDashboardSummaryEmail({
+      const { response } = await sendDashboardSummaryEmail({
         email,
         language,
         filename: "PARAAT_dashboard.pdf",
@@ -336,7 +336,8 @@ export default function Dashboard() {
         overallReliabilityScore,
         analysisData
       });
-      console.info(`Dashboard PDF emailed to ${email} (dummy API call).`);
+      const messageId = response?.messageId ? ` (message id: ${response.messageId})` : "";
+      console.info(`Dashboard PDF emailed to ${email}${messageId}.`);
     } catch (err) {
       console.error("Failed to send dashboard PDF email:", err);
     } finally {
