@@ -70,7 +70,8 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
 };
 
 
-/* -------------------------- Spacing Diagram + Physics ------------------------- */
+const EMPLOYEE_SPEED_MULTIPLIER = 18;/* -------------------------- Spacing Diagram + Physics ------------------------- */
+
 const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {} }) => {
     const animationFrameId = useRef(null);
     const nodeRefs = useRef([]);
@@ -81,6 +82,16 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const personIconPath =
     "M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z";
     const iconScale = (personRadius * 1) / 512;
+
+    const occupantDescriptors = useMemo(() => {
+        const residentCount = people?.length ?? 0;
+        const employeeCount = Math.max(1, Math.ceil(residentCount / 8));
+        const descriptors = Array.from({ length: residentCount }, () => ({ type: 'resident' }));
+        for (let i = 0; i < employeeCount; i++) {
+            descriptors.push({ type: 'employee' });
+        }
+        return descriptors;
+    }, [people]);
 
     const { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape } = useMemo(() => {
         let viewBoxWidth = 10, viewBoxHeight = 10;
@@ -139,7 +150,12 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const stepPhysics = useCallback((dt) => {
         const pts = particlesRef.current;
         if (!pts || pts.length === 0) return;
-        const desired = socialDistance, kClose = 0.18, kFar = 0.06, farRange = desired * 4, damping = 0.88, timeScale = 1.5;
+        const desired = socialDistance;
+        const kClose = 0.18;
+        const kFar = 0.06;
+        const farRange = desired * 4;
+        const damping = 0.88;
+        const timeScale = 1.5;
         for (let i = 0; i < pts.length; i++) {
             const p1 = pts[i];
             let fx = 0, fy = 0;
@@ -156,8 +172,9 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 }
             }
             
-            p1.vx = (p1.vx + fx * timeScale) * damping;
-            p1.vy = (p1.vy + fy * timeScale) * damping;
+            const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
+            p1.vx = (p1.vx + fx * timeScale * multiplier) * damping;
+            p1.vy = (p1.vy + fy * timeScale * multiplier) * damping;
 
             let nx = p1.x + p1.vx * dt;
             let ny = p1.y + p1.vy * dt;
@@ -201,11 +218,44 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
         const jitter = socialDistance * 0.05;
-        particlesRef.current = people.map((pos, i) => ({
-            id: i, x: pos.x + (Math.random() - 0.5) * jitter, y: pos.y + (Math.random() - 0.5) * jitter,
-            vx: (Math.random() - 0.5) * 0.02, vy: (Math.random() - 0.5) * 0.02,
-            px: Math.random() * Math.PI * 2, py: Math.random() * Math.PI * 2,
-        }));
+        const margin = personRadius;
+
+        const randomPointInside = () => {
+            for (let attempt = 0; attempt < 50; attempt++) {
+                const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
+                const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
+                if (isInsideShape(rx, ry)) {
+                    return { x: rx, y: ry };
+                }
+            }
+            return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
+        };
+
+        particlesRef.current = occupantDescriptors.map((descriptor, i) => {
+            let basePosition;
+            if (descriptor.type === 'resident' && people[i]) {
+                const pos = people[i];
+                basePosition = {
+                    x: pos.x + (Math.random() - 0.5) * jitter,
+                    y: pos.y + (Math.random() - 0.5) * jitter,
+                };
+            } else {
+                basePosition = randomPointInside();
+            }
+
+            const speedMultiplier = descriptor.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
+            return {
+                id: i,
+                type: descriptor.type,
+                x: basePosition.x,
+                y: basePosition.y,
+                vx: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+                vy: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+                px: Math.random() * Math.PI * 2,
+                py: Math.random() * Math.PI * 2,
+                speedMultiplier,
+            };
+        });
         startTimeRef.current = null;
         if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
         const loop = (t) => {
@@ -222,7 +272,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             animationFrameId.current = requestAnimationFrame(loop);
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame]);
+    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius]);
 
     const padding = 1.5;
     return (
@@ -248,9 +298,15 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                             </defs>
                             {wallElement}
                             {floorElement}
-                            {people.map((_, i) => (
+                            {occupantDescriptors.map((descriptor, i) => (
                                 <g key={i} ref={(el) => { nodeRefs.current[i] = el; }} transform="translate(-1000,-1000)">
-                                    <circle cx="0" cy="0" r={personRadius} fill="#22c55e" opacity="0.85" />
+                                    <circle
+                                        cx="0"
+                                        cy="0"
+                                        r={personRadius}
+                                        fill={descriptor.type === 'employee' ? '#ef4444' : '#22c55e'}
+                                        opacity="0.85"
+                                    />
                                     <g transform={`scale(${iconScale}) translate(-224, -256)`}>
                                         <path d={personIconPath} fill="white" />
                                     </g>

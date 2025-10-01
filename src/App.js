@@ -143,6 +143,22 @@ const Tool = () => {
   const content = translations[language];
   const activeQuestions = content.questionSets[activeCategory];
 
+  const totalQuestions = categoryOrder.reduce((total, category) => total + content.questionSets[category].length, 0);
+
+  const getAbsoluteQuestionIndex = () => {
+    let index = 0;
+    for (const category of categoryOrder) {
+      if (category === activeCategory) {
+        index += currentQuestionIndex;
+        break;
+      }
+      index += content.questionSets[category].length;
+    }
+    return index;
+  };
+
+  const absoluteQuestionIndex = getAbsoluteQuestionIndex();
+
   useEffect(() => {
     const currentQuestion = activeQuestions[currentQuestionIndex];
     const answer = answers[currentQuestion.id];
@@ -395,7 +411,7 @@ const Tool = () => {
           <main className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10 transition-all duration-500">
               <div className="mb-12">
                 <h2 className="text-base font-bold text-indigo-600 mb-2 tracking-wider uppercase">
-                  {content.step} {currentQuestionIndex + 1} {content.of} {activeQuestions.length}
+                  {content.step} {absoluteQuestionIndex + 1} {content.of} {totalQuestions}
                 </h2>
                 <p className="text-2xl font-bold text-slate-900 leading-snug">
                   {activeQuestions[currentQuestionIndex].questionText}

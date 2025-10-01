@@ -152,14 +152,14 @@ We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties
         heading: 'Results',
         body: `• PARAAT-score
 
-        0–100; higher = better prepared.
+  0–100; higher = better prepared.
 • Reliability
 
-The reliability of this result depends on your input. We start at 100%. For each question where you answer "I don't know," the reliability decreases.
+  The reliability of this result depends on your input. We start at 100%. For each question where you answer "I don't know," the reliability decreases.
 
 • PARAAT-result card (priorities)
 
-Actions are ranked by impact and effort. You start with actions that offer high impact and low effort. Each item is labeled:
+  Actions are ranked by impact and effort. You start with actions that offer high impact and low effort. Each item is labeled:
   ◦ Quick adjustment
   ◦ Long-term adjustment
   ◦ Information`,
@@ -303,7 +303,21 @@ function SectionBody({ text }) {
       }
       return;
     }
-
+        const indentMatch = line.match(/^(\t| {2,})(.*)$/);
+    if (indentMatch) {
+      flushPara();
+      flushAllLists();
+      const indentText = indentMatch[2];
+      items.push(
+        <p
+          key={`indent-${items.length}`}
+          className="text-slate-700 text-base text-justify mb-3 ml-5 sm:ml-6"
+        >
+          {renderInline(indentText)}
+        </p>
+      );
+      return;
+    }
     paraBuffer.push(t);
   });
 
