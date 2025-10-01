@@ -21,7 +21,9 @@ const translations = {
     noSummaryText: 'Please start the action plan first.',
     goToStart: 'Go to Start',
     paraatScore: 'PARAAT Score',
+    paraatScoreInfo: 'Indicates the pandemic preparedness of the living room. Score from 0 to 100. The higher the better.',
     reliabilityScore: 'Reliability Score',
+    reliabilityScoreInfo: 'Indicates the reliability of the PARAAT score. The more often "I don\'t know" is selected, the lower the reliability.',
     topRecommendationsTitle: 'Top Recommendations',
     topRecommendationsText: 'Based on your results, focusing on improving ventilation and ensuring staff have up-to-date knowledge on infection prevention will have the highest impact on your pandemic readiness.',
     noRecommendations: "No high-priority recommendations based on your answers.",
@@ -88,7 +90,9 @@ const translations = {
     noSummaryText: 'Start eerst het actieplan.',
     goToStart: 'Ga naar Start',
     paraatScore: 'PARAAT Score',
+    paraatScoreInfo: 'Geeft de pandemische paraatheid van de woonkamer aan. Score van 0 tot 100. Hoe hoger hoe beter.',
     reliabilityScore: 'Betrouwbaarheidsscore',
+    reliabilityScoreInfo: 'Geeft de betrouwbaarheid van de PARAAT score aan. Hoe vaker “Weet ik niet” is ingevuld, hoe lager de betrouwbaarheid.',
     topRecommendationsTitle: 'Belangrijkste aanbevelingen',
     topRecommendationsText: 'Op basis van uw resultaten zal het focussen op het verbeteren van de ventilatie en het zorgen voor actuele kennis over infectiepreventie bij het personeel de grootste impact hebben op uw pandemische paraatheid.',
     noRecommendations: "Geen aanbevelingen met hoge prioriteit op basis van uw antwoorden.",
@@ -230,8 +234,38 @@ const ExpandedFactorCard = ({ title, description }) => (
   </div>
 );
 
+const InfoIcon = ({ text }) => {
+    const [showInfo, setShowInfo] = useState(false);
+
+    return (
+        <div
+            className="relative inline-block ml-2 cursor-pointer"
+            onClick={() => setShowInfo(!showInfo)}
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+            >
+                <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                />
+            </svg>
+            {showInfo && (
+                <div className="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-1 px-2 z-10">
+                    {text}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
 /* ----------------------------- FancyParaatDial ----------------------------- */
-const FancyParaatDial = ({ score, label }) => {
+const FancyParaatDial = ({ score, label, infoText }) => {
   const v = Math.max(0, Math.min(100, Math.round(score || 0)));
   const uid = useMemo(() => Math.random().toString(36).slice(2), []);
   const gradId = `grad-${uid}`;
@@ -269,13 +303,16 @@ const FancyParaatDial = ({ score, label }) => {
           {v}
         </text>
       </svg>
-      <div className="mt-4 text-xl font-bold text-slate-800 text-center">{label}</div>
+        <div className="mt-4 text-xl font-bold text-slate-800 text-center flex items-center">
+            {label}
+            <InfoIcon text={infoText}/>
+        </div>
     </div>
   );
 };
 
 /* --------------------------- ReliabilityScoreBar --------------------------- */
-const ReliabilityScoreBar = ({ score, label }) => {
+const ReliabilityScoreBar = ({ score, label, infoText }) => {
   const v = Math.max(0, Math.min(100, Math.round(score || 0)));
   const getScoreColorClass = (value) => (value < 33 ? 'text-red-500' : value < 66 ? 'text-amber-500' : 'text-green-500');
   const scoreColorClass = getScoreColorClass(v);
@@ -284,7 +321,10 @@ const ReliabilityScoreBar = ({ score, label }) => {
   return (
     <div className="w-80">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-base font-semibold text-slate-700">{label}</h3>
+        <h3 className="text-base font-semibold text-slate-700 flex items-center">
+            {label}
+            <InfoIcon text={infoText} />
+        </h3>
         <span className={`text-lg font-bold ${scoreColorClass}`}>{v}%</span>
       </div>
       <div className="relative w-full h-5 rounded-full overflow-hidden">
@@ -835,8 +875,8 @@ export default function Dashboard() {
             <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
                     <div className="md:w-1/2 flex flex-col justify-start items-center gap-8">
-                        <FancyParaatDial score={overallParaatScore} label={content.paraatScore} />
-                        <ReliabilityScoreBar score={overallReliabilityScore} label={content.reliabilityScore} />
+                        <FancyParaatDial score={overallParaatScore} label={content.paraatScore} infoText={content.paraatScoreInfo}/>
+                        <ReliabilityScoreBar score={overallReliabilityScore} label={content.reliabilityScore} infoText={content.reliabilityScoreInfo}/>
                     </div>
                     <div className="w-full md:w-px h-px md:h-auto self-stretch bg-slate-200"></div>
                     <div className="md:w-1/2">
