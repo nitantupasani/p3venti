@@ -277,7 +277,8 @@ async function addCanvasAsMultipagePDF(pdf, canvas, breakPositionsPx = []) {
     const ctx = pageCanvas.getContext("2d");
     ctx.drawImage(canvas, 0, y0, imgWidthPx, sliceHeight, 0, 0, imgWidthPx, sliceHeight);
 
-    const imgData = pageCanvas.toDataURL("image/png");
+    const jpegQuality = 0.9;
+    const imgData = pageCanvas.toDataURL("image/jpeg", jpegQuality);
     if (i !== 0) pdf.addPage();
     // Keep width fit; height is proportional
     pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, sliceHeight * mmPerPx);
@@ -362,7 +363,7 @@ async function createDashboardPdf({
     });
 
     // 2) Render to canvas (hi-res)
-    const scale = 1.25;
+    const scale = 1;
     const canvas = await html2canvas(printRoot, {
       scale,
       useCORS: true,
