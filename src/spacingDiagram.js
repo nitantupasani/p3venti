@@ -236,13 +236,13 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 }
             }
 
+
             const wanderFreq = p1.type === 'employee' ? 0.9 : 0.7;
             const wanderStrength = desired * (p1.type === 'employee' ? 0.18 : 0.12);
             p1.px += dt * wanderFreq;
             p1.py += dt * (wanderFreq * 0.77);
             fx += Math.cos(p1.px) * wanderStrength;
             fy += Math.sin(p1.py) * wanderStrength;
-
             const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
             const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
             p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
