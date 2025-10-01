@@ -235,33 +235,35 @@ const ExpandedFactorCard = ({ title, description }) => (
 );
 
 const InfoIcon = ({ text }) => {
-    const [showInfo, setShowInfo] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
-    return (
-        <div
-            className="relative inline-block ml-2 cursor-pointer"
-            onClick={() => setShowInfo(!showInfo)}
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-            >
-                <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                />
-            </svg>
-            {showInfo && (
-                <div className="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-1 px-2 z-10">
-                    {text}
-                </div>
-            )}
+  return (
+    <div
+      className="relative inline-block ml-2"
+      onMouseEnter={() => setShowInfo(true)}
+      onMouseLeave={() => setShowInfo(false)}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 text-gray-500 cursor-pointer"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fillRule="evenodd"
+          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+          clipRule="evenodd"
+        />
+      </svg>
+      {showInfo && (
+        <div className="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-1 px-2 z-10">
+          {text}
         </div>
-    );
+      )}
+    </div>
+  );
 };
+
 
 
 /* ----------------------------- FancyParaatDial ----------------------------- */
