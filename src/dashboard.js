@@ -5,6 +5,8 @@ import { AnalysisRow, recommendations, scoringRules, topRecommendationsData } fr
 import { downloadDashboardFullPDF } from "./DownloadPDF";
 import { sendDashboardSummaryEmail } from "./emailService";
 
+const DEFAULT_USABLE_SPACE_PERCENT = 60;
+
 const translations = {
   en: {
     pageTitle: 'P3 Venti',
@@ -678,8 +680,7 @@ export default function Dashboard() {
 
     const socialDistance = 1.5;
     const { positions, fullTheoretical } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
-    const usablePercent = 75;
-    const geometricCapacity = Math.floor(fullTheoretical * usablePercent / 100);
+    const geometricCapacity = Math.floor(fullTheoretical * DEFAULT_USABLE_SPACE_PERCENT / 100);
 
     return {
       shape,
@@ -692,7 +693,7 @@ export default function Dashboard() {
         geometricCapacity,
         limiting: 'geometry',
         roomArea: area,
-        usablePercent,
+        usablePercent: DEFAULT_USABLE_SPACE_PERCENT,
       },
     };
   }, [answers]);

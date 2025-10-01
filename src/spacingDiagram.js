@@ -70,7 +70,7 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
 };
 
 
-const EMPLOYEE_SPEED_MULTIPLIER = 18;/* -------------------------- Spacing Diagram + Physics ------------------------- */
+const EMPLOYEE_SPEED_MULTIPLIER = 1.2;/* -------------------------- Spacing Diagram + Physics ------------------------- */
 
 const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {} }) => {
     const animationFrameId = useRef(null);
@@ -154,7 +154,9 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         const kClose = 0.18;
         const kFar = 0.06;
         const farRange = desired * 4;
-        const damping = 0.88;
+        const residentDamping = 0.97;
+        const employeeDamping = 1.0;
+        const boundaryBounceRetention = 0.98;
         const timeScale = 1.5;
         for (let i = 0; i < pts.length; i++) {
             const p1 = pts[i];
@@ -173,6 +175,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             }
             
             const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
+            const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
             p1.vx = (p1.vx + fx * timeScale * multiplier) * damping;
             p1.vy = (p1.vy + fy * timeScale * multiplier) * damping;
 
@@ -182,17 +185,17 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             if (!isInsideShape(nx, ny)) {
                 if (isInsideShape(nx, p1.y)) {
                     ny = p1.y;
-                    p1.vy *= -0.5;
-                } 
+                    p1.vy *= -boundaryBounceRetention;
+                }
                 else if (isInsideShape(p1.x, ny)) {
                     nx = p1.x;
-                    p1.vx *= -0.5;
-                } 
+                    p1.vy *= -boundaryBounceRetention;
+                }
                 else {
                     nx = p1.x;
                     ny = p1.y;
-                    p1.vx *= -0.5;
-                    p1.vy *= -0.5;
+                    p1.vx *= -boundaryBounceRetention;
+                    p1.vy *= -boundaryBounceRetention;
                 }
             }
             p1.x = nx; p1.y = ny;
