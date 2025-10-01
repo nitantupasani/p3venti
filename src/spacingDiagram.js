@@ -286,7 +286,6 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             p1.py += dt * (wanderFreq * 0.77);
             fx += Math.cos(p1.px) * wanderStrength;
             fy += Math.sin(p1.py) * wanderStrength;
-
             const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
             const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
             p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
@@ -336,6 +335,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [shape, isInsideShape, socialDistance, viewBoxWidth, viewBoxHeight, dims, projectInside, assignNewTarget]);
 
     useEffect(() => {
@@ -396,7 +396,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             animationFrameId.current = requestAnimationFrame(loop);
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget]);
+
+    }, [people, socialDistance, isInsideShape, stepPhysics, drawFrame, occupantDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget]);
 
     const padding = 1.5;
     return (
