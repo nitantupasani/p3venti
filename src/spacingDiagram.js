@@ -70,10 +70,10 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
 };
 
 
-const EMPLOYEE_SPEED_MULTIPLIER = 2.4;
+const EMPLOYEE_SPEED_MULTIPLIER = 1.6;
 /* -------------------------- Spacing Diagram + Physics ------------------------- */
 
-const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {}, noteBox = null }) => {
+const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {} }) => {
     const animationFrameId = useRef(null);
     const nodeRefs = useRef([]);
     const particlesRef = useRef([]);
@@ -83,16 +83,6 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const personIconPath =
     "M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z";
     const iconScale = (personRadius * 1) / 512;
-
-    const occupantDescriptors = useMemo(() => {
-        const residentCount = people?.length ?? 0;
-        const employeeCount = Math.max(1, Math.ceil(residentCount / 8));
-        const descriptors = Array.from({ length: residentCount }, () => ({ type: 'resident' }));
-        for (let i = 0; i < employeeCount; i++) {
-            descriptors.push({ type: 'employee' });
-        }
-        return descriptors;
-    }, [people]);
 
     const { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape } = useMemo(() => {
         let viewBoxWidth = 10, viewBoxHeight = 10;
@@ -147,6 +137,61 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             return [];
         }
     }, [shape, dims, socialDistance]);
+
+    const capacityFromMeta = meta?.capacityMax;
+    const maxPeople = useMemo(() => {
+        if (Number.isFinite(capacityFromMeta)) {
+            return Math.max(0, Math.floor(capacityFromMeta));
+        }
+        if (Array.isArray(people)) {
+            return people.length;
+        }
+        return layoutPositions.length;
+    }, [capacityFromMeta, people, layoutPositions.length]);
+
+    const occupantDescriptors = useMemo(() => {
+        const totalSlots = Math.max(0, maxPeople);
+        if (totalSlots === 0) return [];
+
+        let employeeCount = totalSlots > 0 ? Math.max(1, Math.round(totalSlots / 8)) : 0;
+        if (totalSlots > 1) {
+            employeeCount = Math.min(employeeCount, totalSlots - 1);
+        } else {
+            employeeCount = Math.min(employeeCount, totalSlots);
+        }
+
+        if (employeeCount === 0) {
+            return Array.from({ length: totalSlots }, () => ({ type: 'resident' }));
+        }
+
+        if (employeeCount >= totalSlots) {
+            return Array.from({ length: totalSlots }, () => ({ type: 'employee' }));
+        }
+
+        const descriptors = Array.from({ length: totalSlots }, () => ({ type: 'resident' }));
+
+        const interval = totalSlots / employeeCount;
+        const employeeIndices = new Set();
+        for (let e = 0; e < employeeCount; e++) {
+            let candidate = Math.round(e * interval);
+            if (candidate >= totalSlots) {
+                candidate = totalSlots - 1;
+            }
+            while (employeeIndices.has(candidate) && candidate < totalSlots - 1) {
+                candidate++;
+            }
+            while (employeeIndices.has(candidate) && candidate > 0) {
+                candidate--;
+            }
+            employeeIndices.add(candidate);
+        }
+
+        employeeIndices.forEach((idx) => {
+            descriptors[idx] = { type: 'employee' };
+        });
+
+        return descriptors;
+    }, [maxPeople]);
 
     const projectInside = useCallback((from, to) => {
         if (!isInsideShape) {
@@ -271,13 +316,15 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 fy += toTargetY * eased * targetPull;
             }
 
-            const wanderFreq = p1.type === 'employee' ? 0.95 : 0.75;
-            const wanderStrength = desired * (p1.type === 'employee' ? 0.24 : 0.16);
+            const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
+            const wanderFreqBase = p1.type === 'employee' ? 0.95 : 0.75;
+            const wanderStrengthBase = desired * (p1.type === 'employee' ? 0.24 : 0.16);
+            const wanderFreq = wanderFreqBase * multiplier;
+            const wanderStrength = wanderStrengthBase * multiplier;
             p1.px += dt * wanderFreq;
             p1.py += dt * (wanderFreq * 0.77);
             fx += Math.cos(p1.px) * wanderStrength;
             fy += Math.sin(p1.py) * wanderStrength;
-            const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
             const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
             p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
             p1.vy = (p1.vy + fy * timeScale * multiplier * dt) * damping;
@@ -331,22 +378,23 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
 
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
-        const jitter = socialDistance * 0.04;
         let layoutIndex = 0;
+        const layoutCount = layoutPositions.length;
 
         particlesRef.current = occupantDescriptors.map((descriptor, i) => {
             let basePosition;
-            if (descriptor.type === 'resident' && people[i]) {
+            if (people && people[i]) {
                 const pos = people[i];
                 basePosition = {
-                    x: pos.x + (Math.random() - 0.5) * jitter,
-                    y: pos.y + (Math.random() - 0.5) * jitter,
+                    x: pos.x,
+                    y: pos.y,
                 };
-            } else if (layoutIndex < layoutPositions.length) {
-                const layoutPos = layoutPositions[layoutIndex++];
+            } else if (layoutCount > 0) {
+                const layoutPos = layoutPositions[layoutIndex % layoutCount];
+                layoutIndex++;
                 basePosition = {
-                    x: layoutPos.x + (Math.random() - 0.5) * jitter,
-                    y: layoutPos.y + (Math.random() - 0.5) * jitter,
+                    x: layoutPos.x,
+                    y: layoutPos.y,
                 };
             } else {
                 basePosition = randomPointInside();
