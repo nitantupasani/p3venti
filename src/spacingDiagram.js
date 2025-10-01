@@ -70,7 +70,17 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
 };
 
 
-const EMPLOYEE_SPEED_MULTIPLIER = 1.2;/* -------------------------- Spacing Diagram + Physics ------------------------- */
+const EMPLOYEE_SPEED_MULTIPLIER = 1.2;
+/* -------------------------- Spacing Diagram + Physics ------------------------- */
+
+const shufflePositions = (positions) => {
+    const arr = positions.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+};
 
 const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {} }) => {
     const animationFrameId = useRef(null);
@@ -137,6 +147,77 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape };
     }, [shape, dims, personRadius]);
 
+    const layoutPositions = useMemo(() => {
+        if (!dims || !socialDistance) return [];
+        try {
+            const { positions } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
+            return shufflePositions(positions);
+        } catch (error) {
+            return [];
+        }
+    }, [shape, dims, socialDistance]);
+
+    const projectInside = useCallback((from, to) => {
+        if (!isInsideShape) {
+            return { point: to, normal: null };
+        }
+        if (isInsideShape(to.x, to.y)) {
+            return { point: to, normal: null };
+        }
+        const dirX = to.x - from.x;
+        const dirY = to.y - from.y;
+        let low = 0;
+        let high = 1;
+        let point = { ...from };
+        for (let iter = 0; iter < 12; iter++) {
+            const mid = (low + high) / 2;
+            const test = { x: from.x + dirX * mid, y: from.y + dirY * mid };
+            if (isInsideShape(test.x, test.y)) {
+                point = test;
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+        const nx = to.x - point.x;
+        const ny = to.y - point.y;
+        const normalLength = Math.hypot(nx, ny);
+        if (normalLength > 1e-6) {
+            const normal = { x: nx / normalLength, y: ny / normalLength };
+            const nudgedPoint = {
+                x: point.x - normal.x * 0.01,
+                y: point.y - normal.y * 0.01,
+            };
+            if (isInsideShape(nudgedPoint.x, nudgedPoint.y)) {
+                return { point: nudgedPoint, normal };
+            }
+            return { point, normal };
+        }
+        return { point, normal: null };
+    }, [isInsideShape]);
+
+    const randomPointInside = useCallback(() => {
+        if (!isInsideShape || !Number.isFinite(viewBoxWidth) || !Number.isFinite(viewBoxHeight)) {
+            return { x: 0, y: 0 };
+        }
+        const margin = personRadius;
+        for (let attempt = 0; attempt < 80; attempt++) {
+            const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
+            const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
+            if (isInsideShape(rx, ry)) {
+                return { x: rx, y: ry };
+            }
+        }
+        return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
+    }, [isInsideShape, viewBoxWidth, viewBoxHeight, personRadius]);
+
+    const assignNewTarget = useCallback((particle) => {
+        const destination = randomPointInside();
+        particle.targetX = destination.x;
+        particle.targetY = destination.y;
+        particle.targetTimer = 1.6 + Math.random() * 2.8;
+    }, [randomPointInside]);
+
     const drawFrame = useCallback(() => {
         const pts = particlesRef.current;
         const nodes = nodeRefs.current;
@@ -151,13 +232,13 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         const pts = particlesRef.current;
         if (!pts || pts.length === 0) return;
         const desired = socialDistance;
-        const kClose = 0.18;
-        const kFar = 0.06;
-        const farRange = desired * 4;
-        const residentDamping = 0.97;
-        const employeeDamping = 1.0;
-        const boundaryBounceRetention = 0.98;
-        const timeScale = 1.5;
+        const kClose = 0.22;
+        const kFar = 0.045;
+        const farRange = desired * 3.5;
+        const residentDamping = 0.9;
+        const employeeDamping = 0.94;
+        const boundaryBounceRetention = 0.6;
+        const timeScale = 1.2;
         for (let i = 0; i < pts.length; i++) {
             const p1 = pts[i];
             let fx = 0, fy = 0;
@@ -167,33 +248,72 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 const dx = p1.x - p2.x, dy = p1.y - p2.y, dist = Math.hypot(dx, dy) || 1e-6, ux = dx / dist, uy = dy / dist;
                 if (dist < desired) {
                     const overlap = desired - dist;
-                    fx += ux * (kClose * overlap); fy += uy * (kClose * overlap);
+                    fx += ux * (kClose * overlap);
+                    fy += uy * (kClose * overlap);
                 } else if (dist < farRange) {
                     const s = 1 - (dist - desired) / (farRange - desired);
-                    fx += ux * (kFar * s * s / (dist * dist)); fy += uy * (kFar * s * s / (dist * dist));
+                    const falloff = kFar * s * s / Math.max(dist * dist, 1e-6);
+                    fx += ux * falloff;
+                    fy += uy * falloff;
                 }
             }
-            
+
+            p1.targetTimer = Math.max(0, (p1.targetTimer ?? 0) - dt);
+            if (!Number.isFinite(p1.targetX) || !Number.isFinite(p1.targetY) || p1.targetTimer <= 0 || !isInsideShape(p1.targetX, p1.targetY)) {
+                assignNewTarget(p1);
+            }
+
+            let toTargetX = p1.targetX - p1.x;
+            let toTargetY = p1.targetY - p1.y;
+            let targetDist = Math.hypot(toTargetX, toTargetY);
+            if (targetDist < desired * 0.25) {
+                assignNewTarget(p1);
+                toTargetX = p1.targetX - p1.x;
+                toTargetY = p1.targetY - p1.y;
+                targetDist = Math.hypot(toTargetX, toTargetY);
+            }
+
+            const targetPull = desired * (p1.type === 'employee' ? 0.62 : 0.48);
+            if (targetDist > 1e-4) {
+                const eased = Math.min(targetDist, desired * 1.6) / Math.max(targetDist, 1e-4);
+                fx += toTargetX * eased * targetPull;
+                fy += toTargetY * eased * targetPull;
+            }
+
+            const wanderFreq = p1.type === 'employee' ? 0.95 : 0.75;
+            const wanderStrength = desired * (p1.type === 'employee' ? 0.24 : 0.16);
+            p1.px += dt * wanderFreq;
+            p1.py += dt * (wanderFreq * 0.77);
+            fx += Math.cos(p1.px) * wanderStrength;
+            fy += Math.sin(p1.py) * wanderStrength;
+
             const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
             const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
-            p1.vx = (p1.vx + fx * timeScale * multiplier) * damping;
-            p1.vy = (p1.vy + fy * timeScale * multiplier) * damping;
+            p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
+            p1.vy = (p1.vy + fy * timeScale * multiplier * dt) * damping;
+
+            const maxSpeed = socialDistance * 2.8;
+            const speed = Math.hypot(p1.vx, p1.vy);
+            if (speed > maxSpeed) {
+                const scale = maxSpeed / speed;
+                p1.vx *= scale;
+                p1.vy *= scale;
+            }
 
             let nx = p1.x + p1.vx * dt;
             let ny = p1.y + p1.vy * dt;
 
             if (!isInsideShape(nx, ny)) {
-                if (isInsideShape(nx, p1.y)) {
-                    ny = p1.y;
-                    p1.vy *= -boundaryBounceRetention;
-                }
-                else if (isInsideShape(p1.x, ny)) {
-                    nx = p1.x;
-                    p1.vy *= -boundaryBounceRetention;
-                }
-                else {
-                    nx = p1.x;
-                    ny = p1.y;
+                const { point, normal } = projectInside({ x: p1.x, y: p1.y }, { x: nx, y: ny });
+                nx = point.x;
+                ny = point.y;
+                if (normal) {
+                    const vn = p1.vx * normal.x + p1.vy * normal.y;
+                    const vtX = p1.vx - vn * normal.x;
+                    const vtY = p1.vy - vn * normal.y;
+                    p1.vx = vtX - vn * normal.x * boundaryBounceRetention;
+                    p1.vy = vtY - vn * normal.y * boundaryBounceRetention;
+                } else {
                     p1.vx *= -boundaryBounceRetention;
                     p1.vy *= -boundaryBounceRetention;
                 }
@@ -216,23 +336,12 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [shape, isInsideShape, socialDistance, viewBoxWidth, viewBoxHeight, dims]);
+    }, [shape, isInsideShape, socialDistance, viewBoxWidth, viewBoxHeight, dims, projectInside, assignNewTarget]);
 
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
-        const jitter = socialDistance * 0.05;
-        const margin = personRadius;
-
-        const randomPointInside = () => {
-            for (let attempt = 0; attempt < 50; attempt++) {
-                const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
-                const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
-                if (isInsideShape(rx, ry)) {
-                    return { x: rx, y: ry };
-                }
-            }
-            return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
-        };
+        const jitter = socialDistance * 0.04;
+        let layoutIndex = 0;
 
         particlesRef.current = occupantDescriptors.map((descriptor, i) => {
             let basePosition;
@@ -242,22 +351,34 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                     x: pos.x + (Math.random() - 0.5) * jitter,
                     y: pos.y + (Math.random() - 0.5) * jitter,
                 };
+            } else if (layoutIndex < layoutPositions.length) {
+                const layoutPos = layoutPositions[layoutIndex++];
+                basePosition = {
+                    x: layoutPos.x + (Math.random() - 0.5) * jitter,
+                    y: layoutPos.y + (Math.random() - 0.5) * jitter,
+                };
             } else {
                 basePosition = randomPointInside();
             }
 
             const speedMultiplier = descriptor.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
-            return {
+            const velocityRange = socialDistance * 0.12 * speedMultiplier;
+            const particle = {
                 id: i,
                 type: descriptor.type,
                 x: basePosition.x,
                 y: basePosition.y,
-                vx: (Math.random() - 0.5) * 0.02 * speedMultiplier,
-                vy: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+                vx: (Math.random() - 0.5) * velocityRange,
+                vy: (Math.random() - 0.5) * velocityRange,
                 px: Math.random() * Math.PI * 2,
                 py: Math.random() * Math.PI * 2,
                 speedMultiplier,
+                targetX: basePosition.x,
+                targetY: basePosition.y,
+                targetTimer: 0,
             };
+            assignNewTarget(particle);
+            return particle;
         });
         startTimeRef.current = null;
         if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -275,7 +396,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             animationFrameId.current = requestAnimationFrame(loop);
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius]);
+    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget]);
 
     const padding = 1.5;
     return (
