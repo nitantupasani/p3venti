@@ -363,7 +363,7 @@ async function createDashboardPdf({
     });
 
     // 2) Render to canvas (hi-res)
-    const scale = 1;
+    const scale = 2;
     const canvas = await html2canvas(printRoot, {
       scale,
       useCORS: true,
