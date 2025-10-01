@@ -89,7 +89,7 @@ const translations = {
     goToStart: 'Ga naar Start',
     paraatScore: 'PARAAT Score',
     reliabilityScore: 'Betrouwbaarheidsscore',
-    topRecommendationsTitle: 'Topaanbevelingen',
+    topRecommendationsTitle: 'Belangrijkste aanbevelingen',
     topRecommendationsText: 'Op basis van uw resultaten zal het focussen op het verbeteren van de ventilatie en het zorgen voor actuele kennis over infectiepreventie bij het personeel de grootste impact hebben op uw pandemische paraatheid.',
     noRecommendations: "Geen aanbevelingen met hoge prioriteit op basis van uw antwoorden.",
     cardsTitle: 'Houd bij het maken van veranderingen altijd rekening met deze factoren',
