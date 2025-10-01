@@ -47,6 +47,16 @@ const translations = {
     emailLabel: 'Email the report to me!',
     emailPlaceholder: 'Enter your email here',
     sendEmailButton: 'Send PDF to Email',
+    sendingEmailButton: 'Sending…',
+    emailRequiredMessage: 'Please enter an email address.',
+    emailInvalidMessage: 'Please enter a valid email address.',
+    emailSendingMessage: 'Sending email…',
+    emailSuccessMessage: 'Dashboard PDF sent to your inbox!',
+    emailErrorMessage: 'Could not send email:',
+    emailGenericError: 'Something went wrong while sending the email. Please try again later.',
+    emailNetworkErrorMessage: 'We could not reach the email service. Please check your connection or try again later.',
+    emailServerErrorMessage: 'The email service responded with status {status}. Please try again later.',
+    emailReferenceLabel: 'reference',
     downloadPdfButton: 'Download PDF Report',
     categoryNames: {
       personal: 'People & Use',
@@ -104,6 +114,16 @@ const translations = {
     emailLabel: 'Uw e-mail:',
     emailPlaceholder: 'Vul hier uw e-mailadres in',
     sendEmailButton: 'Stuur PDF naar e-mail',
+    sendingEmailButton: 'Bezig met verzenden…',
+    emailRequiredMessage: 'Vul een e-mailadres in.',
+    emailInvalidMessage: 'Vul een geldig e-mailadres in.',
+    emailSendingMessage: 'E-mail wordt verzonden…',
+    emailSuccessMessage: 'Dashboard-PDF is verzonden naar uw inbox!',
+    emailErrorMessage: 'Kon e-mail niet verzenden:',
+    emailGenericError: 'Er is iets misgegaan bij het versturen van de e-mail. Probeer het later opnieuw.',
+    emailNetworkErrorMessage: 'We konden de e-mailservice niet bereiken. Controleer uw verbinding of probeer het later opnieuw.',
+    emailServerErrorMessage: 'De e-mailservice gaf status {status} terug. Probeer het later opnieuw.',
+    emailReferenceLabel: 'referentie',
     downloadPdfButton: 'Download PDF-rapport',
     categoryNames: {
       personal: 'Mensen & gebruik',
@@ -169,7 +189,7 @@ const TopRecommendations = ({ userAnswers, content, language }) => {
             </ul>
         );
     }
-    
+
     return <p className="text-slate-600 text-center">{content.noRecommendations}</p>;
 };
 
@@ -282,6 +302,8 @@ export default function Dashboard() {
   const [email, setEmail] = useState('');
   const params = new URLSearchParams(location.search);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState({ type: 'idle', message: '' });
+  const emailStatusTimeoutRef = useRef(null);
   const initialLang = params.get('lang') || 'nl';
   const [language, setLanguage] = useState(initialLang);
 
@@ -305,29 +327,180 @@ export default function Dashboard() {
     { title: content.categoryNames.organizational, questionIds: ['q17','q18','q19','q20','q21'], totalWeight: 0.19 },
   ], [content]);
   const userAnswers = location.state?.answers || {};
-  
+
   const onCardSelect = (id) => {
     setActiveCardIndex(prev => (prev === id ? null : id));
   };
-  
+
   const handleRestart = () => navigate(`/tool?lang=${language}`);
   const handleHomeClick = () => navigate('/');
   const handleInfoClick = () => navigate(`/info?lang=${language}`);
+
+  const emailStatusId = 'email-status-message';
+  const emailStatusStyles = {
+    success: 'bg-green-50 border-green-200 text-green-700',
+    error: 'bg-red-50 border-red-200 text-red-700',
+    pending: 'bg-sky-50 border-sky-200 text-sky-700',
+  };
+
+  const renderEmailStatusIcon = (statusType) => {
+    if (statusType === 'success') {
+      return (
+        <svg
+          className="w-4 h-4 flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+      );
+    }
+
+    if (statusType === 'error') {
+      return (
+        <svg
+          className="w-4 h-4 flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      );
+    }
+
+    if (statusType === 'pending') {
+      return (
+        <svg
+          className="w-4 h-4 flex-shrink-0 animate-spin"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          />
+        </svg>
+      );
+    }
+
+    return null;
+  };
+
+  const getFriendlyEmailErrorMessage = (error) => {
+    if (!error) {
+      return content.emailGenericError;
+    }
+
+    const rawMessage = typeof error === 'string' ? error : error?.message || '';
+    const sanitizedMessage = rawMessage.replace(/^Error:\s*/i, '').trim();
+
+    if (!sanitizedMessage) {
+      return `${content.emailErrorMessage} ${content.emailGenericError}`.trim();
+    }
+
+    if (/unable to reach the email service/i.test(sanitizedMessage)) {
+      return `${content.emailErrorMessage} ${content.emailNetworkErrorMessage}`.trim();
+    }
+
+    const statusMatch = sanitizedMessage.match(/status\s+(\d{3})/i);
+    if (statusMatch) {
+      const statusText = content.emailServerErrorMessage.replace('{status}', statusMatch[1]);
+      return `${content.emailErrorMessage} ${statusText}`.trim();
+    }
+
+    return `${content.emailErrorMessage} ${sanitizedMessage}`.trim();
+  };
 
   const allQuestions = useMemo(() => {
     return questionsData && questionsData.questionSets ? Object.values(questionsData.questionSets).flat() : [];
   }, [questionsData]);
 
-  const handleSendEmail = async () => {
-    if (!email || isSendingEmail) {
+  useEffect(() => {
+    return () => {
+      if (emailStatusTimeoutRef.current) {
+        clearTimeout(emailStatusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (emailStatusTimeoutRef.current) {
+      clearTimeout(emailStatusTimeoutRef.current);
+      emailStatusTimeoutRef.current = null;
+    }
+
+    if (emailStatus.type === 'idle' || emailStatus.type === 'pending') {
+      return;
+    }
+
+    emailStatusTimeoutRef.current = setTimeout(() => {
+      setEmailStatus({ type: 'idle', message: '' });
+    }, 6000);
+
+    return () => {
+      if (emailStatusTimeoutRef.current) {
+        clearTimeout(emailStatusTimeoutRef.current);
+        emailStatusTimeoutRef.current = null;
+      }
+    };
+  }, [emailStatus.type]);
+
+  useEffect(() => {
+    setEmailStatus({ type: 'idle', message: '' });
+  }, [language]);
+
+  const handleSendEmail = async (event) => {
+    if (event) {
+      event.preventDefault();
+    }
+
+    if (isSendingEmail) {
+      return;
+    }
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setEmailStatus({ type: 'error', message: content.emailRequiredMessage });
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(trimmedEmail)) {
+      setEmailStatus({ type: 'error', message: content.emailInvalidMessage });
       return;
     }
 
     setIsSendingEmail(true);
+    setEmailStatus({ type: 'pending', message: content.emailSendingMessage });
 
     try {
       const { response } = await sendDashboardSummaryEmail({
-        email,
+        email: trimmedEmail,
         language,
         filename: "PARAAT_dashboard.pdf",
         content,
@@ -336,10 +509,21 @@ export default function Dashboard() {
         overallReliabilityScore,
         analysisData
       });
-      const messageId = response?.messageId ? ` (message id: ${response.messageId})` : "";
-      console.info(`Dashboard PDF emailed to ${email}${messageId}.`);
+      const messageId = response?.messageId
+        ? ` (${content.emailReferenceLabel} ${response.messageId})`
+        : '';
+      console.info(`Dashboard PDF emailed to ${trimmedEmail}${messageId}.`);
+      setEmailStatus({
+        type: 'success',
+        message: `${content.emailSuccessMessage}${messageId}`.trim(),
+      });
     } catch (err) {
       console.error("Failed to send dashboard PDF email:", err);
+      const friendlyMessage = getFriendlyEmailErrorMessage(err);
+      setEmailStatus({
+        type: 'error',
+        message: friendlyMessage,
+      });
     } finally {
       setIsSendingEmail(false);
     }
@@ -372,7 +556,7 @@ export default function Dashboard() {
           answeredQuestions++;
           totalValueScore += getScore('values', id, answerIndex);
           totalRiskScore += getScore('risk', id, answerIndex);
-          
+
           const rec = recommendations[language]?.[id]?.[answerIndex];
           if (rec) recommendationsList.push(rec);
 
@@ -391,7 +575,7 @@ export default function Dashboard() {
 
       const protectionScore = 100 - normalizedRiskScore;
       const paraatScore = (protectionScore + normalizedValueScore) / 2;
-      
+
       const categoryBaseReliability = row.totalWeight;
       const finalCategoryReliability = ((categoryBaseReliability - reliabilityDeduction) / categoryBaseReliability) * 100;
 
@@ -406,11 +590,11 @@ export default function Dashboard() {
 
   const { totalScoreValues, totalScoreExposure } = useMemo(() => {
     const normalizeScore = (score) => (score / 5) * 100;
-    
+
     if (!answers || allQuestions.length === 0) {
         return { totalScoreValues: 0, totalScoreExposure: 0 };
     }
-    
+
     let totalValue = 0;
     let totalRisk = 0;
     let answeredCount = 0;
@@ -456,7 +640,7 @@ export default function Dashboard() {
     });
     return Math.max(0, currentReliability * 100);
   }, [answers, allQuestions]);
-  
+
   const safeSpaceData = useMemo(() => {
     const area = answers['q6'] || 50;
     const shapeAnswer = answers['q7'];
@@ -513,6 +697,14 @@ export default function Dashboard() {
     };
   }, [answers]);
 
+  const emailInputHasError = emailStatus.type === 'error';
+  const emailInputClasses = [
+    'flex-1 px-3 py-2 bg-white border rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none transition-colors',
+    emailInputHasError
+      ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+      : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500',
+  ].join(' ');
+
   return (
     <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
@@ -554,24 +746,69 @@ export default function Dashboard() {
                 </div>
             </header>
 
-            <div className="flex flex-row items-center justify-center gap-4 mb-8">
-              <div className="w-full max-w-md flex items-center gap-2">
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                    focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                  placeholder={content.emailPlaceholder}
-                />
-                <button
-                  onClick={handleSendEmail}
-                  disabled={isSendingEmail}
-                  className="shrink-0 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {content.sendEmailButton}
-                </button>
+            <div className="flex flex-row items-start justify-center gap-4 mb-8">
+              <div className="w-full max-w-md flex flex-col gap-2">
+                <form className="w-full flex items-center gap-2" onSubmit={handleSendEmail} noValidate>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailStatus.type !== 'idle' && emailStatus.type !== 'pending') {
+                        setEmailStatus({ type: 'idle', message: '' });
+                      }
+                    }}
+                    className={emailInputClasses}
+                    aria-invalid={emailInputHasError}
+                    aria-describedby={emailStatus.type !== 'idle' ? emailStatusId : undefined}
+                    placeholder={content.emailPlaceholder}
+                    autoComplete="email"
+                    inputMode="email"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSendingEmail}
+                    className="shrink-0 inline-flex items-center justify-center gap-2 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    aria-busy={isSendingEmail}
+                  >
+                    {isSendingEmail && (
+                      <svg
+                        className="w-4 h-4 animate-spin"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                    )}
+                    <span>{isSendingEmail ? content.sendingEmailButton : content.sendEmailButton}</span>
+                  </button>
+                </form>
+                {emailStatus.type !== 'idle' && (
+                  <div
+                    id={emailStatusId}
+                    role={emailStatus.type === 'error' ? 'alert' : 'status'}
+                    aria-live={emailStatus.type === 'error' ? 'assertive' : 'polite'}
+                    className={`flex items-center gap-2 text-sm px-3 py-2 rounded-md border ${emailStatusStyles[emailStatus.type]}`}
+                  >
+                    {renderEmailStatusIcon(emailStatus.type)}
+                    <span>{emailStatus.message}</span>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() =>
@@ -653,7 +890,7 @@ export default function Dashboard() {
                             quick: content.recHeaderQuick,
                             investment: content.recHeaderInvestment,
                             information: content.recHeaderInformation,
-                        }} 
+                        }}
                     />
                 ))}
             </div>
