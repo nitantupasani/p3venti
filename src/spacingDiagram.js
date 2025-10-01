@@ -69,6 +69,15 @@ export const getPositionsAndTheoreticalMax = (shape, dims, social_d) => {
     return { positions, fullTheoretical: positions.length };
 };
 
+// Helper function to shuffle array elements
+const shuffleArray = (array) => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+};
 
 const EMPLOYEE_SPEED_MULTIPLIER = 2.4;
 /* -------------------------- Spacing Diagram + Physics ------------------------- */
@@ -107,10 +116,14 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     }, [shape, dims, socialDistance]);
 
     const residentPositions = useMemo(() => {
-        if (residentCount === 0) return [];
-        const basePositions = (people && people.length) ? people : layoutPositions;
-        return basePositions.slice(0, residentCount);
-    }, [people, layoutPositions, residentCount]);
+    if (residentCount === 0) return [];
+    const basePositions = (people && people.length) ? people : layoutPositions;
+    
+    // Shuffle positions for a uniform distribution
+    const shuffledPositions = shuffleArray(basePositions);
+
+    return shuffledPositions.slice(0, residentCount);
+}, [people, layoutPositions, residentCount]);
 
     const employeeDescriptors = useMemo(() => {
         return Array.from({ length: employeeCount }, () => 'employee');
@@ -241,153 +254,152 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     }, []);
 
     const stepPhysics = useCallback((dt) => {
-        const pts = particlesRef.current;
-        if (!pts || pts.length === 0) return;
-        const desired = socialDistance;
-        const kClose = 0.22;
-        const kFar = 0.045;
-        const farRange = desired * 3.5;
-        const residentDamping = 0.9;
-        const employeeDamping = 0.94;
-        const boundaryBounceRetention = 0.6;
-        const timeScale = 1.2;
+    const pts = particlesRef.current;
+    if (!pts || pts.length === 0) return;
+    const desired = socialDistance;
+    const kClose = 0.22;
+    const kFar = 0.045;
+    const farRange = desired * 3.5;
+    const residentDamping = 0.9;
+    const employeeDamping = 0.94;
+    const boundaryBounceRetention = 0.6;
+    const timeScale = 1.2;
+    for (let i = 0; i < pts.length; i++) {
+        const p1 = pts[i];
+        let fx = 0, fy = 0;
+        for (let j = 0; j < pts.length; j++) {
+            if (i === j) continue;
+            const p2 = pts[j];
+            const dx = p1.x - p2.x, dy = p1.y - p2.y, dist = Math.hypot(dx, dy) || 1e-6, ux = dx / dist, uy = dy / dist;
+            if (dist < desired) {
+                const overlap = desired - dist;
+                fx += ux * (kClose * overlap);
+                fy += uy * (kClose * overlap);
+            } else if (dist < farRange) {
+                const s = 1 - (dist - desired) / (farRange - desired);
+                const falloff = kFar * s * s / Math.max(dist * dist, 1e-6);
+                fx += ux * falloff;
+                fy += uy * falloff;
+            }
+        }
+        
+        for (const resident of residentPositions) {
+            const dx = p1.x - resident.x;
+            const dy = p1.y - resident.y;
+            const dist = Math.hypot(dx, dy) || 1e-6;
+            const ux = dx / dist;
+            const uy = dy / dist;
+            if (dist < desired) {
+                const overlap = desired - dist;
+                const residentRepulsion = 1.8; 
+                fx += ux * (kClose * overlap * residentRepulsion);
+                fy += uy * (kClose * overlap * residentRepulsion);
+            } else if (dist < farRange) {
+                const s = 1 - (dist - desired) / (farRange - desired);
+                const falloff = kFar * s * s / Math.max(dist * dist, 1e-6);
+                fx += ux * falloff;
+                fy += uy * falloff;
+            }
+        }
+
+        p1.targetTimer = Math.max(0, (p1.targetTimer ?? 0) - dt);
+        if (!Number.isFinite(p1.targetX) || !Number.isFinite(p1.targetY) || p1.targetTimer <= 0 || !isInsideShape(p1.targetX, p1.targetY)) {
+            assignNewTarget(p1);
+        }
+
+        let toTargetX = p1.targetX - p1.x;
+        let toTargetY = p1.targetY - p1.y;
+        let targetDist = Math.hypot(toTargetX, toTargetY);
+        if (targetDist < desired * 0.25) {
+            assignNewTarget(p1);
+            toTargetX = p1.targetX - p1.x;
+            toTargetY = p1.targetY - p1.y;
+            targetDist = Math.hypot(toTargetX, toTargetY);
+        }
+
+        const targetPull = desired * (p1.type === 'employee' ? 0.62 : 0.48);
+        if (targetDist > 1e-4) {
+            const eased = Math.min(targetDist, desired * 1.6) / Math.max(targetDist, 1e-4);
+            fx += toTargetX * eased * targetPull;
+            fy += toTargetY * eased * targetPull;
+        }
+
+        const wanderFreq = p1.type === 'employee' ? 0.95 : 0.75;
+        const wanderStrength = desired * (p1.type === 'employee' ? 0.24 : 0.16);
+        p1.px += dt * wanderFreq;
+        p1.py += dt * (wanderFreq * 0.77);
+        fx += Math.cos(p1.px) * wanderStrength;
+        fy += Math.sin(p1.py) * wanderStrength;
+        const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
+        const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
+        p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
+        p1.vy = (p1.vy + fy * timeScale * multiplier * dt) * damping;
+
+        const maxSpeed = socialDistance * 2.8;
+        const speed = Math.hypot(p1.vx, p1.vy);
+        if (speed > maxSpeed) {
+            const scale = maxSpeed / speed;
+            p1.vx *= scale;
+            p1.vy *= scale;
+        }
+
+        let nx = p1.x + p1.vx * dt;
+        let ny = p1.y + p1.vy * dt;
+
+        if (!isInsideShape(nx, ny)) {
+            const { point, normal } = projectInside({ x: p1.x, y: p1.y }, { x: nx, y: ny });
+            nx = point.x;
+            ny = point.y;
+            if (normal) {
+                const vn = p1.vx * normal.x + p1.vy * normal.y;
+                const vtX = p1.vx - vn * normal.x;
+                const vtY = p1.vy - vn * normal.y;
+                p1.vx = vtX - vn * normal.x * boundaryBounceRetention;
+                p1.vy = vtY - vn * normal.y * boundaryBounceRetention;
+            } else {
+                p1.vx *= -boundaryBounceRetention;
+                p1.vy *= -boundaryBounceRetention;
+            }
+        }
+        p1.x = nx; p1.y = ny;
+    }
+
+    const iterations = 2;
+    for (let it = 0; it < iterations; it++) {
         for (let i = 0; i < pts.length; i++) {
-            const p1 = pts[i];
-            let fx = 0, fy = 0;
-            for (let j = 0; j < pts.length; j++) {
-                if (i === j) continue;
-                const p2 = pts[j];
-                const dx = p1.x - p2.x, dy = p1.y - p2.y, dist = Math.hypot(dx, dy) || 1e-6, ux = dx / dist, uy = dy / dist;
-                if (dist < desired) {
-                    const overlap = desired - dist;
-                    fx += ux * (kClose * overlap);
-                    fy += uy * (kClose * overlap);
-                } else if (dist < farRange) {
-                    const s = 1 - (dist - desired) / (farRange - desired);
-                    const falloff = kFar * s * s / Math.max(dist * dist, 1e-6);
-                    fx += ux * falloff;
-                    fy += uy * falloff;
+            for (let j = i + 1; j < pts.length; j++) {
+                const a = pts[i], b = pts[j], dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 1e-6;
+                if (dist < socialDistance) {
+                    const overlap = (socialDistance - dist) * 0.5, ux = dx / dist, uy = dy / dist;
+                    const ax = a.x - ux * overlap, ay = a.y - uy * overlap, bx = b.x + ux * overlap, by = b.y + uy * overlap;
+                    if (isInsideShape(ax, ay)) { a.x = ax; a.y = ay; }
+                    if (isInsideShape(bx, by)) { b.x = bx; b.y = by; }
                 }
             }
-            
+        }
+
+        for (let i = 0; i < pts.length; i++) {
+            const particle = pts[i];
             for (const resident of residentPositions) {
-                const dx = p1.x - resident.x;
-                const dy = p1.y - resident.y;
+                const dx = particle.x - resident.x;
+                const dy = particle.y - resident.y;
                 const dist = Math.hypot(dx, dy) || 1e-6;
-                const ux = dx / dist;
-                const uy = dy / dist;
-                if (dist < desired) {
-                    const overlap = desired - dist;
-                    fx += ux * (kClose * overlap);
-                    fy += uy * (kClose * overlap);
-                } else if (dist < farRange) {
-                    const s = 1 - (dist - desired) / (farRange - desired);
-                    const falloff = kFar * s * s / Math.max(dist * dist, 1e-6);
-                    fx += ux * falloff;
-                    fy += uy * falloff;
-                }
-            }
-
-            p1.targetTimer = Math.max(0, (p1.targetTimer ?? 0) - dt);
-            if (!Number.isFinite(p1.targetX) || !Number.isFinite(p1.targetY) || p1.targetTimer <= 0 || !isInsideShape(p1.targetX, p1.targetY)) {
-                assignNewTarget(p1);
-            }
-
-            let toTargetX = p1.targetX - p1.x;
-            let toTargetY = p1.targetY - p1.y;
-            let targetDist = Math.hypot(toTargetX, toTargetY);
-            if (targetDist < desired * 0.25) {
-                assignNewTarget(p1);
-                toTargetX = p1.targetX - p1.x;
-                toTargetY = p1.targetY - p1.y;
-                targetDist = Math.hypot(toTargetX, toTargetY);
-            }
-
-            const targetPull = desired * (p1.type === 'employee' ? 0.62 : 0.48);
-            if (targetDist > 1e-4) {
-                const eased = Math.min(targetDist, desired * 1.6) / Math.max(targetDist, 1e-4);
-                fx += toTargetX * eased * targetPull;
-                fy += toTargetY * eased * targetPull;
-            }
-
-            const wanderFreq = p1.type === 'employee' ? 0.95 : 0.75;
-            const wanderStrength = desired * (p1.type === 'employee' ? 0.24 : 0.16);
-            p1.px += dt * wanderFreq;
-            p1.py += dt * (wanderFreq * 0.77);
-            fx += Math.cos(p1.px) * wanderStrength;
-            fy += Math.sin(p1.py) * wanderStrength;
-            const multiplier = p1.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
-            const damping = p1.type === 'employee' ? employeeDamping : residentDamping;
-            p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
-            p1.vy = (p1.vy + fy * timeScale * multiplier * dt) * damping;
-
-            const maxSpeed = socialDistance * 2.8;
-            const speed = Math.hypot(p1.vx, p1.vy);
-            if (speed > maxSpeed) {
-                const scale = maxSpeed / speed;
-                p1.vx *= scale;
-                p1.vy *= scale;
-            }
-
-            let nx = p1.x + p1.vx * dt;
-            let ny = p1.y + p1.vy * dt;
-
-            if (!isInsideShape(nx, ny)) {
-                const { point, normal } = projectInside({ x: p1.x, y: p1.y }, { x: nx, y: ny });
-                nx = point.x;
-                ny = point.y;
-                if (normal) {
-                    const vn = p1.vx * normal.x + p1.vy * normal.y;
-                    const vtX = p1.vx - vn * normal.x;
-                    const vtY = p1.vy - vn * normal.y;
-                    p1.vx = vtX - vn * normal.x * boundaryBounceRetention;
-                    p1.vy = vtY - vn * normal.y * boundaryBounceRetention;
-                } else {
-                    p1.vx *= -boundaryBounceRetention;
-                    p1.vy *= -boundaryBounceRetention;
-                }
-            }
-            p1.x = nx; p1.y = ny;
-        }
-
-        const iterations = 2;
-        for (let it = 0; it < iterations; it++) {
-            for (let i = 0; i < pts.length; i++) {
-                for (let j = i + 1; j < pts.length; j++) {
-                    const a = pts[i], b = pts[j], dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 1e-6;
-                    if (dist < socialDistance) {
-                        const overlap = (socialDistance - dist) * 0.5, ux = dx / dist, uy = dy / dist;
-                        const ax = a.x - ux * overlap, ay = a.y - uy * overlap, bx = b.x + ux * overlap, by = b.y + uy * overlap;
-                        if (isInsideShape(ax, ay)) { a.x = ax; a.y = ay; }
-                        if (isInsideShape(bx, by)) { b.x = bx; b.y = by; }
+                if (dist < socialDistance) {
+                    const overlap = socialDistance - dist;
+                    const ux = dx / dist;
+                    const uy = dy / dist;
+                    const newX = particle.x + ux * overlap;
+                    const newY = particle.y + uy * overlap;
+                    if (isInsideShape(newX, newY)) {
+                        particle.x = newX;
+                        particle.y = newY;
                     }
                 }
             }
-
-            for (let i = 0; i < pts.length; i++) {
-                const particle = pts[i];
-                for (const resident of residentPositions) {
-                    const dx = particle.x - resident.x;
-                    const dy = particle.y - resident.y;
-                    const dist = Math.hypot(dx, dy) || 1e-6;
-                    if (dist < socialDistance) {
-                        const overlap = socialDistance - dist;
-                        const ux = dx / dist;
-                        const uy = dy / dist;
-                        const newX = particle.x + ux * overlap;
-                        const newY = particle.y + uy * overlap;
-                        if (isInsideShape(newX, newY)) {
-                            particle.x = newX;
-                            particle.y = newY;
-                        }
-                    }
-                }
-            }
-
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
 
-    }, [isInsideShape, socialDistance, projectInside, assignNewTarget, residentPositions]);
+    }
+}, [isInsideShape, socialDistance, projectInside, assignNewTarget, residentPositions]);
 
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
