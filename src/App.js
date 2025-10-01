@@ -43,17 +43,17 @@ const translations = {
         viewSummary: 'View Dashboard',
         questionSets: {
             personal: [
-                { id: "q1", questionText: "How many people are usually in the living room at the same time (residents + staff + visitors)?", type: "slider", min: 1, max: 50, unit: "people" },
-                { id: "q2", questionText: "Which group primarily uses this living room?", answerOptions: [{ answerText: "Psychogeriatrics" }, { answerText: "Somatics" }, { answerText: "Intellectual impairments" }, { answerText: "Mixed" }, { answerText: "I don't know" }] },
+                { id: "q1", questionText: "Consider a typical weekday in your living room. How many people are usually present at the same time? Think of residents, staff, and visitors.", type: "slider", min: 1, max: 50, unit: "people" },
+                { id: "q2", questionText: "Which group of residents uses this living room?", answerOptions: [{ answerText: "Psychogeriatrics" }, { answerText: "Somatics" }, { answerText: "Intellectual impairments" }, { answerText: "Mixed" }, { answerText: "I don't know" }] },
                 { id: "q3", questionText: "How long are residents in this room on average per day?", answerOptions: [{ answerText: "<1 hour" }, { answerText: "1-3 hours" }, { answerText: "> 3 hours" }, { answerText: "I don't know" }] },
-                { id: "q4", questionText: "Can you temporarily isolate someone if they have symptoms?", answerOptions: [{ answerText: "Yes" }, { answerText: "Partly" }, { answerText: "No" }, { answerText: "I don't know" }] },
+                { id: "q4", questionText: "Can residents temporarily be isolated if they have symptoms (for example in their own rooms)?", answerOptions: [{ answerText: "Yes" }, { answerText: "Partly" }, { answerText: "No" }, { answerText: "I don't know" }] },
                 { id: "q5", questionText: "Do different departments/groups regularly mix here?", answerOptions: [{ answerText: "Often" }, { answerText: "Sometimes" }, { answerText: "Rarely" }, { answerText: "I don't know" }] },
             ],
             interaction: [
               { id: "q6", questionText: "How large is the living room (in m²)?", type: "slider", min: 0, max: 200, unit: "m²" },
               { id: "q7", questionText: "What is the shape of the room?", answerOptions: [{ answerText: "Square" }, { answerText: "Rectangle" }, { answerText: "L-shaped" }, { answerText: "Long and narrow" }, { answerText: "Other" }, { answerText: "I don't know" }] },
-              { id: "q8", questionText: "Can people maintain a distance of approximately 1.5 meters when sitting/doing activities?", answerOptions: [{ answerText: "Usually" }, { answerText: "Sometimes" }, { answerText: "Almost never" }, { answerText: "I don't know" }] },
-              { id: "q9", questionText: "Can windows or an outside door be opened?", answerOptions: [{ answerText: "Yes, several" }, { answerText: "Yes, but limited" }, { answerText: "No" }, { answerText: "I don't know" }] },
+              { id: "q8", questionText: "Is there enough space in the living room so that people can keep a distance of approximately 1.5 meters from each other during activities or rest periods?", answerOptions: [{ answerText: "Usually" }, { answerText: "Sometimes" }, { answerText: "Almost never" }, { answerText: "I don't know" }] },
+              { id: "q9", questionText: "Is it possible to open windows or an outside door in the living room for fresh air?", answerOptions: [{ answerText: "Yes, several" }, { answerText: "Yes, but limited" }, { answerText: "No" }, { answerText: "I don't know" }] },
               { id: "q10", questionText: "Are there ventilation grilles (above a window or in the wall)?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
               { id: "q11", questionText: "What type of ventilation system is installed?", answerOptions: [{ answerText: "Type A: Natural air supply + natural air exhaust" }, { answerText: "Type B: Mechanical air supply + natural air exhaust" }, { answerText: "Type C: Natural air supply + mechanical air exhaust" }, { answerText: "Type D: Mechanical air supply + mechanical air exhaust" }, { answerText: "I don't know" }] },
               { id: "q12", questionText: "Is indoor air (partially) recirculated in the building (reused/backflow)?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
@@ -63,11 +63,11 @@ const translations = {
               { id: "q16", questionText: "Do residents experience discomfort (drafts/cold/noise) when you provide additional ventilation?", answerOptions: [{ answerText: "Often" }, { answerText: "Sometimes" }, { answerText: "Rarely/Never" }, { answerText: "I don't know" }] },
             ],
             organizational: [
-                { id: "q17", questionText: "Are there brief instructions for windows/grids/settings in this room?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
+                { id: "q17", questionText: "Are there short and easy-to-read instructions available in the living room for using windows, ventilation grilles and ventilation settings?", answerOptions: [{ answerText: "Yes" }, { answerText: "No" }, { answerText: "I don't know" }] },
                 { id: "q18", questionText: "Is personal protective equipment (PPE) available where needed?", answerOptions: [{ answerText: "Often" }, { answerText: "Sometimes" }, { answerText: "Rarely/Never" }, { answerText: "I don't know" }] },
                 { id: "q19", questionText: "How many shifts were unstaffed in the past 14 days?", answerOptions: [{ answerText: "0" }, { answerText: "1-2" }, { answerText: "3-5" }, { answerText: "6+" }, { answerText: "I don't know" }] },
-                { id: "q20", questionText: "Do you work with permanent teams per room, and do residents stay in fixed groups (little mixing between departments)?", answerOptions: [{ answerText: "Yes" }, { answerText: "Sometimes" }, { answerText: "No" }, { answerText: "I don't know" }] },
-                { id: "q21", questionText: "Is there a budget or plan for adjustments or measures (maintenance, sensors, grids, PPE, additional staff)?", answerOptions: [{ answerText: "Yes, now" }, { answerText: "Within 12 months" }, { answerText: "Not yet" }, { answerText: "I don't know" }] }
+                { id: "q20", questionText: "Do you work with fixed teams per living room?", answerOptions: [{ answerText: "Yes" }, { answerText: "Sometimes" }, { answerText: "No" }, { answerText: "I don't know" }] },
+                { id: "q21", questionText: "Is there budget available for adjustments or measures (maintenance, sensors, schedules, PPE, additional staff)?", answerOptions: [{ answerText: "Yes, now" }, { answerText: "Within 12 months" }, { answerText: "Not yet" }, { answerText: "I don't know" }] }
             ]
         }
     },
@@ -86,17 +86,17 @@ const translations = {
         viewSummary: 'Bekijk Dashboard',
         questionSets: {
             personal: [
-              { id: "q1", questionText: "Hoeveel mensen zijn meestal tegelijk in de woonkamer (bewoners + medewerkers + bezoekers)?", type: "slider", min: 1, max: 50, unit: "mensen" },
-              { id: "q2", questionText: "Welke groep gebruikt deze woonkamer vooral?", answerOptions: [{ answerText: "Psychogeriatrie" }, { answerText: "Somatiek" }, { answerText: "Verstandelijke beperkingen" }, { answerText: "Gemengd" }, { answerText: "Weet ik niet" }] },
+              { id: "q1", questionText: "Kijk eens naar een gewone doordeweekse dag in de woonkamer. Hoeveel mensen zijn er meestal tegelijk aanwezig? Denk hierbij aan bewoners, medewerkers en bezoekers.", type: "slider", min: 1, max: 50, unit: "mensen" },
+              { id: "q2", questionText: "Welke groep bewoners gebruikt deze woonkamer?", answerOptions: [{ answerText: "Psychogeriatrie" }, { answerText: "Somatiek" }, { answerText: "Verstandelijke beperkingen" }, { answerText: "Gemengd" }, { answerText: "Weet ik niet" }] },
               { id: "q3", questionText: "Hoelang zijn bewoners gemiddeld per dag in deze kamer?", answerOptions: [{ answerText: "<1 uur" }, { answerText: "1-3 uur" }, { answerText: "> 3 uur" }, { answerText: "Weet ik niet" }] },
-              { id: "q4", questionText: "Kunt u iemand tijdelijk apart laten verblijven bij klachten?", answerOptions: [{ answerText: "Ja" }, { answerText: "Gedeeltelijk" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
-              { id: "q5", questionText: "Mengen verschillende afdelingen/groepen hier regelmatig?", answerOptions: [{ answerText: "Vaak" }, { answerText: "Soms" }, { answerText: "Zelden" }, { answerText: "Weet ik niet" }] },
+              { id: "q4", questionText: "Kunnen de bewoners tijdelijk apart verblijven bij klachten (bijvoorbeeld op hun eigen kamer)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Gedeeltelijk" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
+              { id: "q5", questionText: "Mengen verschillende groepen hier regelmatig?", answerOptions: [{ answerText: "Vaak" }, { answerText: "Soms" }, { answerText: "Zelden" }, { answerText: "Weet ik niet" }] },
             ],
             interaction: [
               { id: "q6", questionText: "Hoe groot is de woonkamer (in m²)?", type: "slider", min: 0, max: 200, unit: "m²" },
               { id: "q7", questionText: "Wat is de vorm van de kamer?", answerOptions: [{ answerText: "Vierkant" }, { answerText: "Rechthoek" }, { answerText: "L-vorm" }, { answerText: "Lang en smal" }, { answerText: "Anders" }, { answerText: "Weet ik niet" }] },
-              { id: "q8", questionText: "Kunnen mensen ongeveer 1,5 meter afstand houden bij zitten/activiteiten?", answerOptions: [{ answerText: "Meestal" }, { answerText: "Soms" }, { answerText: "Bijna nooit" }, { answerText: "Weet ik niet" }] },
-              { id: "q9", questionText: "Kunnen ramen of een buitendeur open?", answerOptions: [{ answerText: "Ja, meerdere" }, { answerText: "Ja, maar beperkt" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
+              { id: "q8", questionText: "Is er voldoende ruimte in de woonkamer zodat mensen ongeveer 1,5 meter afstand van elkaar kunnen houden bij activiteiten of rustmomenten?", answerOptions: [{ answerText: "Meestal" }, { answerText: "Soms" }, { answerText: "Bijna nooit" }, { answerText: "Weet ik niet" }] },
+              { id: "q9", questionText: "Is het in de woonkamer mogelijk om ramen of een buitendeur te openen voor frisse lucht?", answerOptions: [{ answerText: "Ja, meerdere" }, { answerText: "Ja, maar beperkt" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
               { id: "q10", questionText: "Zijn er ventilatieroosters (boven raam of in de muur)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
               { id: "q11", questionText: "Welk type ventilatiesysteem is geinstalleerd?", answerOptions: [{ answerText: "Type A: Natuurlijke luchttoevoer + natuurlijke luchtafvoer" }, { answerText: "Type B: Mechanische luchttoevoer + natuurlijke luchtafvoer" }, { answerText: "Type C: Natuurlijke luchttoevoer + mechanische luchtafvoer" }, { answerText: "Type D: Mechanische luchttoevoer + mechanische luchtafvoer" }, { answerText: "Weet ik niet" }] },
               { id: "q12", questionText: "Wordt binnenlucht (deels) gerecirculeerd in het gebouw (hergebruikt/teruggeblazen)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
@@ -106,11 +106,11 @@ const translations = {
               { id: "q16", questionText: "Ervaren bewoners last (tocht/koud/geluid) als u extra ventileert?", answerOptions: [{ answerText: "Vaak" }, { answerText: "Soms" }, { answerText: "Zelden/nooit" }, { answerText: "Weet ik niet" }] },
             ],
             organizational: [
-                { id: "q17", questionText: "Is er een korte instructie voor ramen/roosters/instellingen in deze kamer?", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
+                { id: "q17", questionText: "Is er in de woonkamer een korte en goed leesbare instructie beschikbaar voor het gebruik van ramen, ventilatieroosters en eventuele instellingen voor ventilatie? ", answerOptions: [{ answerText: "Ja" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
                 { id: "q18", questionText: "Zijn persoonlijke beschermingsmiddelen (PBM) beschikbaar waar nodig?", answerOptions: [{ answerText: "Altijd" }, { answerText: "Soms" }, { answerText: "Zelden/niet" }, { answerText: "Weet ik niet" }] },
                 { id: "q19", questionText: "Hoeveel diensten bleven onbezet in de laatste 14 dagen?", answerOptions: [{ answerText: "0" }, { answerText: "1-2" }, { answerText: "3-5" }, { answerText: "6+" }, { answerText: "Weet ik niet" }] },
-                { id: "q20", questionText: "Werkt u met vaste teams per woonkamer en blijven bewoners in vaste groepen (weinig menging tussen afdelingen)?", answerOptions: [{ answerText: "Ja" }, { answerText: "Soms" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
-                { id: "q21", questionText: "Is er budget of een plan voor aanpassingen of maatregelen (onderhoud, sensoren, roosters, PBM, extra personeel)?", answerOptions: [{ answerText: "Ja, nu" }, { answerText: "Binnen 12 maanden" }, { answerText: "Nog niet" }, { answerText: "Weet ik niet" }] }
+                { id: "q20", questionText: "Werkt u met vaste teams per woonkamer?", answerOptions: [{ answerText: "Ja" }, { answerText: "Soms" }, { answerText: "Nee" }, { answerText: "Weet ik niet" }] },
+                { id: "q21", questionText: "Is er budget beschikbaar voor aanpassingen of maatregelen (onderhoud, sensoren, roosters, PBM, extra personeel)? ", answerOptions: [{ answerText: "Ja, nu" }, { answerText: "Binnen 12 maanden" }, { answerText: "Nog niet" }, { answerText: "Weet ik niet" }] }
             ]
         }
     }
