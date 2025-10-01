@@ -27,6 +27,10 @@ const translations = {
     topRecommendationsTitle: 'Top Recommendations',
     topRecommendationsText: 'Based on your results, focusing on improving ventilation and ensuring staff have up-to-date knowledge on infection prevention will have the highest impact on your pandemic readiness.',
     noRecommendations: "No high-priority recommendations based on your answers.",
+    pleaseNoteTitle: 'Please Note',
+    pleaseNoteText: `This is a diagram that visualizes the maximum occupancy of a living room. 
+This is based on the size of the room and a distance of 1.5 meters between people. 
+Factors such as furnishings and ventilation are not taken into account.`,
     cardsTitle: 'Always keep in mind these factors when making changes',
     card1Title: 'Quality of life resident',
     card1Back: 'Well-being of the resident. Consists of several components that are important for that person to give a valuable meaning to their life. This also includes humanity, autonomy and comfort. This should be priority.',
@@ -96,6 +100,10 @@ const translations = {
     topRecommendationsTitle: 'Belangrijkste aanbevelingen',
     topRecommendationsText: 'Op basis van uw resultaten zal het focussen op het verbeteren van de ventilatie en het zorgen voor actuele kennis over infectiepreventie bij het personeel de grootste impact hebben op uw pandemische paraatheid.',
     noRecommendations: "Geen aanbevelingen met hoge prioriteit op basis van uw antwoorden.",
+    pleaseNoteTitle: 'Let op',
+    pleaseNoteText: `Dit is een schema dat de maximale bezetting van de woonkamer visualiseert. 
+Dit is gebaseerd op de grootte van de ruimte en een afstand van 1.5 meter tussen personen. 
+Er is hier geen rekening gehouden met factoren zoals inrichting en ventilatie.`,
     cardsTitle: 'Houd bij het maken van veranderingen altijd rekening met deze factoren',
     card1Title: 'Kwaliteit van leven bewoner',
     card1Back: 'Welzijn van de bewoner. Bestaat uit verschillende componenten die voor die persoon belangrijk zijn om een waardevolle invulling aan zijn leven te geven. Dit omvat ook menselijkheid, autonomie en comfort. Dit zou prioriteit moeten hebben.',
@@ -939,14 +947,23 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-12">
-                <SpacingDiagram {...safeSpaceData} visualizationTitle={content.visualizationTitle} labels={{
-                    maxPeople: content.maxPeopleLabel,
-                    geometryLimited: content.geometryLimitedLabel,
-                    ventilationLimited: content.ventilationLimitedLabel,
-                    roomArea: content.roomAreaLabel,
-                    usableArea: content.usableAreaLabel,
-                    socialDistance: content.socialDistanceLabel,
-                }} />
+                <SpacingDiagram
+  {...safeSpaceData}
+  visualizationTitle={content.visualizationTitle}
+  labels={{
+    maxPeople: content.maxPeopleLabel,
+    geometryLimited: content.geometryLimitedLabel,
+    ventilationLimited: content.ventilationLimitedLabel,
+    roomArea: content.roomAreaLabel,
+    usableArea: content.usableAreaLabel,
+    socialDistance: content.socialDistanceLabel,
+  }}
+  noteBox={{
+    title: content.pleaseNoteTitle,   // always "Please Note"
+    text: content.pleaseNoteText      // language-specific text
+  }}
+/>
+
             </div>
 
             <div className="text-center mt-12">

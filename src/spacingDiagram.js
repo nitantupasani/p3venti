@@ -451,46 +451,103 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 .caption-box { width: 260px; }
             `}</style>
             <div className="diagram-container">
-                <div className="diagram-row flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mx-auto">
-                    <div className="svg-wrap">
-                        <svg className="w-full h-auto overflow-visible" viewBox={`${-padding} ${-padding} ${viewBoxWidth + 2 * padding} ${viewBoxHeight + 2 * padding}`} preserveAspectRatio="xMidYMid meet">
-                            <defs>
-                                <pattern id="floorPattern" patternUnits="userSpaceOnUse" width="1" height="1">
-                                    <rect width="1" height="1" fill="#f3f0e8" />
-                                    <path d="M -0.25,0.25 L 0.25, -0.25 M 0.75,-0.25 L 1.25,0.25 M -0.25,0.75 L 0.25,0.25 M 0.75,0.25 L 1.25,0.75" stroke="#dcd6c8" strokeWidth="0.04" />
-                                </pattern>
-                            </defs>
-                            {wallElement}
-                            {floorElement}
-                            {occupantDescriptors.map((descriptor, i) => (
-                                <g key={i} ref={(el) => { nodeRefs.current[i] = el; }} transform="translate(-1000,-1000)">
-                                    <circle
-                                        cx="0"
-                                        cy="0"
-                                        r={personRadius}
-                                        fill={descriptor.type === 'employee' ? '#ef4444' : '#22c55e'}
-                                        opacity="0.85"
-                                    />
-                                    <g transform={`scale(${iconScale}) translate(-224, -256)`}>
-                                        <path d={personIconPath} fill="white" />
-                                    </g>
-                                </g>
-                            ))}
-                        </svg>
-                    </div>
-                    {meta && (
-                        <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 md:self-center">
-                            <div className="text-slate-900 font-bold text-xl leading-tight">{labels.maxPeople || 'Max people'}: {meta.capacityMax}</div>
-                            <div className="text-slate-600 text-sm mt-1">{meta.limiting === 'ventilation' ? (labels.ventilationLimited || 'Ventilation-limited') : (labels.geometryLimited || 'Geometry-limited')}</div>
-                            <div className="h-px bg-slate-200 my-3" />
-                            <div className="space-y-1.5 text-slate-700 text-sm">
-                                <div>{labels.roomArea || 'Room area'}: <span className="font-medium">{Number.isFinite(meta.roomArea) ? meta.roomArea.toFixed(1) : meta.roomArea} m²</span></div>
-                                <div>{labels.usableArea || 'Usable area (packing)'}: <span className="font-medium">{meta.usablePercent}%</span></div>
-                                <div>{labels.socialDistance || 'Social distance'}: <span className="font-medium">{socialDistance} m</span></div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+<div
+  className="diagram-row grid mx-auto items-center justify-items-center"
+  style={{
+    gridTemplateColumns: '325px minmax(360px, max-content) 325px',
+    columnGap: '2px'
+  }}
+>
+  {/* Left-side: Please Note */}
+  {noteBox?.text && (
+    <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[500px]">
+      <div className="text-slate-900 font-bold text-xl leading-tight">
+        {noteBox.title || 'Please Note'}
+      </div>
+      <div className="h-px bg-slate-200 my-3" />
+      <p className="text-slate-700 text-sm whitespace-pre-line text-center">
+        {noteBox.text}
+      </p>
+    </div>
+  )}
+
+  {/* Center: Diagram */}
+  <div className="svg-wrap">
+    <svg
+      className="overflow-visible max-w-full"
+      style={{ width: 'min(72vw, 640px)' }}
+      viewBox={`${-padding} ${-padding} ${viewBoxWidth + 2 * padding} ${viewBoxHeight + 2 * padding}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <pattern id="floorPattern" patternUnits="userSpaceOnUse" width="1" height="1">
+          <rect width="1" height="1" fill="#f3f0e8" />
+          <path
+            d="M -0.25,0.25 L 0.25, -0.25 M 0.75,-0.25 L 1.25,0.25 M -0.25,0.75 L 0.25,0.25 M 0.75,0.25 L 1.25,0.75"
+            stroke="#dcd6c8"
+            strokeWidth="0.04"
+          />
+        </pattern>
+      </defs>
+      {wallElement}
+      {floorElement}
+      {occupantDescriptors.map((descriptor, i) => (
+        <g
+          key={i}
+          ref={(el) => { nodeRefs.current[i] = el; }}
+          transform="translate(-1000,-1000)"
+        >
+          <circle
+            cx="0"
+            cy="0"
+            r={personRadius}
+            fill={descriptor.type === 'employee' ? '#ef4444' : '#22c55e'}
+            opacity="0.85"
+          />
+          <g transform={`scale(${iconScale}) translate(-224, -256)`}>
+            <path d={personIconPath} fill="white" />
+          </g>
+        </g>
+      ))}
+    </svg>
+  </div>
+
+  {/* Right-side: Max people */}
+  {meta && (
+    <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[260px]">
+      <div className="text-slate-900 font-bold text-xl leading-tight">
+        {labels.maxPeople || 'Max people'}: {meta.capacityMax}
+      </div>
+      <div className="text-slate-600 text-sm mt-1">
+        {meta.limiting === 'ventilation'
+          ? (labels.ventilationLimited || 'Ventilation-limited')
+          : (labels.geometryLimited || 'Geometry-limited')}
+      </div>
+      <div className="h-px bg-slate-200 my-3" />
+      <div className="space-y-1.5 text-slate-700 text-sm">
+        <div>
+          {labels.roomArea || 'Room area'}:{' '}
+          <span className="font-medium">
+            {Number.isFinite(meta.roomArea) ? meta.roomArea.toFixed(1) : meta.roomArea} m²
+          </span>
+        </div>
+        <div>
+          {labels.usableArea || 'Usable area (packing)'}:{' '}
+          <span className="font-medium">{meta.usablePercent}%</span>
+        </div>
+        <div>
+          {labels.socialDistance || 'Social distance'}:{' '}
+          <span className="font-medium">{socialDistance} m</span>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+
+
+
+
             </div>
         </div>
     );
