@@ -20,6 +20,7 @@ function computeTop5Recommendations(language, userAnswers) {
   const queue = PRIORITY_ARRAY.filter((qid) => {
     const a = userAnswers?.[qid];
     if (qid === "q12" && a === 1) return false;
+    if (qid === "q11" && a === 3) return false;
     if (removeOnZero.includes(qid) && a === 0) return false;
     return true;
   });
