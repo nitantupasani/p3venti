@@ -55,12 +55,15 @@ const translations = {
       {
         heading: 'Resultaat',
         body: `• PARAAT-score
-**0–100; hoger = beter voorbereid.**
+
+0–100; hoger = beter voorbereid.
 
 • Betrouwbaarheid
+
 Betrouwbaarheid van deze uitkomst hangt af van wat u invult. We beginnen op 100%. Elke vraag waar u “Weet ik niet” antwoord, gaat de betrouwbaarheid omlaag.
 
-PARAAT-resultaatkaart (prioriteiten)
+• PARAAT-resultaatkaart (prioriteiten)
+
 We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties met veel winst en weinig moeite. Elk item heeft een label:
   ◦ Snelle aanpassing
   ◦ Langetermijnaanpassing
@@ -148,12 +151,14 @@ We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties
       {
         heading: 'Results',
         body: `• PARAAT-score
-**0–100; higher = better prepared.**
 
+        0–100; higher = better prepared.
 • Reliability
+
 The reliability of this result depends on your input. We start at 100%. For each question where you answer "I don't know," the reliability decreases.
 
-PARAAT-result card (priorities)
+• PARAAT-result card (priorities)
+
 Actions are ranked by impact and effort. You start with actions that offer high impact and low effort. Each item is labeled:
   ◦ Quick adjustment
   ◦ Long-term adjustment

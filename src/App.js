@@ -30,10 +30,10 @@ const STYLES = {
 const translations = {
     en: {
         pageSubtitle: 'For location managers in long-term care.',
-        categoryPersonal: 'Stage 1: People & use',
-        categoryInteraction: 'Stage 2: Space & air',
-        categoryOrganizational: 'Stage 3: Agreements & resources',
-        step: 'Step',
+        categoryPersonal: 'Step 1: People & use',
+        categoryInteraction: 'Step 2: Space & air',
+        categoryOrganizational: 'Step 3: Agreements & resources',
+        step: 'Question',
         of: 'of',
         summaryTitle: 'Action Plan Summary',
         summarySubtitle: 'The following priorities have been selected:',
@@ -76,7 +76,7 @@ const translations = {
         categoryPersonal: 'Stap 1: Mensen & gebruik',
         categoryInteraction: 'Stap 2: Ruimte & lucht',
         categoryOrganizational: 'Stap 3: Afspraken & middelen',
-        step: 'Stap',
+        step: 'Vraag',
         of: 'van',
         summaryTitle: 'Overzicht Actieplan',
         summarySubtitle: 'De volgende prioriteiten zijn geselecteerd:',
