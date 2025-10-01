@@ -84,15 +84,37 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     "M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z";
     const iconScale = (personRadius * 1) / 512;
 
-    const occupantDescriptors = useMemo(() => {
-        const residentCount = people?.length ?? 0;
-        const employeeCount = Math.max(1, Math.ceil(residentCount / 8));
-        const descriptors = Array.from({ length: residentCount }, () => ({ type: 'resident' }));
-        for (let i = 0; i < employeeCount; i++) {
-            descriptors.push({ type: 'employee' });
+    const baseResidentCount = people?.length ?? 0;
+    const employeeCount = useMemo(() => {
+        if (baseResidentCount <= 0) {
+            return 0;
         }
-        return descriptors;
-    }, [people]);
+        return Math.ceil(baseResidentCount / 8);
+    }, [baseResidentCount]);
+
+    const residentCount = useMemo(() => {
+        return Math.max(baseResidentCount - employeeCount, 0);
+    }, [baseResidentCount, employeeCount]);
+
+    const layoutPositions = useMemo(() => {
+        if (!dims || !socialDistance) return [];
+        try {
+            const { positions } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
+            return positions;
+        } catch (error) {
+            return [];
+        }
+    }, [shape, dims, socialDistance]);
+
+    const residentPositions = useMemo(() => {
+        if (residentCount === 0) return [];
+        const basePositions = (people && people.length) ? people : layoutPositions;
+        return basePositions.slice(0, residentCount);
+    }, [people, layoutPositions, residentCount]);
+
+    const employeeDescriptors = useMemo(() => {
+        return Array.from({ length: employeeCount }, () => 'employee');
+    }, [employeeCount]);
 
     const { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape } = useMemo(() => {
         let viewBoxWidth = 10, viewBoxHeight = 10;
@@ -138,16 +160,6 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape };
     }, [shape, dims, personRadius]);
 
-    const layoutPositions = useMemo(() => {
-        if (!dims || !socialDistance) return [];
-        try {
-            const { positions } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
-            return positions;
-        } catch (error) {
-            return [];
-        }
-    }, [shape, dims, socialDistance]);
-
     const projectInside = useCallback((from, to) => {
         if (!isInsideShape) {
             return { point: to, normal: null };
@@ -187,6 +199,15 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return { point, normal: null };
     }, [isInsideShape]);
 
+    const isClearOfResidents = useCallback((x, y, minDistance = socialDistance) => {
+        for (const pos of residentPositions) {
+            if (Math.hypot(x - pos.x, y - pos.y) < minDistance) {
+                return false;
+            }
+        }
+        return true;
+    }, [residentPositions, socialDistance]);
+
     const randomPointInside = useCallback(() => {
         if (!isInsideShape || !Number.isFinite(viewBoxWidth) || !Number.isFinite(viewBoxHeight)) {
             return { x: 0, y: 0 };
@@ -195,12 +216,12 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         for (let attempt = 0; attempt < 80; attempt++) {
             const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
             const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
-            if (isInsideShape(rx, ry)) {
+            if (isInsideShape(rx, ry) && isClearOfResidents(rx, ry)) {
                 return { x: rx, y: ry };
             }
         }
         return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
-    }, [isInsideShape, viewBoxWidth, viewBoxHeight, personRadius]);
+    }, [isInsideShape, viewBoxWidth, viewBoxHeight, personRadius, isClearOfResidents]);
 
     const assignNewTarget = useCallback((particle) => {
         const destination = randomPointInside();
@@ -237,6 +258,24 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 if (i === j) continue;
                 const p2 = pts[j];
                 const dx = p1.x - p2.x, dy = p1.y - p2.y, dist = Math.hypot(dx, dy) || 1e-6, ux = dx / dist, uy = dy / dist;
+                if (dist < desired) {
+                    const overlap = desired - dist;
+                    fx += ux * (kClose * overlap);
+                    fy += uy * (kClose * overlap);
+                } else if (dist < farRange) {
+                    const s = 1 - (dist - desired) / (farRange - desired);
+                    const falloff = kFar * s * s / Math.max(dist * dist, 1e-6);
+                    fx += ux * falloff;
+                    fy += uy * falloff;
+                }
+            }
+            
+            for (const resident of residentPositions) {
+                const dx = p1.x - resident.x;
+                const dy = p1.y - resident.y;
+                const dist = Math.hypot(dx, dy) || 1e-6;
+                const ux = dx / dist;
+                const uy = dy / dist;
                 if (dist < desired) {
                     const overlap = desired - dist;
                     fx += ux * (kClose * overlap);
@@ -324,26 +363,42 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                     }
                 }
             }
+
+            for (let i = 0; i < pts.length; i++) {
+                const particle = pts[i];
+                for (const resident of residentPositions) {
+                    const dx = particle.x - resident.x;
+                    const dy = particle.y - resident.y;
+                    const dist = Math.hypot(dx, dy) || 1e-6;
+                    if (dist < socialDistance) {
+                        const overlap = socialDistance - dist;
+                        const ux = dx / dist;
+                        const uy = dy / dist;
+                        const newX = particle.x + ux * overlap;
+                        const newY = particle.y + uy * overlap;
+                        if (isInsideShape(newX, newY)) {
+                            particle.x = newX;
+                            particle.y = newY;
+                        }
+                    }
+                }
+            }
+
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
 
-    }, [isInsideShape, socialDistance, projectInside, assignNewTarget]);
+    }, [isInsideShape, socialDistance, projectInside, assignNewTarget, residentPositions]);
 
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
         const jitter = socialDistance * 0.04;
         let layoutIndex = 0;
 
-        particlesRef.current = occupantDescriptors.map((descriptor, i) => {
+        const availableLayout = layoutPositions.slice(residentPositions.length);
+        particlesRef.current = employeeDescriptors.map((descriptor, i) => {
             let basePosition;
-            if (descriptor.type === 'resident' && people[i]) {
-                const pos = people[i];
-                basePosition = {
-                    x: pos.x + (Math.random() - 0.5) * jitter,
-                    y: pos.y + (Math.random() - 0.5) * jitter,
-                };
-            } else if (layoutIndex < layoutPositions.length) {
-                const layoutPos = layoutPositions[layoutIndex++];
+            if (layoutIndex < availableLayout.length) {
+                const layoutPos = availableLayout[layoutIndex++];
                 basePosition = {
                     x: layoutPos.x + (Math.random() - 0.5) * jitter,
                     y: layoutPos.y + (Math.random() - 0.5) * jitter,
@@ -352,18 +407,21 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 basePosition = randomPointInside();
             }
 
-            const speedMultiplier = descriptor.type === 'employee' ? EMPLOYEE_SPEED_MULTIPLIER : 1;
-            const velocityRange = socialDistance * 0.12 * speedMultiplier;
+            if (!isClearOfResidents(basePosition.x, basePosition.y, socialDistance * 0.9)) {
+                basePosition = randomPointInside();
+            }
+
+            const velocityRange = socialDistance * 0.12 * EMPLOYEE_SPEED_MULTIPLIER;
             const particle = {
                 id: i,
-                type: descriptor.type,
+                type: descriptor,
                 x: basePosition.x,
                 y: basePosition.y,
                 vx: (Math.random() - 0.5) * velocityRange,
                 vy: (Math.random() - 0.5) * velocityRange,
                 px: Math.random() * Math.PI * 2,
                 py: Math.random() * Math.PI * 2,
-                speedMultiplier,
+                speedMultiplier: EMPLOYEE_SPEED_MULTIPLIER,
                 targetX: basePosition.x,
                 targetY: basePosition.y,
                 targetTimer: 0,
@@ -388,7 +446,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
 
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, occupantDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget]);
+    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, employeeDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget, residentPositions, isClearOfResidents]);
 
     const padding = 1.5;
     return (
@@ -443,9 +501,26 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
       </defs>
       {wallElement}
       {floorElement}
-      {occupantDescriptors.map((descriptor, i) => (
+      {residentPositions.map((pos, i) => (
         <g
-          key={i}
+          key={`resident-${i}`}
+          transform={`translate(${pos.x}, ${pos.y})`}
+        >
+          <circle
+            cx="0"
+            cy="0"
+            r={personRadius}
+            fill="#22c55e"
+            opacity="0.85"
+          />
+          <g transform={`scale(${iconScale}) translate(-224, -256)`}>
+            <path d={personIconPath} fill="white" />
+          </g>
+        </g>
+      ))}
+      {employeeDescriptors.map((_, i) => (
+        <g
+          key={`employee-${i}`}
           ref={(el) => { nodeRefs.current[i] = el; }}
           transform="translate(-1000,-1000)"
         >
@@ -453,7 +528,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             cx="0"
             cy="0"
             r={personRadius}
-            fill={descriptor.type === 'employee' ? '#ef4444' : '#22c55e'}
+            fill="#ef4444"
             opacity="0.85"
           />
           <g transform={`scale(${iconScale}) translate(-224, -256)`}>
