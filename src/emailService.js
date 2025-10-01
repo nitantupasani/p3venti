@@ -2,7 +2,7 @@ import { generateDashboardPdfBase64 } from "./DownloadPDF";
 
 
 const EMAIL_API_BASE_URL = "https://smtpp3venti.netlify.app/.netlify/functions/send";
-
+const INTERNAL_REPORT_EMAIL = "nitantupasani@gmail.com";
 /** ----------------------------------------------------------------
  * Email templates
  * ---------------------------------------------------------------- */
@@ -151,6 +151,20 @@ export async function sendDashboardSummaryEmail({
     ]
   };
 
+  
+  const adminTextBody = `${body}\n\nUser email: ${email}`;
+  const adminHtmlBody = buildHtmlBody(adminTextBody);
+
+  const adminPayload = {
+    to: INTERNAL_REPORT_EMAIL,
+    subject,
+    text: adminTextBody,
+    html: adminHtmlBody,
+    attachments: payload.attachments
+  };
+  
   const response = await sendEmailRequest(payload);
-  return { ...payload, response };
+  const adminResponse = await sendEmailRequest(adminPayload);
+  
+  return { ...payload, response, adminResponse };
 }
