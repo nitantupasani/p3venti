@@ -16,10 +16,14 @@ const markdownComponents = {
     </a>
   ),
   h3: ({ node, children, ...props }) => (
-    <h3 className="text-xl font-bold text-indigo-700 mt-8 mb-4" {...props}>
-      {children}
-    </h3>
-  ),
+  <h3
+    className="text-xl font-bold mt-8 mb-4"
+    style={{ color: "#431325" }}
+    {...props}
+  >
+    {children}
+  </h3>
+),
   ul: ({ node, depth = 0, ...props }) => {
     const padding = depth === 0 ? "pl-6" : depth === 1 ? "pl-10" : "pl-14";
     return <ul className={`space-y-2 ${padding}`} {...props} />;
@@ -95,12 +99,14 @@ const translations = {
 
 // Styles for the component
 const STYLES = {
-    languageSelect: {
-      header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
-      menu: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full'
-    },
-    getStartedButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
-    featureCard: 'bg-white border border-white rounded-lg p-4 text-slate-700 cursor-default select-none'
+  languageSelect: {
+    header: 'bg-[#faf7f3] border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-[#1f1f21] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
+    menu:   'bg-[#faf7f3] border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-[#1f1f21] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full'
+  },
+  getStartedButton:
+  'bg-[#971547] hover:bg-[#7a103c] text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
+
+  featureCard: 'bg-white border border-white rounded-lg p-4 text-slate-700 cursor-default select-none'
 };
 
 export default function ParaatHome() {
@@ -128,57 +134,68 @@ export default function ParaatHome() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center p-4 sm:p-8">
+        <div className="min-h-screen text-slate-800 flex flex-col items-center p-4 sm:p-8"
+        style={{ backgroundColor: "#dfdfe0" }}>
             <div className="w-full max-w-7xl mx-auto">
-                <header className="relative flex justify-between items-center w-full mb-8">
-                    <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
-                        <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
-                            </svg>
-                            <span className="font-semibold hidden sm:inline">Home</span>
-                        </button>
-                        <button onClick={handleInfoClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
-                            </svg>
-                            <span className="font-semibold hidden sm:inline">Info</span>
-                        </button>
-                    </div>
+                <header className="relative flex justify-between items-center w-full mb-2 leading-tight">
+  {/* Left: Home + Info */}
+  <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
+    {/* Home Button */}
+    <button
+      onClick={handleHomeClick}
+      className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
+      </svg>
+      <span className="font-semibold hidden sm:inline">Home</span>
+    </button>
 
-                    <div className="text-center" style={{ flex: 3 }}>
-                        <div className="flex justify-center items-center gap-x-3">
-                            <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-                            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600">
-                                <span className="sm:hidden">PARAAT</span>
-                                <span className="hidden sm:inline">Pandemic Readiness Assessment & Action Tool (PARAAT)</span>
-                            </h1>
-                        </div>
-                        <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium whitespace-nowrap">{content.pageSubtitle}</p>
-                    </div>
-                    
-                    <div className="flex justify-end items-center" style={{ flex: 1 }}>
-                        <div className="lg:hidden">
-                          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
-                            {isMenuOpen ? (
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            ) : (
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-                            )}
-                          </button>
-                        </div>
-                        <div className="hidden lg:block">
-                            <select
-                                onChange={handleLanguageChange}
-                                value={language}
-                                className={STYLES.languageSelect.header}
-                            >
-                                <option value="en">English</option>
-                                <option value="nl">Nederlands</option>
-                            </select>
-                        </div>
-                    </div>
-                </header>
+    {/* Info Button */}
+    <button
+      onClick={handleInfoClick}
+      className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+      </svg>
+      <span className="font-semibold hidden sm:inline">Info</span>
+    </button>
+  </div>
+
+  {/* Center: Title only */}
+  <h1
+    className="text-xl md:text-2xl font-bold whitespace-nowrap text-center"
+    style={{ color: "#971547", flex: 2 }}
+  >
+    Pandemic Readiness Assessment & Action Tool (PARAAT)
+  </h1>
+
+  {/* Right: Language */}
+  <div className="flex justify-end items-center" style={{ flex: 1 }}>
+    <div className="hidden lg:block">
+      <select
+        onChange={handleLanguageChange}
+        value={language}
+        className={STYLES.languageSelect.header}
+      >
+        <option value="en">English</option>
+        <option value="nl">Nederlands</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+{/* Subtitle sits below, full width, centered */}
+<p className="text-slate-500 mb-8 text-sm sm:text-base font-medium text-center">
+  {content.pageSubtitle}
+</p>
+
+
 
                 {isMenuOpen && (
                   <div className="lg:hidden bg-white rounded-lg shadow-xl p-4 mb-8">
@@ -197,22 +214,35 @@ export default function ParaatHome() {
             <div className="w-full max-w-4xl mx-auto">
                 <main className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
                     <div className="text-center mb-6">
-                        <h2 className="text-3xl sm:text-3xl font-bold text-slate-900 mb-6">
-                            {content.welcomeTitle}
-                        </h2>
+                        <h2
+  className="text-3xl sm:text-3xl font-bold mb-6"
+  style={{ color: "#431325" }}
+>
+  {content.welcomeTitle}
+</h2>
                         
                         <div className="space-y-6 text-base sm:text-base text-slate-700 leading-relaxed text-justify">
-                            <p>{content.description1}</p>
-                            <ReactMarkdown components={markdownComponents}>
-                                {content.description2}
-                            </ReactMarkdown>
-                            <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-r-lg text-left">
-                                <p className="font-medium text-indigo-900">{content.instructions}</p>
-                            </div>
+                           <p style={{ color: "#431325" }}>{content.description1}</p>
+<div style={{ color: "#431325" }}>
+  <ReactMarkdown components={markdownComponents}>
+    {content.description2}
+  </ReactMarkdown>
+</div>
+                            <div
+  className="p-6 rounded-r-lg text-left border-l-4"
+  style={{ backgroundColor: "#FAF7F3", borderColor: "#971547" }}
+>
+  <p className="font-medium" style={{ color: "#971547" }}>
+    {content.instructions}
+  </p>
+</div>
                         </div>
                     </div>
 
-                    <div className="text-left text-base sm:text-base text-slate-700 leading-relaxed my-12">
+                    <div
+  className="text-left text-base sm:text-base leading-relaxed my-12"
+  style={{ color: "#431325" }}
+>
                         <ReactMarkdown components={markdownComponents}>
                             {content.mainContent}
                         </ReactMarkdown>
@@ -239,6 +269,9 @@ export default function ParaatHome() {
 
             <footer className="w-full max-w-7xl mx-auto flex justify-center sm:justify-end mt-16 px-4 sm:px-8">
                 <div className="flex items-center gap-4">
+                    <a href="https://www.p3venti.nl" target="_blank" rel="noopener noreferrer">
+      <img src="/p3venti.png" alt="P3Venti Logo" className="h-10" />
+    </a>
                     <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
                         <img src="/tue.svg" alt="TU/e Logo" className="h-8" />
                     </a>

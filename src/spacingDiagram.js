@@ -118,12 +118,22 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const residentPositions = useMemo(() => {
     if (residentCount === 0) return [];
     const basePositions = (people && people.length) ? people : layoutPositions;
-    
-    // Shuffle positions for a uniform distribution
-    const shuffledPositions = shuffleArray(basePositions);
 
-    return shuffledPositions.slice(0, residentCount);
-}, [people, layoutPositions, residentCount]);
+    // Shuffle positions for a uniform distribution
+        const shuffledPositions = shuffleArray(basePositions);
+
+        return shuffledPositions.slice(0, residentCount);
+    }, [people, layoutPositions, residentCount]);
+
+    const availableLayoutPositions = useMemo(() => {
+        if (!layoutPositions?.length) return [];
+        if (!residentPositions?.length) return layoutPositions;
+
+        const formatKey = (pos) => `${pos.x.toFixed(4)}:${pos.y.toFixed(4)}`;
+        const residentKeys = new Set(residentPositions.map(formatKey));
+
+        return layoutPositions.filter((pos) => !residentKeys.has(formatKey(pos)));
+    }, [layoutPositions, residentPositions]);
 
     const employeeDescriptors = useMemo(() => {
         return Array.from({ length: employeeCount }, () => 'employee');
@@ -406,7 +416,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         const jitter = socialDistance * 0.04;
         let layoutIndex = 0;
 
-        const availableLayout = layoutPositions.slice(residentPositions.length);
+        const availableLayout = availableLayoutPositions;
         particlesRef.current = employeeDescriptors.map((descriptor, i) => {
             let basePosition;
             if (layoutIndex < availableLayout.length) {
@@ -458,7 +468,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
 
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, employeeDescriptors, personRadius, layoutPositions, randomPointInside, assignNewTarget, residentPositions, isClearOfResidents]);
+    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, employeeDescriptors, personRadius, availableLayoutPositions, randomPointInside, assignNewTarget, residentPositions, isClearOfResidents]);
 
     const padding = 1.5;
     return (

@@ -6,24 +6,33 @@ import CustomSlider from './CustomSlider';
 // --- Style Definitions ---
 const STYLES = {
     languageSelect: {
-      menu: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full',
-      header: 'bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors'
-    },
+    header: 'bg-[#faf7f3] border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-[#1f1f21] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors',
+    menu:   'bg-[#faf7f3] border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-[#1f1f21] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-full'
+  },
     categoryButton: {
         base: 'px-6 py-3 rounded-full text-base font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap w-full text-center',
-        get active() { return `${this.base} bg-indigo-600 text-white shadow-lg`; },
-        get inactive() { return `${this.base} bg-white text-slate-700 hover:bg-slate-100 border-2 border-slate-300`; },
-        get completed() { return `${this.base} bg-green-500 text-white shadow-lg cursor-default`; },
-        get disabled() { return `${this.base} bg-slate-200 text-slate-400 cursor-not-allowed`; },
+        get active() { return `${this.base} bg-[#971547] text-white shadow-lg`; },
+        get inactive() { return `${this.base} bg-[#971547] text-white hover:bg-[#CAABBF] border-2 border-slate-300`; },
+        get completed() { return `${this.base} bg-white text-[#971547] shadow-lg cursor-default`; },
+        get disabled() { return `${this.base} bg-[#CAABBF] text-[#971547] cursor-not-allowed`; },
     },
     answerButton: {
-        base: 'p-5 rounded-xl text-left text-base font-semibold transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-        get default() { return `${this.base} bg-white hover:bg-indigo-50 border-2 border-slate-300 hover:border-indigo-400 cursor-pointer`; },
-        get selected() { return `${this.base} bg-indigo-600 text-white border-2 border-indigo-600 cursor-default`; },
-    },
+  base: 'p-5 rounded-xl text-left text-base font-semibold transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#971547]',
+  get default() {
+    return `${this.base} bg-white border-2 border-[#971547] hover:bg-[#caabbf] hover:border-[#971547] cursor-pointer`;
+  },
+  get selected() {
+    return `${this.base} bg-[#971547] text-white border-2 border-[#971547] cursor-default`;
+  },
+},
+
     navButton: 'font-bold py-2 px-5 sm:py-3 sm:px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base',
-    get nextButton() { return `${this.navButton} bg-indigo-600 hover:bg-indigo-700 text-white`; },
-    get previousButton() { return `${this.navButton} bg-slate-500 hover:bg-slate-600 text-white`; },
+    get nextButton() {
+  return `${this.navButton} bg-[#971547] hover:bg-[#7a103c] text-white focus:ring-[#971547]`;
+},
+get previousButton() {
+  return `${this.navButton} bg-[#caabbf] hover:bg-[#b393a8] text-white focus:ring-[#caabbf]`;
+},
 };
 
 // --- Multi-language Content ---
@@ -325,57 +334,66 @@ const Tool = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center p-4 sm:p-8">
+    <div className="min-h-screen text-slate-800 flex flex-col items-center p-4 sm:p-8"
+    style={{ backgroundColor: "#dfdfe0" }}>
       <div className="w-full max-w-7xl mx-auto">
-        <header className="relative flex justify-between items-center w-full mb-8">
-          <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
-            <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
-              </svg>
-              <span className="font-semibold hidden sm:inline">Home</span>
-            </button>
-            <button onClick={handleInfoClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
-              </svg>
-              <span className="font-semibold hidden sm:inline">Info</span>
-            </button>
-          </div>
+        <header className="relative flex justify-between items-center w-full mb-2 leading-tight">
+  {/* Left: Home + Info */}
+  <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
+    {/* Home Button */}
+    <button
+      onClick={handleHomeClick}
+      className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
+      </svg>
+      <span className="font-semibold hidden sm:inline">Home</span>
+    </button>
 
-          <div className="text-center" style={{ flex: 3 }}>
-              <div className="flex justify-center items-center gap-x-3">
-                <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600">
-                    <span className="sm:hidden">PARAAT</span>
-                    <span className="hidden sm:inline">Pandemic Readiness Assessment & Action Tool (PARAAT)</span>
-                </h1>
-              </div>
-              <p className="text-slate-500 mt-2 text-sm sm:text-base font-medium">{content.pageSubtitle}</p>
-          </div>
-          
-          <div className="flex justify-end items-center" style={{ flex: 1 }}>
-            <div className="lg:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
-                {isMenuOpen ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-                )}
-              </button>
-            </div>
-            <div className="hidden lg:block">
-              <select
-                  onChange={handleLanguageChange}
-                  value={language}
-                  className={STYLES.languageSelect.header}
-              >
-                  <option value="en">English</option>
-                  <option value="nl">Nederlands</option>
-              </select>
-            </div>
-          </div>
-        </header>
+    {/* Info Button */}
+    <button
+      onClick={handleInfoClick}
+      className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+      </svg>
+      <span className="font-semibold hidden sm:inline">Info</span>
+    </button>
+  </div>
+
+  {/* Center: Title only */}
+  <h1
+    className="text-xl md:text-2xl font-bold whitespace-nowrap text-center"
+    style={{ color: "#971547", flex: 2 }}
+  >
+    Pandemic Readiness Assessment & Action Tool (PARAAT)
+  </h1>
+
+  {/* Right: Language */}
+  <div className="flex justify-end items-center" style={{ flex: 1 }}>
+    <div className="hidden lg:block">
+      <select
+        onChange={handleLanguageChange}
+        value={language}
+        className={STYLES.languageSelect.header}
+      >
+        <option value="en">English</option>
+        <option value="nl">Nederlands</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+{/* Subtitle sits below, full width, centered */}
+<p className="text-slate-500 mb-8 text-sm sm:text-base font-medium text-center">
+  {content.pageSubtitle}
+</p>
 
         {isMenuOpen && (
           <div className="lg:hidden bg-white rounded-lg shadow-xl p-4 mb-8 space-y-4">
@@ -410,10 +428,16 @@ const Tool = () => {
 
           <main className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10 transition-all duration-500">
               <div className="mb-12">
-                <h2 className="text-base font-bold text-indigo-600 mb-2 tracking-wider uppercase">
-                  {content.step} {absoluteQuestionIndex + 1} {content.of} {totalQuestions}
-                </h2>
-                <p className="text-2xl font-bold text-slate-900 leading-snug">
+                <h2
+  className="text-base font-bold mb-2 tracking-wider uppercase"
+  style={{ color: "#971547" }}
+>
+  {content.step} {absoluteQuestionIndex + 1} {content.of} {totalQuestions}
+</h2>
+                <p
+  className="text-2xl font-bold leading-snug"
+  style={{ color: "#431325" }}
+>
                   {activeQuestions[currentQuestionIndex].questionText}
                 </p>
               </div>
@@ -439,9 +463,12 @@ const Tool = () => {
                         onClick={() => handleAnswerOptionClick(option.answerText, index)}
                         className={isSelected ? STYLES.answerButton.selected : STYLES.answerButton.default}
                       >
-                        <span className={isSelected ? 'text-white' : 'text-slate-800'}>
-                          {option.answerText}
-                        </span>
+                        <span
+  className={isSelected ? 'text-white' : ''}
+  style={{ color: isSelected ? 'white' : '#431325' }}
+>
+  {option.answerText}
+</span>
                       </button>
                     );
                   })}
@@ -469,6 +496,9 @@ const Tool = () => {
 
       <footer className="w-full max-w-7xl mx-auto flex justify-end mt-16 px-4 sm:px-8">
           <div className="flex items-center gap-4">
+            <a href="https://www.p3venti.nl" target="_blank" rel="noopener noreferrer">
+      <img src="/p3venti.png" alt="P3Venti Logo" className="h-10" />
+    </a>
               <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
                 <img src="/tue.svg" alt="TU/e Logo" className="h-8" />
               </a>

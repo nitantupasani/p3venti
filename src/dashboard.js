@@ -761,45 +761,53 @@ export default function Dashboard() {
   ].join(' ');
 
   return (
-    <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
+    <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: "#dfdfe0" , color: "#431325" }}>
         <div className="max-w-7xl mx-auto">
-            <header className="relative flex justify-between items-center w-full mb-8">
-                <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
-                    <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
-                        </svg>
-                        <span className="font-semibold">Home</span>
-                    </button>
-                    <button onClick={handleInfoClick} className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
-                        </svg>
-                        <span className="font-semibold">Info</span>
-                    </button>
-                </div>
+            <header className="relative flex justify-between items-center w-full mb-3">
+  {/* Left: Home + Info */}
+  <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
+    <button onClick={handleHomeClick} className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.122 0l8.954 8.955M12 21.75V12m0 0l-3.75 3.75M12 12l3.75 3.75M4.5 9.75v10.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9.75M8.25 21.75h7.5" />
+      </svg>
+      <span className="font-semibold">Home</span>
+    </button>
+    <button onClick={handleInfoClick} className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+      </svg>
+      <span className="font-semibold">Info</span>
+    </button>
+  </div>
 
-                <div className="text-center" style={{ flex: 3 }}>
-                    <div className="flex justify-center items-center gap-x-3">
-                        <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-                        <h1 className="text-2xl lg:text-1xl font-bold text-indigo-600">Pandemic Readiness Assessment & Action Tool (PARAAT)</h1>
-                    </div>
-                    <p className="text-slate-500 mt-2 text-base font-medium">{content.pageSubtitle}</p>
-                </div>
+  {/* Center: Title only (aligned with left/right) */}
+  <h1
+    className="text-xl md:text-2xl font-bold whitespace-nowrap text-center leading-tight"
+    style={{ color: "#971547", flex: 2 }}
+  >
+    Pandemic Readiness Assessment & Action Tool (PARAAT)
+  </h1>
 
-                <div className="flex justify-end items-center" style={{ flex: 1 }}>
-                    <div className="hidden lg:block">
-                        <select
-                            onChange={e => setLanguage(e.target.value)}
-                            value={language}
-                            className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
-                        >
-                            <option value="en">English</option>
-                            <option value="nl">Nederlands</option>
-                        </select>
-                    </div>
-                </div>
-            </header>
+  {/* Right: Language */}
+  <div className="flex justify-end items-center" style={{ flex: 1 }}>
+    <div className="hidden lg:block">
+      <select
+        onChange={e => setLanguage(e.target.value)}
+        value={language}
+        className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-[#1f1f21] focus:outline-none focus:ring-2 focus:ring-[#971547] transition-colors"
+      >
+        <option value="en">English</option>
+        <option value="nl">Nederlands</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+{/* Subtitle below the aligned header */}
+<p className="text-slate-500 mb-8 text-sm sm:text-base font-medium text-center leading-snug">
+  {content.pageSubtitle}
+</p>
+
 
             <div className="flex flex-row items-start justify-center gap-4 mb-8">
               <div className="w-full max-w-md flex flex-col gap-2">
@@ -824,7 +832,7 @@ export default function Dashboard() {
                   <button
                     type="submit"
                     disabled={isSendingEmail}
-                    className="shrink-0 inline-flex items-center justify-center gap-2 text-sm px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 text-sm px-3 py-2 rounded-md bg-[#971547] hover:bg-[#caabbf] text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     aria-busy={isSendingEmail}
                   >
                     {isSendingEmail && (
@@ -878,7 +886,7 @@ export default function Dashboard() {
                     filename: "PARAAT_dashboard.pdf",
                   })
                 }
-                className="text-sm px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white transition-colors"
+                className="text-sm px-3 py-2 rounded-md bg-[#431325] hover:bg-[#caabbf] text-white transition-colors"
               >
                 {content.downloadPdfButton}
               </button>
@@ -971,13 +979,16 @@ export default function Dashboard() {
             </div>
 
             <div className="text-center mt-12">
-                <button onClick={handleRestart} className="bg-blue-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-md">
+                <button onClick={handleRestart} className="bg-[#971547] hover:bg-[#caabbf] text-white font-semibold py-2 px-4 rounded-md transition-colors">
                     {content.startOver || 'Start Over'}
                 </button>
             </div>
         </div>
         <footer className="w-full max-w-7xl mx-auto flex justify-end mt-16 px-4 sm:px-8">
           <div className="flex items-center gap-4">
+            <a href="https://www.p3venti.nl" target="_blank" rel="noopener noreferrer">
+      <img src="/p3venti.png" alt="P3Venti Logo" className="h-10" />
+    </a>
               <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
                 <img src="/tue.png" alt="TU/e Logo" className="h-20" />
               </a>
