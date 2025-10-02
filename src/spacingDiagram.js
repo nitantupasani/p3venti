@@ -523,7 +523,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
 
   return (
     <>
-    <h1 className="text-2xl font-bold text-[#431325] mt-8 text-center">{visualizationTitle}</h1>
+    <h1 className="text-2xl font-bold text-[#431325] mt-8 mb-8 text-center">{visualizationTitle}</h1>
     <div className="p-4 bg-white rounded-lg shadow">
       <style>{`
         .room-wall { fill: none; stroke: #1f2937; stroke-linejoin: round; }
