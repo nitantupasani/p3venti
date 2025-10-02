@@ -382,25 +382,16 @@ export default function Info() {
               <span className="font-semibold hidden sm:inline">Home</span>
             </button>
             <button
-              onClick={handleInfoClick}
-              className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-8 h-8"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z"
-                />
-              </svg>
-              <span className="font-semibold hidden sm:inline">Info</span>
-            </button>
+      onClick={handleInfoClick}
+      className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M12 9v3m0 4h.01M12 21.75a9.75 9.75 0 100-19.5 9.75 9.75 0 000 19.5z" />
+      </svg>
+      <span className="font-semibold hidden sm:inline">Info</span>
+    </button>
           </div>
 
           <div className="text-center" style={{ flex: 3 }}>
@@ -434,7 +425,7 @@ export default function Info() {
 
       <div className="w-full max-w-4xl mx-auto flex-grow">
         <main className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center" style={{ color: "#431325" }}>
+          <h2 className="text-2xl sm:text-2xl font-bold mb-8 text-center" style={{ color: "#431325" }}>
             {content.title}
           </h2>
 

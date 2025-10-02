@@ -1,12 +1,11 @@
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 
-const PERSON_VISUAL_SCALE = 0.8;
+const PERSON_VISUAL_SCALE = 0.5;
 const FINE_GRID_STEP_SCALE = 0.5;
 export const LAYOUT_GRID_STEP_SCALE = FINE_GRID_STEP_SCALE;
-const RESIDENT_CLEARANCE_STEPS = [3, 2, 1];
-const FALLBACK_RESIDENT_CLEARANCE = 0;
-const EMPLOYEE_MIN_ACTIVE_SPEED_FACTOR = 0.1;
-const EMPLOYEE_SPEED_NUDGE_FACTOR = 0.5;
+const RESIDENT_DISTANCE_MULTIPLIERS = [1.8, 1.5, 1.25, 1.1, 1.0];
+const EMPLOYEE_MIN_ACTIVE_SPEED_FACTOR = 0.05;
+const EMPLOYEE_SPEED_NUDGE_FACTOR = 0.12;
 
 /* --------------------- Utility: grid positions & capacity --------------------- */
 export const getPositionsAndTheoreticalMax = (shape, dims, social_d, options = {}) => {
@@ -115,7 +114,9 @@ const shuffleArray = (array) => {
 
 const EMPLOYEE_SPEED_MULTIPLIER = 2.4;
 const FORCE_CAP_MULTIPLIER = 2.2;
-const SEPARATION_ITERATIONS = 3;
+const SEPARATION_ITERATIONS = 4;
+const EMPLOYEE_RESIDENT_GAP_MULTIPLIER = 1.08;
+const EMPLOYEE_EMPLOYEE_GAP_MULTIPLIER = 1.02;
 /* -------------------------- Spacing Diagram + Physics ------------------------- */
 
 const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visualizationTitle, labels = {}, noteBox = null }) => {
@@ -133,7 +134,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const employeeMinClearance = useMemo(() => {
         const gridClearance = gridStep > 0 ? gridStep * 2.2 : 0;
         const visualClearance = personRadius > 0 ? personRadius * 4 : 0;
-        const distanceClearance = socialDistance ? socialDistance * 0.95 : 0;
+        const distanceClearance = socialDistance ? socialDistance * EMPLOYEE_RESIDENT_GAP_MULTIPLIER : 0;
         return Math.max(gridClearance, visualClearance, distanceClearance, 0);
     }, [gridStep, personRadius, socialDistance]);
 
@@ -149,25 +150,29 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return Math.max(baseResidentCount - employeeCount, 0);
     }, [baseResidentCount, employeeCount]);
 
-    const layoutPositions = useMemo(() => {
-        if (!dims || !socialDistance) return [];
+    const { layoutPositions, theoreticalResidentPositions } = useMemo(() => {
+        if (!dims || !socialDistance) {
+            return { layoutPositions: [], theoreticalResidentPositions: [] };
+        }
         try {
             const effectiveGridStep = gridStep > 0 ? gridStep : socialDistance;
-            const { positions } = getPositionsAndTheoreticalMax(shape, dims, socialDistance, {
+            const { positions, theoreticalPositions } = getPositionsAndTheoreticalMax(shape, dims, socialDistance, {
                 gridStep: effectiveGridStep,
                 marginRadius: occupancyRadius,
             });
-            return positions;
+            return { layoutPositions: positions, theoreticalResidentPositions: theoreticalPositions };
         } catch (error) {
-            return [];
+            return { layoutPositions: [], theoreticalResidentPositions: [] };
         }
     }, [shape, dims, socialDistance, gridStep, occupancyRadius]);
 
     const residentPositions = useMemo(() => {
         if (residentCount === 0) return [];
-        const basePool = (layoutPositions && layoutPositions.length)
-            ? layoutPositions
-            : (people && people.length ? people : []);
+        const basePool = (theoreticalResidentPositions && theoreticalResidentPositions.length)
+            ? theoreticalResidentPositions
+            : (layoutPositions && layoutPositions.length
+                ? layoutPositions
+                : (people && people.length ? people : []));
 
         if (!basePool.length) return [];
 
@@ -175,64 +180,62 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         const targetCount = Math.min(residentCount, shuffledPositions.length);
         if (targetCount === 0) return [];
 
-        if (!(gridStep > 0)) {
-            return shuffledPositions.slice(0, targetCount);
-        }
-
-        const clearanceCandidates = [...RESIDENT_CLEARANCE_STEPS, FALLBACK_RESIDENT_CLEARANCE];
-        let bestSelection = [];
-
-        for (const clearance of clearanceCandidates) {
-            const minDistance = Math.max(
-                (gridStep > 0 ? gridStep * (clearance + 1) : 0),
-                socialDistance || 0
-            );
+        const buildSelection = (source, minDistance) => {
             const candidate = [];
-            for (const pos of shuffledPositions) {
+            for (const pos of source) {
                 const isFarEnough = candidate.every((selected) =>
                     Math.hypot(selected.x - pos.x, selected.y - pos.y) >= minDistance - 1e-6
                 );
                 if (isFarEnough) {
                     candidate.push(pos);
                     if (candidate.length === targetCount) {
-                        bestSelection = candidate;
                         break;
                     }
                 }
             }
-            if (bestSelection.length === targetCount) {
-                break;
+            return candidate;
+        };
+
+        const attemptSelection = (source) => {
+            let best = [];
+            for (const multiplier of RESIDENT_DISTANCE_MULTIPLIERS) {
+                const minDistance = Math.max((socialDistance || 0) * multiplier, socialDistance || 0);
+                const candidate = buildSelection(source, minDistance);
+                if (candidate.length === targetCount) {
+                    return candidate;
+                }
+                if (candidate.length > best.length) {
+                    best = candidate;
+                }
             }
-            if (candidate.length > bestSelection.length) {
-                bestSelection = candidate;
-            }
+            return best;
+        };
+
+        const shuffledSelection = attemptSelection(shuffledPositions);
+        if (shuffledSelection.length === targetCount) {
+            return shuffledSelection;
         }
 
-        if (bestSelection.length < targetCount) {
-            const fallbackDistance = Math.max(socialDistance || 0, occupancyRadius * 2);
-            for (const pos of shuffledPositions) {
-                const isFarEnough = bestSelection.every((selected) =>
-                    Math.hypot(selected.x - pos.x, selected.y - pos.y) >= fallbackDistance - 1e-6
-                );
-                if (!isFarEnough) continue;
-                bestSelection.push(pos);
-                if (bestSelection.length === targetCount) break;
-            }
+        const orderedPositions = [...basePool].sort((a, b) => (a.x - b.x) || (a.y - b.y));
+        const orderedSelection = attemptSelection(orderedPositions);
+        if (orderedSelection.length === targetCount) {
+            return orderedSelection;
         }
 
-        return bestSelection.slice(0, targetCount);
-    }, [people, layoutPositions, residentCount, gridStep, socialDistance, occupancyRadius]);
+        return shuffledSelection.length >= orderedSelection.length ? shuffledSelection : orderedSelection;
+    }, [people, layoutPositions, theoreticalResidentPositions, residentCount, socialDistance]);
 
     const availableLayoutPositions = useMemo(() => {
         if (!layoutPositions?.length) return [];
         if (!residentPositions?.length) return layoutPositions;
 
+        const minDistance = Math.max(employeeMinClearance, (socialDistance || 0) * EMPLOYEE_RESIDENT_GAP_MULTIPLIER);
         return layoutPositions.filter((pos) =>
             residentPositions.every((resident) =>
-                Math.hypot(resident.x - pos.x, resident.y - pos.y) >= employeeMinClearance - 1e-6
+                Math.hypot(resident.x - pos.x, resident.y - pos.y) >= minDistance - 1e-6
             )
         );
-    }, [layoutPositions, residentPositions, employeeMinClearance]);
+    }, [layoutPositions, residentPositions, employeeMinClearance, socialDistance]);
 
     const employeeDescriptors = useMemo(() => {
         return Array.from({ length: employeeCount }, () => 'employee');
@@ -305,7 +308,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             }
         }
         const nx = to.x - point.x;
-               const ny = to.y - point.y;
+        const ny = to.y - point.y;
         const normalLength = Math.hypot(nx, ny);
         if (normalLength > 1e-6) {
             const normal = { x: nx / normalLength, y: ny / normalLength };
@@ -322,8 +325,9 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     }, [isInsideShape]);
 
     const isClearOfResidents = useCallback((x, y, minDistance = socialDistance) => {
+        const clearance = Math.max(minDistance ?? 0, (socialDistance || 0) * EMPLOYEE_RESIDENT_GAP_MULTIPLIER);
         for (const pos of residentPositions) {
-            if (Math.hypot(x - pos.x, y - pos.y) < minDistance) {
+            if (Math.hypot(x - pos.x, y - pos.y) < clearance) {
                 return false;
             }
         }
@@ -346,7 +350,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     }, [isInsideShape, viewBoxWidth, viewBoxHeight, occupancyRadius, isClearOfResidents, socialDistance]);
 
     const assignNewTarget = useCallback((particle) => {
-        const clearance = Math.max(employeeMinClearance, (socialDistance || 0) * 1.05);
+        const clearance = Math.max(employeeMinClearance, (socialDistance || 0) * EMPLOYEE_RESIDENT_GAP_MULTIPLIER);
         const destination = randomPointInside(clearance);
         particle.targetX = destination.x;
         particle.targetY = destination.y;
@@ -378,6 +382,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const boundaryBounceRetention = 0.72;
     const timeScale = 1.05;
     const forceCap = desired * FORCE_CAP_MULTIPLIER;
+    const employeeContactDistance = Math.max(desired * EMPLOYEE_EMPLOYEE_GAP_MULTIPLIER, desired);
+    const residentContactDistance = Math.max(desired * EMPLOYEE_RESIDENT_GAP_MULTIPLIER, desired);
     for (let i = 0; i < pts.length; i++) {
         const p1 = pts[i];
         let fx = 0, fy = 0;
@@ -385,8 +391,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             if (i === j) continue;
             const p2 = pts[j];
             const dx = p1.x - p2.x, dy = p1.y - p2.y, dist = Math.hypot(dx, dy) || 1e-6, ux = dx / dist, uy = dy / dist;
-            if (dist < desired) {
-                const overlap = desired - dist;
+            if (dist < employeeContactDistance) {
+                const overlap = employeeContactDistance - dist;
                 fx += ux * (kClose * overlap);
                 fy += uy * (kClose * overlap);
             } else if (dist < farRange) {
@@ -403,9 +409,9 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             const dist = Math.hypot(dx, dy) || 1e-6;
             const ux = dx / dist;
             const uy = dy / dist;
-            if (dist < desired) {
-                const overlap = desired - dist;
-                const residentRepulsion = 1.8;
+            if (dist < residentContactDistance) {
+                const overlap = residentContactDistance - dist;
+                const residentRepulsion = 2.1;
                 fx += ux * (kClose * overlap * residentRepulsion);
                 fy += uy * (kClose * overlap * residentRepulsion);
             } else if (dist < farRange) {
@@ -456,7 +462,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         p1.vx = (p1.vx + fx * timeScale * multiplier * dt) * damping;
         p1.vy = (p1.vy + fy * timeScale * multiplier * dt) * damping;
 
-        const maxSpeed = socialDistance * 2.8;
+        const maxSpeed = socialDistance * 2.4;
         let speed = Math.hypot(p1.vx, p1.vy);
         if (speed > maxSpeed) {
             const scale = maxSpeed / speed;
@@ -497,8 +503,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         for (let i = 0; i < pts.length; i++) {
             for (let j = i + 1; j < pts.length; j++) {
                 const a = pts[i], b = pts[j], dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 1e-6;
-                if (dist < socialDistance) {
-                    const overlap = (socialDistance - dist) * 0.5, ux = dx / dist, uy = dy / dist;
+                if (dist < employeeContactDistance) {
+                    const overlap = (employeeContactDistance - dist) * 0.5, ux = dx / dist, uy = dy / dist;
                     const ax = a.x - ux * overlap, ay = a.y - uy * overlap, bx = b.x + ux * overlap, by = b.y + uy * overlap;
                     if (isInsideShape(ax, ay)) { a.x = ax; a.y = ay; }
                     if (isInsideShape(bx, by)) { b.x = bx; b.y = by; }
@@ -512,8 +518,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
                 const dx = particle.x - resident.x;
                 const dy = particle.y - resident.y;
                 const dist = Math.hypot(dx, dy) || 1e-6;
-                if (dist < socialDistance) {
-                    const overlap = socialDistance - dist;
+                if (dist < residentContactDistance) {
+                    const overlap = residentContactDistance - dist;
                     const ux = dx / dist;
                     const uy = dy / dist;
                     const newX = particle.x + ux * overlap;
@@ -590,149 +596,128 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
 
     const padding = 1.5;
     return (
-  <>
-    {/* Title outside the white box */}
-    <h1
-      className="text-2xl font-bold mt-8 mb-3 text-center"
-      style={{ color: "#431325" }}
+        <div className="p-4 bg-white rounded-lg shadow">
+            <h1 className="text-3xl font-bold text-slate-800 mt-8 text-center">{visualizationTitle}</h1>
+            <style>{`
+                .room-wall { fill: none; stroke: #1f2937; stroke-linejoin: round; }
+                .room-wall-filled { fill: #1f2937; stroke: #1f2937; stroke-width: 1; stroke-linejoin: round; }
+                .room-floor { fill: url(#floorPattern); stroke: none; }
+                .diagram-container { width: 100%; margin: 0 auto; background-color: #ffffff; padding: 1rem; border-radius: 8px; }
+                .svg-wrap { width: 100%; max-width: 600px; }
+                .caption-box { width: 260px; }
+            `}</style>
+            <div className="diagram-container">
+<div
+  className="diagram-row grid mx-auto items-center justify-items-center"
+  style={{
+    gridTemplateColumns: '325px minmax(360px, max-content) 325px',
+    columnGap: '2px'
+  }}
+>
+  {/* Left-side: Please Note */}
+  {noteBox?.text && (
+    <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[500px]">
+      <div className="text-slate-900 font-bold text-xl leading-tight">
+        {noteBox.title || 'Please Note'}
+      </div>
+      <div className="h-px bg-slate-200 my-3" />
+      <p className="text-slate-700 text-sm whitespace-pre-line text-center">
+        {noteBox.text}
+      </p>
+    </div>
+  )}
+
+  {/* Center: Diagram */}
+  <div className="svg-wrap">
+    <svg
+      className="overflow-visible max-w-full"
+      style={{ width: 'min(72vw, 640px)' }}
+      viewBox={`${-padding} ${-padding} ${viewBoxWidth + 2 * padding} ${viewBoxHeight + 2 * padding}`}
+      preserveAspectRatio="xMidYMid meet"
     >
-      {visualizationTitle}
-    </h1>
-
-    {/* White box with diagram + captions */}
-    <div className="p-4 bg-white rounded-lg shadow">
-      <style>{`
-        .room-wall { fill: none; stroke: #1f2937; stroke-linejoin: round; }
-        .room-wall-filled { fill: #1f2937; stroke: #1f2937; stroke-width: 1; stroke-linejoin: round; }
-        .room-floor { fill: url(#floorPattern); stroke: none; }
-        .diagram-container { width: 100%; margin: 0 auto; background-color: #ffffff; padding: 1rem; border-radius: 8px; }
-        .svg-wrap { width: 100%; max-width: 600px; }
-        .caption-box { width: 260px; }
-      `}</style>
-
-      <div className="diagram-container">
-        <div
-          className="diagram-row grid mx-auto items-center justify-items-center"
-          style={{
-            gridTemplateColumns: "325px minmax(360px, max-content) 325px",
-            columnGap: "2px",
-          }}
+      <defs>
+        <pattern id="floorPattern" patternUnits="userSpaceOnUse" width="1" height="1">
+          <rect width="1" height="1" fill="#f3f0e8" />
+          <path
+            d="M -0.25,0.25 L 0.25, -0.25 M 0.75,-0.25 L 1.25,0.25 M -0.25,0.75 L 0.25,0.25 M 0.75,0.25 L 1.25,0.75"
+            stroke="#dcd6c8"
+            strokeWidth="0.04"
+          />
+        </pattern>
+      </defs>
+      {wallElement}
+      {floorElement}
+      {residentPositions.map((pos, i) => (
+        <g
+          key={`resident-${i}`}
+          transform={`translate(${pos.x}, ${pos.y})`}
         >
-          {/* Left-side: Please Note */}
-          {noteBox?.text && (
-            <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[500px]">
-              <div className="text-slate-900 font-bold text-xl leading-tight">
-                {noteBox.title || "Please Note"}
-              </div>
-              <div className="h-px bg-slate-200 my-3" />
-              <p className="text-slate-700 text-sm whitespace-pre-line text-center">
-                {noteBox.text}
-              </p>
-            </div>
-          )}
+          <circle
+            cx="0"
+            cy="0"
+            r={personRadius}
+            fill="#22c55e"
+            opacity="0.85"
+          />
+          <g transform={`scale(${iconScale}) translate(-224, -256)`}>
+            <path d={personIconPath} fill="white" />
+          </g>
+        </g>
+      ))}
+      {employeeDescriptors.map((_, i) => (
+        <g
+          key={`employee-${i}`}
+          ref={(el) => { nodeRefs.current[i] = el; }}
+          transform="translate(-1000,-1000)"
+        >
+          <circle
+            cx="0"
+            cy="0"
+            r={personRadius}
+            fill="#ef4444"
+            opacity="0.85"
+          />
+          <g transform={`scale(${iconScale}) translate(-224, -256)`}>
+            <path d={personIconPath} fill="white" />
+          </g>
+        </g>
+      ))}
+    </svg>
+  </div>
 
-          {/* Center: Diagram */}
-          <div className="svg-wrap">
-            <svg
-              className="overflow-visible max-w-full"
-              style={{ width: "min(72vw, 640px)" }}
-              viewBox={`${-padding} ${-padding} ${
-                viewBoxWidth + 2 * padding
-              } ${viewBoxHeight + 2 * padding}`}
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <defs>
-                <pattern
-                  id="floorPattern"
-                  patternUnits="userSpaceOnUse"
-                  width="1"
-                  height="1"
-                >
-                  <rect width="1" height="1" fill="#f3f0e8" />
-                  <path
-                    d="M -0.25,0.25 L 0.25, -0.25 M 0.75,-0.25 L 1.25,0.25 M -0.25,0.75 L 0.25,0.25 M 0.75,0.25 L 1.25,0.75"
-                    stroke="#dcd6c8"
-                    strokeWidth="0.04"
-                  />
-                </pattern>
-              </defs>
-              {wallElement}
-              {floorElement}
-              {residentPositions.map((pos, i) => (
-                <g key={`resident-${i}`} transform={`translate(${pos.x}, ${pos.y})`}>
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r={personRadius}
-                    fill="#22c55e"
-                    opacity="0.85"
-                  />
-                  <g transform={`scale(${iconScale}) translate(-224, -256)`}>
-                    <path d={personIconPath} fill="white" />
-                  </g>
-                </g>
-              ))}
-              {employeeDescriptors.map((_, i) => (
-                <g
-                  key={`employee-${i}`}
-                  ref={(el) => {
-                    nodeRefs.current[i] = el;
-                  }}
-                  transform="translate(-1000,-1000)"
-                >
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r={personRadius}
-                    fill="#ef4444"
-                    opacity="0.85"
-                  />
-                  <g transform={`scale(${iconScale}) translate(-224, -256)`}>
-                    <path d={personIconPath} fill="white" />
-                  </g>
-                </g>
-              ))}
-            </svg>
-          </div>
-
-          {/* Right-side: Max people */}
-          {meta && (
-            <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[260px]">
-              <div className="text-slate-900 font-bold text-xl leading-tight">
-                {labels.maxPeople || "Max people"}: {meta.capacityMax}
-              </div>
-              <div className="text-slate-600 text-sm mt-1">
-                {meta.limiting === "ventilation"
-                  ? labels.ventilationLimited || "Ventilation-limited"
-                  : labels.geometryLimited || "Geometry-limited"}
-              </div>
-              <div className="h-px bg-slate-200 my-3" />
-              <div className="space-y-1.5 text-slate-700 text-sm">
-                <div>
-                  {labels.roomArea || "Room area"}{" "}
-                  <span className="font-medium">
-                    {Number.isFinite(meta.roomArea)
-                      ? meta.roomArea.toFixed(1)
-                      : meta.roomArea}{" "}
-                    m²
-                  </span>
-                </div>
-                <div>
-                  {labels.usableArea || "Usable area (packing)"}{" "}
-                  <span className="font-medium">{meta.usablePercent}%</span>
-                </div>
-                <div>
-                  {labels.socialDistance || "Social distance"}{" "}
-                  <span className="font-medium">{socialDistance} m</span>
-                </div>
-              </div>
-            </div>
-          )}
+  {/* Right-side: Max people */}
+  {meta && (
+    <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[260px]">
+      <div className="text-slate-900 font-bold text-xl leading-tight">
+        {labels.maxPeople || 'Max people'}: {meta.capacityMax}
+      </div>
+      <div className="text-slate-600 text-sm mt-1">
+        {meta.limiting === 'ventilation'
+          ? (labels.ventilationLimited || 'Ventilation-limited')
+          : (labels.geometryLimited || 'Geometry-limited')}
+      </div>
+      <div className="h-px bg-slate-200 my-3" />
+      <div className="space-y-1.5 text-slate-700 text-sm">
+        <div>
+          {labels.roomArea || 'Room area'}{' '}
+          <span className="font-medium">
+            {Number.isFinite(meta.roomArea) ? meta.roomArea.toFixed(1) : meta.roomArea} m²
+          </span>
+        </div>
+        <div>
+          {labels.usableArea || 'Usable area (packing)'}{' '}
+          <span className="font-medium">{meta.usablePercent}%</span>
+        </div>
+        <div>
+          {labels.socialDistance || 'Social distance'}{' '}
+          <span className="font-medium">{socialDistance} m</span>
         </div>
       </div>
     </div>
-  </>
-);
-
+  )}
+</div>
+            </div>
+        </div>
+    );
 };
 export default SpacingDiagram;
