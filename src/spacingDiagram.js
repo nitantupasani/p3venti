@@ -130,13 +130,12 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const personIconPath =
     "M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z\";";
     const iconScale = (personRadius * 1) / 512;
-    const gridStep = socialDistance ? socialDistance * FINE_GRID_STEP_SCALE : 0;
+    
     const employeeMinClearance = useMemo(() => {
-        const gridClearance = gridStep > 0 ? gridStep * 2.2 : 0;
-        const visualClearance = personRadius > 0 ? personRadius * 4 : 0;
-        const distanceClearance = socialDistance ? socialDistance * EMPLOYEE_RESIDENT_GAP_MULTIPLIER : 0;
-        return Math.max(gridClearance, visualClearance, distanceClearance, 0);
-    }, [gridStep, personRadius, socialDistance]);
+        // Clearance is now based on the visual radius of the circles to prevent initial overlap
+        // and allow employees to be placed closer to residents.
+        return personRadius > 0 ? personRadius * 2 * EMPLOYEE_RESIDENT_GAP_MULTIPLIER : 0;
+    }, [personRadius]);
 
     const baseResidentCount = people?.length ?? 0;
     const employeeCount = useMemo(() => {
@@ -155,6 +154,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             return { layoutPositions: [], theoreticalResidentPositions: [] };
         }
         try {
+            const gridStep = socialDistance * FINE_GRID_STEP_SCALE;
             const effectiveGridStep = gridStep > 0 ? gridStep : socialDistance;
             const { positions, theoreticalPositions } = getPositionsAndTheoreticalMax(shape, dims, socialDistance, {
                 gridStep: effectiveGridStep,
@@ -164,7 +164,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         } catch (error) {
             return { layoutPositions: [], theoreticalResidentPositions: [] };
         }
-    }, [shape, dims, socialDistance, gridStep, occupancyRadius]);
+    }, [shape, dims, socialDistance, occupancyRadius]);
 
     const residentPositions = useMemo(() => {
         if (residentCount === 0) return [];
@@ -225,18 +225,6 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return shuffledSelection.length >= orderedSelection.length ? shuffledSelection : orderedSelection;
     }, [people, layoutPositions, theoreticalResidentPositions, residentCount, socialDistance]);
 
-    const availableLayoutPositions = useMemo(() => {
-        if (!layoutPositions?.length) return [];
-        if (!residentPositions?.length) return layoutPositions;
-
-        const minDistance = Math.max(employeeMinClearance, (socialDistance || 0) * EMPLOYEE_RESIDENT_GAP_MULTIPLIER);
-        return layoutPositions.filter((pos) =>
-            residentPositions.every((resident) =>
-                Math.hypot(resident.x - pos.x, resident.y - pos.y) >= minDistance - 1e-6
-            )
-        );
-    }, [layoutPositions, residentPositions, employeeMinClearance, socialDistance]);
-
     const employeeDescriptors = useMemo(() => {
         return Array.from({ length: employeeCount }, () => 'employee');
     }, [employeeCount]);
@@ -245,7 +233,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         let viewBoxWidth = 10, viewBoxHeight = 10;
         let wallElement, floorElement, isInsideShape;
         const wallThickness = 0.5;
-        const margin = occupancyRadius || 0;
+        // Use personRadius for margin so circles can move to the visual edge of the shape
+        const margin = personRadius || 0;
 
         if (!dims) return {};
 
@@ -283,7 +272,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         }
 
         return { viewBoxWidth, viewBoxHeight, wallElement, floorElement, isInsideShape };
-    }, [shape, dims, occupancyRadius]);
+    }, [shape, dims, personRadius]);
 
     const projectInside = useCallback((from, to) => {
         if (!isInsideShape) {
@@ -324,21 +313,21 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         return { point, normal: null };
     }, [isInsideShape]);
 
-    const isClearOfResidents = useCallback((x, y, minDistance = socialDistance) => {
-        const clearance = Math.max(minDistance ?? 0, (socialDistance || 0) * EMPLOYEE_RESIDENT_GAP_MULTIPLIER);
+    const isClearOfResidents = useCallback((x, y, minDistance) => {
+        const clearance = Math.max(minDistance ?? 0, personRadius * 2);
         for (const pos of residentPositions) {
             if (Math.hypot(x - pos.x, y - pos.y) < clearance) {
                 return false;
             }
         }
         return true;
-    }, [residentPositions, socialDistance]);
+    }, [residentPositions, personRadius]);
 
-    const randomPointInside = useCallback((minClearance = socialDistance) => {
+    const randomPointInside = useCallback((minClearance) => {
         if (!isInsideShape || !Number.isFinite(viewBoxWidth) || !Number.isFinite(viewBoxHeight)) {
             return { x: 0, y: 0 };
         }
-        const margin = occupancyRadius || 0;
+        const margin = personRadius || 0;
         for (let attempt = 0; attempt < 200; attempt++) {
             const rx = margin + Math.random() * Math.max(0.0001, viewBoxWidth - 2 * margin);
             const ry = margin + Math.random() * Math.max(0.0001, viewBoxHeight - 2 * margin);
@@ -347,7 +336,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
             }
         }
         return { x: viewBoxWidth / 2, y: viewBoxHeight / 2 };
-    }, [isInsideShape, viewBoxWidth, viewBoxHeight, occupancyRadius, isClearOfResidents, socialDistance]);
+    }, [isInsideShape, viewBoxWidth, viewBoxHeight, personRadius, isClearOfResidents]);
 
     const assignNewTarget = useCallback((particle) => {
         const clearance = Math.max(employeeMinClearance, (socialDistance || 0) * EMPLOYEE_RESIDENT_GAP_MULTIPLIER);
@@ -382,8 +371,11 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
     const boundaryBounceRetention = 0.72;
     const timeScale = 1.05;
     const forceCap = desired * FORCE_CAP_MULTIPLIER;
-    const employeeContactDistance = Math.max(desired * EMPLOYEE_EMPLOYEE_GAP_MULTIPLIER, desired);
-    const residentContactDistance = Math.max(desired * EMPLOYEE_RESIDENT_GAP_MULTIPLIER, desired);
+    
+    // Contact distances are now based on the visual radius to prevent visual overlap
+    const employeeContactDistance = personRadius * 2 * EMPLOYEE_EMPLOYEE_GAP_MULTIPLIER;
+    const residentContactDistance = personRadius * 2 * EMPLOYEE_RESIDENT_GAP_MULTIPLIER;
+
     for (let i = 0; i < pts.length; i++) {
         const p1 = pts[i];
         let fx = 0, fy = 0;
@@ -565,29 +557,14 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         }
     }
     // --- END: Improved Collision Resolution ---
-}, [isInsideShape, socialDistance, projectInside, assignNewTarget, residentPositions]);
+}, [isInsideShape, socialDistance, projectInside, assignNewTarget, residentPositions, personRadius]);
 
     useEffect(() => {
         if (!dims || !isInsideShape || !viewBoxWidth || !viewBoxHeight) return;
-        const jitter = socialDistance * 0.04;
-        let layoutIndex = 0;
-
-        const availableLayout = availableLayoutPositions;
+        
+        // Red circles (employees) are now placed randomly, not on a grid.
         particlesRef.current = employeeDescriptors.map((descriptor, i) => {
-            let basePosition;
-            if (layoutIndex < availableLayout.length) {
-                const layoutPos = availableLayout[layoutIndex++];
-                basePosition = {
-                    x: layoutPos.x + (Math.random() - 0.5) * jitter,
-                    y: layoutPos.y + (Math.random() - 0.5) * jitter,
-                };
-            } else {
-                basePosition = randomPointInside(employeeMinClearance);
-            }
-
-            if (!isClearOfResidents(basePosition.x, basePosition.y, employeeMinClearance)) {
-                basePosition = randomPointInside(employeeMinClearance);
-            }
+            const basePosition = randomPointInside(employeeMinClearance);
 
             const velocityRange = socialDistance * 0.12 * EMPLOYEE_SPEED_MULTIPLIER;
             const particle = {
@@ -624,12 +601,13 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         });
         return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
 
-    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, employeeDescriptors, employeeMinClearance, availableLayoutPositions, randomPointInside, assignNewTarget, residentPositions, isClearOfResidents]);
+    }, [shape, dims, people, socialDistance, isInsideShape, viewBoxWidth, viewBoxHeight, stepPhysics, drawFrame, employeeDescriptors, employeeMinClearance, randomPointInside, assignNewTarget, residentPositions]);
 
     const padding = 1.5;
     return (
+        <>
+        <h1 className="text-2xl font-bold text-[#431325] mt-8 text-center">{visualizationTitle}</h1>
         <div className="p-4 bg-white rounded-lg shadow">
-            <h1 className="text-3xl font-bold text-slate-800 mt-8 text-center">{visualizationTitle}</h1>
             <style>{`
                 .room-wall { fill: none; stroke: #1f2937; stroke-linejoin: round; }
                 .room-wall-filled { fill: #1f2937; stroke: #1f2937; stroke-width: 1; stroke-linejoin: round; }
@@ -750,6 +728,8 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
 </div>
             </div>
         </div>
+        </>
     );
 };
 export default SpacingDiagram;
+
