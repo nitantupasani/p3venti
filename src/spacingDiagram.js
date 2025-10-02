@@ -114,7 +114,7 @@ const shuffleArray = (array) => {
 
 const EMPLOYEE_SPEED_MULTIPLIER = 2.4;
 const FORCE_CAP_MULTIPLIER = 2.2;
-const SEPARATION_ITERATIONS = 4;
+const SEPARATION_ITERATIONS = 5; // Increased for more stable collision resolution
 const EMPLOYEE_RESIDENT_GAP_MULTIPLIER = 1.08;
 const EMPLOYEE_EMPLOYEE_GAP_MULTIPLIER = 1.02;
 /* -------------------------- Spacing Diagram + Physics ------------------------- */
@@ -499,40 +499,72 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
         p1.x = nx; p1.y = ny;
     }
 
+    // --- START: Improved Collision Resolution ---
+    // This logic ensures circles do not overlap, handling collisions with other moving circles,
+    // static circles, and the boundaries of the shape.
     for (let it = 0; it < SEPARATION_ITERATIONS; it++) {
+        // Resolve collisions between moving red circles
         for (let i = 0; i < pts.length; i++) {
             for (let j = i + 1; j < pts.length; j++) {
-                const a = pts[i], b = pts[j], dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 1e-6;
+                const a = pts[i], b = pts[j];
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.hypot(dx, dy) || 1e-6;
+
                 if (dist < employeeContactDistance) {
-                    const overlap = (employeeContactDistance - dist) * 0.5, ux = dx / dist, uy = dy / dist;
-                    const ax = a.x - ux * overlap, ay = a.y - uy * overlap, bx = b.x + ux * overlap, by = b.y + uy * overlap;
-                    if (isInsideShape(ax, ay)) { a.x = ax; a.y = ay; }
-                    if (isInsideShape(bx, by)) { b.x = bx; b.y = by; }
+                    const overlap = (employeeContactDistance - dist) * 0.5;
+                    const ux = dx / dist, uy = dy / dist;
+                    const ax_new = a.x - ux * overlap, ay_new = a.y - uy * overlap;
+                    const bx_new = b.x + ux * overlap, by_new = b.y + uy * overlap;
+
+                    const a_can_move = isInsideShape(ax_new, ay_new);
+                    const b_can_move = isInsideShape(bx_new, by_new);
+
+                    if (a_can_move && b_can_move) {
+                        a.x = ax_new; a.y = ay_new;
+                        b.x = bx_new; b.y = by_new;
+                    } else if (a_can_move) {
+                        // If b is blocked (e.g., by a wall), 'a' takes the full correction
+                        const { point } = projectInside({ x: a.x, y: a.y }, { x: a.x - ux * overlap * 2, y: a.y - uy * overlap * 2 });
+                        a.x = point.x; a.y = point.y;
+                    } else if (b_can_move) {
+                        // If a is blocked, 'b' takes the full correction
+                        const { point } = projectInside({ x: b.x, y: b.y }, { x: b.x + ux * overlap * 2, y: b.y + uy * overlap * 2 });
+                        b.x = point.x; b.y = point.y;
+                    }
                 }
             }
         }
 
+        // Resolve collisions between moving red circles and static green circles
         for (let i = 0; i < pts.length; i++) {
             const particle = pts[i];
             for (const resident of residentPositions) {
                 const dx = particle.x - resident.x;
                 const dy = particle.y - resident.y;
                 const dist = Math.hypot(dx, dy) || 1e-6;
+
                 if (dist < residentContactDistance) {
                     const overlap = residentContactDistance - dist;
                     const ux = dx / dist;
                     const uy = dy / dist;
                     const newX = particle.x + ux * overlap;
                     const newY = particle.y + uy * overlap;
+
                     if (isInsideShape(newX, newY)) {
                         particle.x = newX;
                         particle.y = newY;
+                    } else {
+                        // If pushed outside the shape, project back to the boundary
+                        const { point } = projectInside({ x: particle.x, y: particle.y }, { x: newX, y: newY });
+                        particle.x = point.x;
+                        particle.y = point.y;
                     }
                 }
             }
         }
-
     }
+    // --- END: Improved Collision Resolution ---
 }, [isInsideShape, socialDistance, projectInside, assignNewTarget, residentPositions]);
 
     useEffect(() => {

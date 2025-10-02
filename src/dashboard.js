@@ -5,7 +5,7 @@ import { AnalysisRow, recommendations, scoringRules, topRecommendationsData } fr
 import { downloadDashboardFullPDF } from "./DownloadPDF";
 import { sendDashboardSummaryEmail } from "./emailService";
 
-const DEFAULT_USABLE_SPACE_PERCENT = 60;
+const DEFAULT_USABLE_SPACE_PERCENT = 75;
 
 const translations = {
   en: {
