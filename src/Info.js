@@ -9,6 +9,7 @@ const STYLES = {
 const translations = {
   nl: {
     title: 'Handleiding Pandemic Readiness Assessment & Action Tool (PARAAT)',
+    pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
     sections: [
       {
         heading: 'Welkom!',
@@ -105,6 +106,7 @@ We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties
   },
   en: {
     title: 'Manual - Pandemic Readiness Assessment & Action Tool (PARAAT)',
+    pageSubtitle: 'For location managers in long-term care.',
     sections: [
       {
         heading: 'Welcome!',
@@ -357,7 +359,7 @@ export default function Info() {
   style={{ backgroundColor: "#dfdfe0", color: "#431325" }}
 >
       <div className="w-full max-w-7xl mx-auto">
-        <header className="relative flex justify-between items-center w-full mb-8">
+        <header className="relative flex justify-between items-center w-full mb-2 leading-tight">
           <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
             <button
               onClick={handleHomeClick}
@@ -403,13 +405,12 @@ export default function Info() {
 
           <div className="text-center" style={{ flex: 3 }}>
             <div className="flex justify-center items-center gap-x-3">
-              <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold" style={{ color: "#971547" }}>
-                <span className="sm:hidden">PARAAT</span>
-                <span className="hidden sm:inline">
-                  Pandemic Readiness Assessment & Action Tool (PARAAT)
-                </span>
-              </h1>
+              <h1
+    className="text-xl md:text-2xl font-bold whitespace-nowrap text-center"
+    style={{ color: "#971547", flex: 2 }}
+  >
+    Pandemic Readiness Assessment & Action Tool (PARAAT)
+  </h1>
             </div>
           </div>
 
@@ -426,6 +427,9 @@ export default function Info() {
             </div>
           </div>
         </header>
+        <p className="text-slate-500 mb-8 text-sm sm:text-base font-medium text-center">
+  {content.pageSubtitle}
+</p>
       </div>
 
       <div className="w-full max-w-4xl mx-auto flex-grow">
@@ -453,6 +457,9 @@ export default function Info() {
 
       <footer className="w-full max-w-7xl mx-auto flex justify-center sm:justify-end mt-16 px-4 sm:px-8">
         <div className="flex items-center gap-4">
+          <a href="https://www.p3venti.nl" target="_blank" rel="noopener noreferrer">
+      <img src="/p3venti.png" alt="P3Venti Logo" className="h-10" />
+    </a>
           <a href="https://www.tue.nl" target="_blank" rel="noopener noreferrer">
             <img src="/tue.svg" alt="TU/e Logo" className="h-8" />
           </a>

@@ -117,12 +117,15 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
 
     const residentPositions = useMemo(() => {
     if (residentCount === 0) return [];
-    const basePositions = (people && people.length) ? people : layoutPositions;
+        const basePool = (layoutPositions && layoutPositions.length)
+            ? layoutPositions
+            : (people && people.length ? people : []);
+    if (!basePool.length) return [];
 
-    // Shuffle positions for a uniform distribution
-        const shuffledPositions = shuffleArray(basePositions);
+        // Shuffle positions for a uniform distribution
+        const shuffledPositions = shuffleArray(basePool);
 
-        return shuffledPositions.slice(0, residentCount);
+        return shuffledPositions.slice(0, Math.min(residentCount, shuffledPositions.length));
     }, [people, layoutPositions, residentCount]);
 
     const availableLayoutPositions = useMemo(() => {
