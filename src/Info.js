@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 const STYLES = {
   getStartedButton:
-    'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
+  'bg-[#971547] hover:bg-[#caabbf] text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
 };
 
 const translations = {
@@ -219,7 +219,7 @@ function SectionBody({ text }) {
   const flushPara = () => {
     if (paraBuffer.length) {
       items.push(
-        <p key={`p-${items.length}`} className="text-slate-700 text-base text-justify mb-3">
+        <p key={`p-${items.length}`} className="text-base text-justify mb-3" style={{ color: "#431325" }}>
           {renderInline(paraBuffer.join(' '))}
         </p>
       );
@@ -352,13 +352,16 @@ export default function Info() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center p-4 sm:p-8">
+    <div
+  className="min-h-screen flex flex-col items-center p-4 sm:p-8"
+  style={{ backgroundColor: "#dfdfe0", color: "#431325" }}
+>
       <div className="w-full max-w-7xl mx-auto">
         <header className="relative flex justify-between items-center w-full mb-8">
           <div className="flex justify-start items-center gap-2" style={{ flex: 1 }}>
             <button
               onClick={handleHomeClick}
-              className="p-2 flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors"
+              className="p-2 flex items-center gap-2 text-[#1f1f21] hover:text-[#1f1f21] transition-colors"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -401,7 +404,7 @@ export default function Info() {
           <div className="text-center" style={{ flex: 3 }}>
             <div className="flex justify-center items-center gap-x-3">
               <img src="/p3venti.png" alt="P3Venti Logo" className="h-12 lg:h-14" />
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold" style={{ color: "#971547" }}>
                 <span className="sm:hidden">PARAAT</span>
                 <span className="hidden sm:inline">
                   Pandemic Readiness Assessment & Action Tool (PARAAT)
@@ -415,7 +418,7 @@ export default function Info() {
               <select
                 onChange={handleLanguageChange}
                 value={language}
-                className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                className="bg-white border-2 border-slate-300 rounded-lg py-2 px-4 text-base font-semibold text-[#1f1f21] focus:outline-none focus:ring-2 focus:ring-[#971547] transition-colors"
               >
                 <option value="en">English</option>
                 <option value="nl">Nederlands</option>
@@ -427,13 +430,13 @@ export default function Info() {
 
       <div className="w-full max-w-4xl mx-auto flex-grow">
         <main className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center" style={{ color: "#431325" }}>
             {content.title}
           </h2>
 
           {content.sections.map((sec, i) => (
             <section key={i} className="mb-8">
-              <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-3">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3" style={{ color: "#431325" }}>
                 {sec.heading}
               </h3>
               <SectionBody text={sec.body} />
