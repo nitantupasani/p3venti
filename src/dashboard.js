@@ -228,8 +228,8 @@ const FactorCardButton = ({ id, label, isActive, onSelect }) => {
       onClick={handleSelect}
       className={`flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 text-center flex items-center justify-center px-3 uppercase text-[10px] sm:text-xs font-semibold tracking-wide transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 ${
       isActive
-        ? 'bg-blue-500 text-white border-blue-500 shadow-2xl ring-4 ring-blue-200 scale-105'
-        : 'bg-white text-slate-700 border-slate-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-2xl hover:scale-105'}`}
+        ? 'bg-[#ab7b97] text-[#dfdfe0] border-[#971547] shadow-2xl ring-1 ring-[#971547] scale-105'
+        : 'bg-[#dfdfe0] text-[#971547] border-[#971547] hover:bg-[#ab7b97] hover:text-[#dfdfe0] hover:border-[#971547] hover:shadow-2xl hover:scale-105'}`}
       aria-pressed={isActive}
     >
       <span className="leading-tight">{label}</span>
@@ -238,9 +238,9 @@ const FactorCardButton = ({ id, label, isActive, onSelect }) => {
 };
 
 const ExpandedFactorCard = ({ title, description }) => (
-  <div className="w-full max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 md:p-8 transition-all duration-500">
-    <h3 className="text-2xl font-bold text-slate-800 uppercase tracking-wide text-center md:text-left">{title}</h3>
-    <p className="mt-4 text-slate-700 leading-relaxed text-sm md:text-base whitespace-pre-line">
+  <div className="w-full max-w-4xl mx-auto bg-[#dfdfe0] border border-gray-300 rounded-2xl shadow-2xl p-6 md:p-8 transition-all duration-500">
+    <h3 className="text-2xl font-bold text-[#971547] uppercase tracking-wide text-center md:text-left">{title}</h3>
+    <p className="mt-4 text-[#971547] leading-relaxed text-sm md:text-base whitespace-pre-line">
       {description}
     </p>
   </div>
@@ -733,7 +733,9 @@ export default function Dashboard() {
     }
 
     const socialDistance = 1.5;
-    const { positions, fullTheoretical } = getPositionsAndTheoreticalMax(shape, dims, socialDistance);
+    const { positions, fullTheoretical } = getPositionsAndTheoreticalMax(shape, dims, socialDistance, {
+      gridStep: socialDistance * 0.5,
+    });
     const geometricCapacity = Math.floor(fullTheoretical * DEFAULT_USABLE_SPACE_PERCENT / 100);
 
     return {
@@ -908,7 +910,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">{content.cardsTitle}</h2>
+            <h2 className="text-2xl font-bold text-[#431325] mb-6 text-center">{content.cardsTitle}</h2>
             <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-12">
                 <div className="flex flex-col items-center space-y-6">
                     <div className="w-full">
@@ -938,7 +940,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">{content.analysisTitle}</h1>
+            <h1 className="text-2xl font-bold text-[#431325] mb-6 text-center">{content.analysisTitle}</h1>
 
             <div className="space-y-6 mb-12">
                 {analysisData.map(data => (
