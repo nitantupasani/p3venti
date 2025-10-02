@@ -30,7 +30,9 @@ const translations = {
     pleaseNoteTitle: 'Please Note',
     pleaseNoteText: `This is a diagram that visualizes the maximum occupancy of a living room. 
 This is based on the size of the room and a distance of 1.5 meters between people. 
-Factors such as furnishings and ventilation are not taken into account.`,
+Factors such as furnishings and ventilation are not taken into account. 
+In this visualization, the red circles represent employees who move dynamically through the space, 
+while the green circles represent the residents of the care home, who are mostly static.`,
     cardsTitle: 'Always keep in mind these factors when making changes',
     card1Title: 'Quality of life resident',
     card1Back: 'Well-being of the resident. Consists of several components that are important for that person to give a valuable meaning to their life. This also includes humanity, autonomy and comfort. This should be priority.',
@@ -103,7 +105,9 @@ Factors such as furnishings and ventilation are not taken into account.`,
     pleaseNoteTitle: 'Let op',
     pleaseNoteText: `Dit is een schema dat de maximale bezetting van de woonkamer visualiseert. 
 Dit is gebaseerd op de grootte van de ruimte en een afstand van 1.5 meter tussen personen. 
-Er is hier geen rekening gehouden met factoren zoals inrichting en ventilatie.`,
+Er is hier geen rekening gehouden met factoren zoals inrichting en ventilatie. 
+In deze visualisatie stellen de rode cirkels de medewerkers voor die zich dynamisch door de ruimte bewegen, 
+terwijl de groene cirkels de bewoners van het zorgcentrum vertegenwoordigen, die grotendeels statisch zijn.`,
     cardsTitle: 'Houd bij het maken van veranderingen altijd rekening met deze factoren',
     card1Title: 'Kwaliteit van leven bewoner',
     card1Back: 'Welzijn van de bewoner. Bestaat uit verschillende componenten die voor die persoon belangrijk zijn om een waardevolle invulling aan zijn leven te geven. Dit omvat ook menselijkheid, autonomie en comfort. Dit zou prioriteit moeten hebben.',

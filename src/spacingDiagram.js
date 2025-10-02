@@ -542,7 +542,7 @@ const SpacingDiagram = ({ shape, dims, people, socialDistance, color, meta, visu
           }}
         >
           {noteBox?.text && (
-            <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 w-[500px]">
+            <div className="caption-box bg-slate-50 border border-slate-300 rounded-md p-4 max-w-xl w-full">
               <div className="text-slate-900 font-bold text-xl leading-tight">
                 {noteBox.title || 'Please Note'}
               </div>
