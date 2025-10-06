@@ -10,6 +10,38 @@ const DEFAULT_USABLE_SPACE_PERCENT = 75;
 const ignoreForValueScore = ['q2','q5','q6','q7','q11','q12'];
 const ignoreForRiskScore = ['q1','q2','q6','q7'];
 
+    const getScore = (type, qId, answer) => {
+  // Special logic for q1 (numerical answer)
+  if (qId === 'q1') {
+    const numAnswer = Number(answer);
+    let value = 0;
+    let risk = 0;
+
+    if (numAnswer >= 1 && numAnswer <= 5) {
+      value = 3; risk = 0;
+    } else if (numAnswer > 5 && numAnswer <= 10) {
+      value = 5; risk = 0;
+    } else if (numAnswer > 10 && numAnswer <= 15) {
+      value = 3; risk = 0;
+    } else if (numAnswer > 15 && numAnswer <= 20) {
+      value = 2; risk = 0;
+    } else if (numAnswer > 20 && numAnswer <= 50) {
+      value = 1; risk = 0;
+    }
+    return type === 'value' ? value : risk;
+  }
+
+  // Skip ignored questions
+  if (type === 'value' && ignoreForValueScore.includes(qId)) return 0;
+  if (type === 'risk' && ignoreForRiskScore.includes(qId)) return 0;
+
+  // Regular index-based lookup for other questions
+  const aIdx = answer;
+  const scoreObject = scoringRules[qId]?.[aIdx];
+  if (!scoreObject) return 0;
+  return scoreObject[type] ?? 0;
+};
+
 const translations = {
   en: {
     pageTitle: 'P3 Venti',
@@ -594,37 +626,7 @@ export default function Dashboard() {
       }));
     }
 
-    const getScore = (type, qId, answer) => {
-  // Special logic for q1 (numerical answer)
-  if (qId === 'q1') {
-    const numAnswer = Number(answer);
-    let value = 0;
-    let risk = 0;
 
-    if (numAnswer >= 1 && numAnswer <= 5) {
-      value = 3; risk = 0;
-    } else if (numAnswer > 5 && numAnswer <= 10) {
-      value = 5; risk = 0;
-    } else if (numAnswer > 10 && numAnswer <= 15) {
-      value = 3; risk = 0;
-    } else if (numAnswer > 15 && numAnswer <= 20) {
-      value = 2; risk = 0;
-    } else if (numAnswer > 20 && numAnswer <= 50) {
-      value = 1; risk = 0;
-    }
-    return type === 'value' ? value : risk;
-  }
-
-  // Skip ignored questions
-  if (type === 'value' && ignoreForValueScore.includes(qId)) return 0;
-  if (type === 'risk' && ignoreForRiskScore.includes(qId)) return 0;
-
-  // Regular index-based lookup for other questions
-  const aIdx = answer;
-  const scoreObject = scoringRules[qId]?.[aIdx];
-  if (!scoreObject) return 0;
-  return scoreObject[type] ?? 0;
-};
 
     return dashboardLayout.map(row => {
       let totalValueScore = 0;
