@@ -7,7 +7,7 @@ import { sendDashboardSummaryEmail } from "./emailService";
 
 const DEFAULT_USABLE_SPACE_PERCENT = 75;
 
-const ignoreForValueScore = ['q2','q5','q6','q7','q11','q12'];
+const ignoreForValueScore = ['q2','q5','q6','q7','q11','q12','q20'];
 const ignoreForRiskScore = ['q1','q2','q6','q7'];
 
 const getScore = (type, qId, answerIndex) => {

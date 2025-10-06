@@ -438,8 +438,8 @@ export const scoringRules = {
     'q17': { values: [5, 1], risk: [0, 5] },
     'q18': { values: [5, 3, 1], risk: [0, 3, 5] },
     'q19': { values: [5, 4, 3, 1], risk: [0, 3, 4, 5] },
-    'q20': { values: [5, 5, 5], risk: [5, 3, 0] },
-    'q21': { values: [5, 3, 1], risk: [1, 3, 5] },
+    'q20': { values: [5, 5, 5], risk: [0, 3, 5] },
+    'q21': { values: [5, 3, 1], risk: [0, 3, 5] },
 };
 
 // --- Exports ---
