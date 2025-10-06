@@ -11,33 +11,25 @@ const ignoreForValueScore = ['q2','q5','q6','q7','q11','q12','q20'];
 const ignoreForRiskScore = ['q1','q2','q6','q7'];
 
 const getScore = (type, qId, answerIndex) => {
-  // Normalize type key to match scoringRules
-  const scoreType = type === 'value' ? 'values' : type; // accept both 'value' and 'values'
+  const scoreKey = (type === 'value') ? 'values' : type; // accept both 'value' and 'values'
 
-  // Special logic for q1 (numeric answer, not index-based)
+  // q1: numeric answer
   if (qId === 'q1') {
     const num = Number(answerIndex);
-    let value = 0;
-    let risk = 0;
-    if (num >= 1 && num <= 5)       { value = 3; risk = 0; }
-    else if (num > 5 && num <= 10)  { value = 5; risk = 0; }
-    else if (num > 10 && num <= 15) { value = 3; risk = 0; }
-    else if (num > 15 && num <= 20) { value = 2; risk = 0; }
-    else if (num > 20 && num <= 50) { value = 1; risk = 0; }
-    return scoreType === 'values' ? value : risk;
+    let values = 0, risk = 0;
+    if (num >= 1 && num <= 5) values = 3;
+    else if (num <= 10)       values = 5;
+    else if (num <= 15)       values = 3;
+    else if (num <= 20)       values = 2;
+    else if (num <= 50)       values = 1;
+    return scoreKey === 'values' ? values : risk;
   }
 
-  // Skip ignored questions
-  if (scoreType === 'values' && ignoreForValueScore.includes(qId)) return 0;
-  if (scoreType === 'risk'   && ignoreForRiskScore.includes(qId))  return 0;
+  if (scoreKey === 'values' && ignoreForValueScore.includes(qId)) return 0;
+  if (scoreKey === 'risk'   && ignoreForRiskScore.includes(qId))  return 0;
 
-  // Correctly read from scoringRules { values: [...], risk: [...] }
   const rule = scoringRules[qId];
-  if (!rule) return 0;
-
-  if (scoreType === 'values') return (rule.values?.[answerIndex] ?? 0);
-  if (scoreType === 'risk')   return (rule.risk?.[answerIndex] ?? 0);
-  return 0;
+  return rule?.[scoreKey]?.[answerIndex] ?? 0; // <-- correct shape
 };
 
 
@@ -617,92 +609,95 @@ export default function Dashboard() {
 
 
   const analysisData = useMemo(() => {
-    const normalizeScore = (score) => (score / 5) * 100;
+  return dashboardLayout.map(row => {
+    let totalValueScore = 0;
+    let totalRiskScore = 0;
+    let valueCount = 0;
+    let riskCount = 0;
+    let recommendationsList = [];
+    let reliabilityDeduction = 0;
 
-    if (!answers || Object.keys(answers).length === 0) {
-      return dashboardLayout.map(row => ({
-        title: row.title, paraatScore: 0, reliabilityScore: 100, recommendations: []
-      }));
-    }
+    row.questionIds.forEach(id => {
+      const answerIndex = answers[id];
+      const question = allQuestions.find(q => q && q.id === id);
 
+      if (answerIndex !== undefined && question) {
+        const v = getScore('values', id, answerIndex);
+        const r = getScore('risk', id, answerIndex);
 
-
-    return dashboardLayout.map(row => {
-      let totalValueScore = 0;
-      let totalRiskScore = 0;
-      let recommendationsList = [];
-      let reliabilityDeduction = 0;
-      let answeredQuestions = 0;
-
-      row.questionIds.forEach(id => {
-        const answerIndex = answers[id];
-        const question = allQuestions.find(q => q && q.id === id);
-
-        if (answerIndex !== undefined && question) {
-          answeredQuestions++;
-          totalValueScore += getScore('values', id, answerIndex);
-          totalRiskScore += getScore('risk', id, answerIndex);
-
-          const rec = recommendations[language]?.[id]?.[answerIndex];
-          if (rec) recommendationsList.push(rec);
-
-          const iDontKnowIndex = question.answerOptions ? question.answerOptions.length - 1 : -1;
-          if (answerIndex === iDontKnowIndex) {
-            reliabilityDeduction += reliabilityWeights[id] || 0;
-          }
+        if (!ignoreForValueScore.includes(id)) {
+          totalValueScore += v;
+          valueCount++;
         }
-      });
-
-      const avgValueScore = answeredQuestions > 0 ? totalValueScore / answeredQuestions : 0;
-      const avgRiskScore = answeredQuestions > 0 ? totalRiskScore / answeredQuestions : 0;
-
-      const normalizedValueScore = normalizeScore(avgValueScore);
-      const normalizedRiskScore = normalizeScore(avgRiskScore);
-
-      const protectionScore = 100 - normalizedRiskScore;
-      const paraatScore = (protectionScore + normalizedValueScore) / 2;
-
-      const categoryBaseReliability = row.totalWeight;
-      const finalCategoryReliability = ((categoryBaseReliability - reliabilityDeduction) / categoryBaseReliability) * 100;
-
-      return {
-        title: row.title,
-        paraatScore: isNaN(paraatScore) ? 0 : paraatScore,
-        reliabilityScore: isNaN(finalCategoryReliability) ? 0 : Math.max(0, finalCategoryReliability),
-        recommendations: recommendationsList
-      };
-    });
-  }, [answers, language, allQuestions, dashboardLayout]);
-
-  const { totalScoreValues, totalScoreExposure } = useMemo(() => {
-    const normalizeScore = (score) => (score / 5) * 100;
-
-    if (!answers || allQuestions.length === 0) {
-        return { totalScoreValues: 0, totalScoreExposure: 0 };
-    }
-
-    let totalValue = 0;
-    let totalRisk = 0;
-    let answeredCount = 0;
-
-    allQuestions.forEach(q => {
-        if(q) {
-            const answerIndex = answers[q.id];
-            if (answerIndex !== undefined) {
-                answeredCount++;
-                totalValue += getScore('values', q.id, answerIndex);
-                totalRisk += getScore('risk', q.id, answerIndex);
-            }
+        if (!ignoreForRiskScore.includes(id)) {
+          totalRiskScore += r;
+          riskCount++;
         }
+
+        const rec = recommendations[language]?.[id]?.[answerIndex];
+        if (rec) recommendationsList.push(rec);
+
+        const iDontKnowIndex = question.answerOptions ? question.answerOptions.length - 1 : -1;
+        if (answerIndex === iDontKnowIndex) {
+          reliabilityDeduction += reliabilityWeights[id] || 0;
+        }
+      }
     });
 
-    const avgValue = answeredCount > 0 ? totalValue / answeredCount : 0;
-    const avgRisk = answeredCount > 0 ? totalRisk / answeredCount : 0;
+    const avgValueScore = valueCount ? totalValueScore / valueCount : 0;
+    const avgRiskScore  = riskCount  ? totalRiskScore  / riskCount  : 0;
+
+    // Inline normalization: 0–5 → 0–100
+    const normalizedValueScore = valueCount ? (avgValueScore / 5) * 100 : 0;
+    const normalizedRiskScore  = riskCount  ? (avgRiskScore  / 5) * 100 : 0;
+
+    const protectionScore = 100 - normalizedRiskScore;
+    const paraatScore = (protectionScore + normalizedValueScore) / 2;
+
+    const categoryBaseReliability = row.totalWeight;
+    const finalCategoryReliability =
+      ((categoryBaseReliability - reliabilityDeduction) / categoryBaseReliability) * 100;
 
     return {
-        totalScoreValues: normalizeScore(avgValue),
-        totalScoreExposure: normalizeScore(avgRisk)
+      title: row.title,
+      paraatScore: isNaN(paraatScore) ? 0 : paraatScore,
+      reliabilityScore: isNaN(finalCategoryReliability) ? 0 : Math.max(0, finalCategoryReliability),
+      recommendations: recommendationsList
     };
+  });
+}, [answers, allQuestions, dashboardLayout, language]);
+
+
+  const { totalScoreValues, totalScoreExposure } = useMemo(() => {
+  // 0–5 → 0–100
+  const toPct = (avg) => (avg / 5) * 100;
+
+  if (!answers || allQuestions.length === 0) {
+    return { totalScoreValues: 0, totalScoreExposure: 0 };
+  }
+
+  let totalValue = 0, totalRisk = 0;
+  let valueCount = 0, riskCount = 0;
+
+  allQuestions.forEach((q) => {
+    if (!q) return;
+    const answerIndex = answers[q.id];
+    if (answerIndex === undefined) return;
+
+    const v = getScore('values', q.id, answerIndex);
+    const r = getScore('risk',   q.id, answerIndex);
+
+    if (!ignoreForValueScore.includes(q.id)) { totalValue += v; valueCount++; }
+    if (!ignoreForRiskScore.includes(q.id))  { totalRisk  += r; riskCount++;  }
+  });
+
+  const avgValue = valueCount ? totalValue / valueCount : 0;
+  const avgRisk  = riskCount  ? totalRisk  / riskCount  : 0;
+
+  return {
+    totalScoreValues: valueCount ? toPct(avgValue) : 0,
+    totalScoreExposure: riskCount ? toPct(avgRisk) : 0,
+  };
 }, [answers, allQuestions]);
 
   const overallParaatScore = useMemo(() => {
