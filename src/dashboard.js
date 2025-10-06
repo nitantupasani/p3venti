@@ -10,37 +10,36 @@ const DEFAULT_USABLE_SPACE_PERCENT = 75;
 const ignoreForValueScore = ['q2','q5','q6','q7','q11','q12'];
 const ignoreForRiskScore = ['q1','q2','q6','q7'];
 
-    const getScore = (type, qId, answer) => {
-  // Special logic for q1 (numerical answer)
+const getScore = (type, qId, answerIndex) => {
+  // Normalize type key to match scoringRules
+  const scoreType = type === 'value' ? 'values' : type; // accept both 'value' and 'values'
+
+  // Special logic for q1 (numeric answer, not index-based)
   if (qId === 'q1') {
-    const numAnswer = Number(answer);
+    const num = Number(answerIndex);
     let value = 0;
     let risk = 0;
-
-    if (numAnswer >= 1 && numAnswer <= 5) {
-      value = 3; risk = 0;
-    } else if (numAnswer > 5 && numAnswer <= 10) {
-      value = 5; risk = 0;
-    } else if (numAnswer > 10 && numAnswer <= 15) {
-      value = 3; risk = 0;
-    } else if (numAnswer > 15 && numAnswer <= 20) {
-      value = 2; risk = 0;
-    } else if (numAnswer > 20 && numAnswer <= 50) {
-      value = 1; risk = 0;
-    }
-    return type === 'value' ? value : risk;
+    if (num >= 1 && num <= 5)       { value = 3; risk = 0; }
+    else if (num > 5 && num <= 10)  { value = 5; risk = 0; }
+    else if (num > 10 && num <= 15) { value = 3; risk = 0; }
+    else if (num > 15 && num <= 20) { value = 2; risk = 0; }
+    else if (num > 20 && num <= 50) { value = 1; risk = 0; }
+    return scoreType === 'values' ? value : risk;
   }
 
   // Skip ignored questions
-  if (type === 'value' && ignoreForValueScore.includes(qId)) return 0;
-  if (type === 'risk' && ignoreForRiskScore.includes(qId)) return 0;
+  if (scoreType === 'values' && ignoreForValueScore.includes(qId)) return 0;
+  if (scoreType === 'risk'   && ignoreForRiskScore.includes(qId))  return 0;
 
-  // Regular index-based lookup for other questions
-  const aIdx = answer;
-  const scoreObject = scoringRules[qId]?.[aIdx];
-  if (!scoreObject) return 0;
-  return scoreObject[type] ?? 0;
+  // Correctly read from scoringRules { values: [...], risk: [...] }
+  const rule = scoringRules[qId];
+  if (!rule) return 0;
+
+  if (scoreType === 'values') return (rule.values?.[answerIndex] ?? 0);
+  if (scoreType === 'risk')   return (rule.risk?.[answerIndex] ?? 0);
+  return 0;
 };
+
 
 const translations = {
   en: {
