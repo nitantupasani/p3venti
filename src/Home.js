@@ -60,7 +60,7 @@ const translations = {
         instructions: 'The questions focus on the living room as a communal space. Please answer the questions for one living room in your facility. If there are multiple living rooms, you can repeat the scan for each one.',
         getStarted: 'Get Started',
         mainContent: `### What you do
-* Choose one room and answer 20 short questions about people & use, space & air, and agreements & resources.
+* Choose one room and answer 21 short questions about people & use, space & air, and agreements & resources.
 * Do you have multiple living rooms? Repeat the scan for each room.
 ### What you get
 * An analysis of the pandemic preparedness of this living room. The higher the score, the better prepared you are.
@@ -81,7 +81,7 @@ const translations = {
         instructions: 'De vragen die gesteld worden gaan over de woonkamer als gemeenschappelijke ruimte. Vul de vragen in over één woonkamer in uw instelling. Als er meerdere woonkamers zijn, vult u de vragen opnieuw in voor de andere woonkamers.',
         getStarted: 'Aan de slag',
         mainContent: `### Wat u doet
-* Kies één ruimte en beantwoord 20 korte vragen over mensen & gebruik, ruimte & lucht, en afspraken & middelen.
+* Kies één ruimte en beantwoord 21 korte vragen over mensen & gebruik, ruimte & lucht, en afspraken & middelen.
 * Heeft u meerdere woonkamers? Herhaal de scan per ruimte.
 ### Wat u krijgt
 * Een analyse van de pandemische paraatheid van deze woonkamer. Hoe hoger de score hoe beter voorbereid u bent. 

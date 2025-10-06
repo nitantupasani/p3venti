@@ -46,7 +46,7 @@ const translations = {
       {
         heading: 'Hoe werkt de PARAAT-scan?',
         body: `• Kies één ruimte. Heeft u meerdere woonkamers? Herhaal de scan per kamer.
-• Beantwoord 20 korte vragen in drie blokken:
+• Beantwoord 21 korte vragen in drie blokken:
   ◦ Mensen & gebruik (wie, hoeveel, isoleren, mengen)
   ◦ Ruimte & lucht (m², 1,5 m mogelijk, ramen/roosters, recirculatie, CO₂, onderhoud)
   ◦ Afspraken & middelen (instructies, PBM, diensten, vaste teams, budget)
@@ -143,7 +143,7 @@ We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties
       {
         heading: 'How does the PARAAT-scan work?',
         body: `• Select one room. Do you have multiple living rooms? Repeat the scan for each room.
-• Answer 20 short questions in three blocks:
+• Answer 21 short questions in three blocks:
   ◦ People & use (who, how many, isolation, mixing)
   ◦ Space & air (m², 1.5 m possible, windows/vents, recirculation, CO₂, maintenance)
   ◦ Agreements & resources (instructions, PPE, services, permanent teams, budget)
@@ -221,7 +221,7 @@ function SectionBody({ text }) {
   const flushPara = () => {
     if (paraBuffer.length) {
       items.push(
-        <p key={`p-${items.length}`} className="text-base text-justify mb-3" style={{ color: "#431325" }}>
+        <p key={`p-${items.length}`} className="text-base text-justify mb-3" style={{ color: "#000000" }}>
           {renderInline(paraBuffer.join(' '))}
         </p>
       );
@@ -234,13 +234,14 @@ function SectionBody({ text }) {
       items.push(
         <ul
           key={`ul-${items.length}`}
-          className="list-disc ml-6 sm:ml-8 pl-2 space-y-1 text-slate-700"
+          className="list-disc ml-6 sm:ml-8 pl-2 space-y-1"
+          style={{ color: "#000000" }}
         >
           {list.map((li, idx) => (
             <li key={`li-${idx}`}>
               <span>{renderInline(li.text)}</span>
               {li.sub && li.sub.length > 0 && (
-                <ul className="list-[circle] ml-10 sm:ml-12 pl-2 space-y-1">
+                <ul className="list-[circle] ml-10 sm:ml-12 pl-2 space-y-1" style={{ color: "#000000" }}>
                   {li.sub.map((s, j) => (
                     <li key={`sub-${idx}-${j}`}>{renderInline(s)}</li>
                   ))}
@@ -260,7 +261,8 @@ function SectionBody({ text }) {
       items.push(
         <ul
           key={`subonly-${items.length}`}
-          className="list-[circle] ml-10 sm:ml-12 pl-2 space-y-1 text-slate-700"
+          className="list-[circle] ml-10 sm:ml-12 pl-2 space-y-1"
+          style={{ color: "#000000" }}
         >
           {listSubOnly.map((s, j) => (
             <li key={`solo-${j}`}>{renderInline(s)}</li>
@@ -305,7 +307,8 @@ function SectionBody({ text }) {
       }
       return;
     }
-        const indentMatch = line.match(/^(\t| {2,})(.*)$/);
+
+    const indentMatch = line.match(/^(\t| {2,})(.*)$/);
     if (indentMatch) {
       flushPara();
       flushAllLists();
@@ -313,7 +316,8 @@ function SectionBody({ text }) {
       items.push(
         <p
           key={`indent-${items.length}`}
-          className="text-slate-700 text-base text-justify mb-3 ml-5 sm:ml-6"
+          className="text-base text-justify mb-3 ml-5 sm:ml-6"
+          style={{ color: "#000000" }}
         >
           {renderInline(indentText)}
         </p>
@@ -328,6 +332,7 @@ function SectionBody({ text }) {
 
   return <div>{items}</div>;
 }
+
 
 export default function Info() {
   const location = useLocation();
@@ -356,7 +361,7 @@ export default function Info() {
   return (
     <div
   className="min-h-screen flex flex-col items-center p-4 sm:p-8"
-  style={{ backgroundColor: "#dfdfe0", color: "#431325" }}
+  style={{ backgroundColor: "#dfdfe0" }}
 >
       <div className="w-full max-w-7xl mx-auto">
         <header className="relative flex justify-between items-center w-full mb-2 leading-tight">

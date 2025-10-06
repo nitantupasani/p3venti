@@ -390,8 +390,8 @@ export const recommendations = {
 };
   
 export const scoringRules = {
-    'q1': { values: [3, 5, 3, 2, 1], risk: [0, 0, 0, 0, 0] },
-    'q2': { values: [0, 0, 0, 0, 0], risk: [0, 0, 0, 0, 0] },
+    // 'q1': { values: [3, 5, 3, 2, 1], risk: [0, 0, 0, 0, 0] },
+    'q2': { values: [5, 5, 5, 5], risk: [0, 0, 0, 0, 0] },
     'q3': { values: [1, 3, 5], risk: [1, 3, 5] },
     'q4': { values: [5, 3, 1], risk: [1, 3, 5] },
     'q5': { values: [0, 0, 0], risk: [5, 3, 1] },
