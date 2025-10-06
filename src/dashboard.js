@@ -940,20 +940,22 @@ export default function Dashboard() {
 
             <div className="space-y-6 mb-12">
                 {analysisData.map(data => (
-                    <AnalysisRow
-                        key={data.title}
-                        title={data.title}
-                        paraatScore={data.paraatScore}
-                        reliabilityScore={data.reliabilityScore}
-                        recommendations={data.recommendations}
-                        reliabilityLabel={content.reliabilityScore}
-                        labels={{
-                            quick: content.recHeaderQuick,
-                            investment: content.recHeaderInvestment,
-                            information: content.recHeaderInformation,
-                        }}
-                    />
-                ))}
+  <AnalysisRow
+    key={data.title}
+    title={data.title}
+    paraatScore={data.paraatScore}
+    reliabilityScore={data.reliabilityScore}
+    recommendations={data.recommendations}
+    reliabilityLabel={content.reliabilityScore}
+    labels={{
+      quick: content.recHeaderQuick,
+      investment: content.recHeaderInvestment,
+      information: content.recHeaderInformation,
+    }}
+    preventiveHeading={language === 'nl' ? 'Preventieve acties' : 'Preventive actions'}
+  />
+))}
+
             </div>
 
             <div className="mt-12">

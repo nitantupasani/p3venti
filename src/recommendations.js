@@ -67,43 +67,74 @@ const ReliabilityScoreBar = ({ score, label }) => {
     );
 };
 
-const AnalysisRow = ({ title, paraatScore, reliabilityScore, recommendations, reliabilityLabel = 'Reliability Score', labels = {} }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    return (
-      <div className="p-4 bg-white rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-          <div className="md:col-span-3">
-            <h3 className="text-xl font-bold text-slate-800">{title}</h3>
-          </div>
-          <div className="md:col-span-5 flex flex-row items-center justify-center gap-6">
-            <FancyParaatDial score={paraatScore} label="PARAAT Score" />
-            <ReliabilityScoreBar score={reliabilityScore} label={reliabilityLabel} compact />
-          </div>
-          <div className="md:col-span-4 flex items-center justify-end">
-            <svg className={`w-8 h-8 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+const AnalysisRow = ({
+  title,
+  paraatScore,
+  reliabilityScore,
+  recommendations,
+  reliabilityLabel = 'Reliability Score',
+  labels = {},
+  preventiveHeading, // passed in from Dashboard
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      {/* Clickable summary row */}
+      <div
+        className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="md:col-span-3">
+          <h3 className="text-xl font-bold text-slate-800">{title}</h3>
         </div>
-        {isExpanded && (
-          <div className="mt-6 pt-4 border-t border-slate-200">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-200">
-              <h4>{labels.quick || 'Quick to do'}</h4>
-              <h4>{labels.investment || 'Investment'}</h4>
-              <h4>{labels.information || 'Information'}</h4>
-            </div>
-            {recommendations.map((rec, index) => (
-              <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
-                <p className="text-sm text-slate-600">{rec[0]}</p>
-                <p className="text-sm text-slate-600">{rec[1]}</p>
-                <p className="text-sm text-slate-600">{rec[2]}</p>
-              </div>
-            ))}
-          </div>
-        )}
+
+        <div className="md:col-span-5 flex flex-row items-center justify-center gap-6">
+          <FancyParaatDial score={paraatScore} label="PARAAT Score" />
+          <ReliabilityScoreBar score={reliabilityScore} label={reliabilityLabel} compact />
+        </div>
+
+        <div className="md:col-span-4 flex items-center justify-end">
+          <svg
+            className={`w-8 h-8 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
-    );
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <div className="mt-6 pt-4 border-t border-slate-200">
+          {/* Preventive actions heading (visible only when expanded) */}
+          <h4 className="text-lg font-bold text-[#431325] text-left mb-3">
+            {preventiveHeading || 'Preventive actions'}
+          </h4>
+
+          {/* Three-column headers */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-200">
+            <h4>{labels.quick || 'Quick to do'}</h4>
+            <h4>{labels.investment || 'Investment'}</h4>
+            <h4>{labels.information || 'Information'}</h4>
+          </div>
+
+          {/* Rows */}
+          {recommendations.map((rec, index) => (
+            <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
+              <p className="text-sm text-slate-600">{rec[0]}</p>
+              <p className="text-sm text-slate-600">{rec[1]}</p>
+              <p className="text-sm text-slate-600">{rec[2]}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
+
 
 // --- Data ---
 
