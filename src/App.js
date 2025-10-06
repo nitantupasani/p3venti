@@ -53,7 +53,7 @@ const translations = {
         questionSets: {
             personal: [
                 { id: "q1", questionText: "Consider a typical weekday in your living room. How many people are usually present at the same time? Think of residents, staff, and visitors.", type: "slider", min: 1, max: 50, unit: "people" },
-                { id: "q2", questionText: "Which group of residents uses this living room?", answerOptions: [{ answerText: "People with psychogeriatric complaints" }, { answerText: "People with somatic complaints" }, { answerText: "People with intellectual disabilities" }, { answerText: "Mixed" }, { answerText: "I don't know" }] },
+                { id: "q2", questionText: "Which group of residents use this living room?", answerOptions: [{ answerText: "People with psychogeriatric complaints" }, { answerText: "People with somatic complaints" }, { answerText: "People with intellectual disabilities" }, { answerText: "Mixed" }, { answerText: "I don't know" }] },
                 { id: "q3", questionText: "How long are residents in this room on average per day?", answerOptions: [{ answerText: "<1 hour" }, { answerText: "1-3 hours" }, { answerText: "> 3 hours" }, { answerText: "I don't know" }] },
                 { id: "q4", questionText: "Can residents temporarily be isolated if they have symptoms (for example in their own rooms)?", answerOptions: [{ answerText: "Yes" }, { answerText: "Some can, some cannot" }, { answerText: "No" }, { answerText: "I don't know" }] },
                 { id: "q5", questionText: "Do different departments/groups regularly mix here?", answerOptions: [{ answerText: "Often" }, { answerText: "Regularly" }, { answerText: "Sometimes" }, { answerText: "Rarely or Never" },{ answerText: "I don't know" }] },
