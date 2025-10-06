@@ -90,8 +90,8 @@ const translations = {
         summaryTitle: 'Overzicht Actieplan',
         summarySubtitle: 'De volgende prioriteiten zijn geselecteerd:',
         startOver: 'Opnieuw Beginnen',
-        previousStep: 'Vorige Stap',
-        nextStep: 'Volgende Stap',
+        previousStep: 'Vorige Vraag',
+        nextStep: 'Volgende Vraag',
         viewSummary: 'Bekijk Dashboard',
         questionSets: {
             personal: [
