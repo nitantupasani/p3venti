@@ -69,8 +69,8 @@ const translations = {
       interaction: 'Space & Air',
       organizational: 'Agreements & Resources'
     },
-    recHeaderQuick: 'Quick to do',
-    recHeaderInvestment: 'Investment',
+    recHeaderQuick: 'Quick adjustment',
+    recHeaderInvestment: 'Long-term adjustment',
     recHeaderInformation: 'Information',
     maxPeopleLabel: 'Max people',
     geometryLimitedLabel: 'Geometry-limited',
@@ -140,8 +140,8 @@ const translations = {
       interaction: 'Ruimte & lucht',
       organizational: 'Afspraken & middelen'
     },
-    recHeaderQuick: 'Snel te doen',
-    recHeaderInvestment: 'Investering',
+    recHeaderQuick: 'Snelle aanpassing',
+    recHeaderInvestment: 'Langetermijnaanpassing',
     recHeaderInformation: 'Informatie',
     maxPeopleLabel: 'Maximum aantal mensen',
     geometryLimitedLabel: 'Gebaseerd op beschikbare ruimte',

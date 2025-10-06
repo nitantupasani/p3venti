@@ -116,8 +116,8 @@ const AnalysisRow = ({
 
           {/* Three-column headers */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-200">
-            <h4>{labels.quick || 'Quick to do'}</h4>
-            <h4>{labels.investment || 'Investment'}</h4>
+            <h4>{labels.quick || 'Quick adjustment'}</h4>
+            <h4>{labels.investment || 'Long-term adjustment'}</h4>
             <h4>{labels.information || 'Information'}</h4>
           </div>
 
