@@ -1,6 +1,59 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const teamMembers = [
+  {
+    id: 'masi',
+    name: 'prof. dr. ir. Masi Mohammadi',
+    roles: {
+      nl: 'Professor at TU/e',
+      en: 'Professor at TU/e',
+    },
+    link: 'https://www.tue.nl/en/research/researchers/masi-mohammadi',
+    image: `${process.env.PUBLIC_URL}/pic1.jpg`,
+  },
+  {
+    id: 'anneke',
+    name: 'Dr. Anneke Spitters',
+    roles: {
+      nl: 'Postdoctoral Researcher at TU/e',
+      en: 'Postdoctoral Researcher at TU/e',
+    },
+    link: 'https://research.tue.nl/en/persons/anneke-spitters',
+    image: `${process.env.PUBLIC_URL}/pic2.jpg`,
+  },
+  {
+    id: 'nitant',
+    name: 'Nitant Upasani',
+    roles: {
+      nl: 'Application Developer/PhD Candidate at TU/e',
+      en: 'Application Developer/PhD Candidate at TU/e',
+    },
+    link: 'https://research.tue.nl/en/persons/nitant-upasani',
+    image: `${process.env.PUBLIC_URL}/pic3.jpg`,
+  },
+  {
+    id: 'parsa',
+    name: 'Parsa Safaee',
+    roles: {
+      nl: 'Application Designer/EngD Candidate at TU/e',
+      en: 'Application Designer/EngD Candidate at TU/e',
+    },
+    link: 'https://www.tue.nl/en/education/student-stories-engd/parsa-safaee',
+    image: `${process.env.PUBLIC_URL}/pic4.jpg`,
+  },
+  {
+    id: 'tno',
+    name: 'Menno Hinkema',
+    roles: {
+      nl: 'Senior Researcher at TNO',
+      en: 'Senior Researcher at TNO',
+    },
+    // link: 'https://www.tue.nl/en/',
+    image: `${process.env.PUBLIC_URL}/pic5.jpg`,
+  },
+];
+
 const STYLES = {
   getStartedButton:
   'bg-[#971547] hover:bg-[#caabbf] text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg',
@@ -9,6 +62,9 @@ const STYLES = {
 const translations = {
   nl: {
     title: 'Handleiding Pandemic Readiness Assessment & Action Tool (PARAAT)',
+    teamTitle: 'Ontmoet het team',
+    teamSubtitle:
+      'Ontwikkelaars van de PARAAT scan',
     pageSubtitle: 'Voor locatiemanagers in de langdurige zorg.',
     sections: [
       {
@@ -106,6 +162,9 @@ We zetten acties op volgorde van effect en inspanning. Zo pakt u eerst de acties
   },
   en: {
     title: 'Manual - Pandemic Readiness Assessment & Action Tool (PARAAT)',
+    teamTitle: 'Meet the team',
+    teamSubtitle:
+      'Developers of the PARAAT Scan.',
     pageSubtitle: 'For location managers in long-term care.',
     sections: [
       {
@@ -442,7 +501,49 @@ export default function Info() {
               <SectionBody text={sec.body} />
             </section>
           ))}
+          <section className="mt-12">
+            <div className="text-center max-w-3xl mx-auto">
+              <h3 className="text-xl sm:text-2xl font-semibold text-slate-900">
+                {content.teamTitle}
+              </h3>
+              <p className="mt-3 text-base sm:text-lg text-slate-600">
+                {content.teamSubtitle}
+              </p>
+            </div>
 
+            <div className="mt-8 grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {teamMembers.map((member) => (
+                <a
+                  key={member.id}
+                  href={member.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <div className="h-full bg-[#ffffff] border border-white rounded-2xl p-5 flex flex-col shadow-sm transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-lg">
+                    <div className="relative w-full overflow-hidden rounded-xl">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full aspect-square object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="mt-4 text-center">
+                      <p className="text-lg font-semibold text-slate-900">{member.name}</p>
+                      <p className="mt-1 text-sm sm:text-base text-slate-600">
+                        {member.roles[language]}
+                      </p>
+                    </div>
+                    {member.id !== 'tno' && (
+  <p className="mt-4 text-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
+    {language === 'nl' ? 'Lees meer bij TU/e' : 'Learn more at TU/e'}
+  </p>
+)}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
           <div className="text-center mt-10">
             <button onClick={handleStart} className={STYLES.getStartedButton}>
               {content.start}
