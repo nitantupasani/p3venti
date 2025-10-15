@@ -6,8 +6,8 @@ const teamMembers = [
     id: 'masi',
     name: 'prof. dr. ir. Masi Mohammadi',
     roles: {
-      nl: 'Professor at TU/e',
-      en: 'Professor at TU/e',
+      nl: 'Research Team',
+      en: 'Research Team',
     },
     link: 'https://www.tue.nl/en/research/researchers/masi-mohammadi',
     image: `${process.env.PUBLIC_URL}/pic1.jpg`,
@@ -16,11 +16,21 @@ const teamMembers = [
     id: 'anneke',
     name: 'Dr. Anneke Spitters',
     roles: {
-      nl: 'Postdoctoral Researcher at TU/e',
-      en: 'Postdoctoral Researcher at TU/e',
+      nl: 'Research Team',
+      en: 'Research Team',
     },
     link: 'https://research.tue.nl/en/persons/anneke-spitters',
     image: `${process.env.PUBLIC_URL}/pic2.jpg`,
+  },
+    {
+    id: 'tno',
+    name: 'Menno Hinkema',
+    roles: {
+      nl: 'Research Team',
+      en: 'Research Team',
+    },
+    link: 'https://www.linkedin.com/in/menno-hinkema-33b2b740/',
+    image: `${process.env.PUBLIC_URL}/pic5.jpg`,
   },
   {
     id: 'nitant',
@@ -41,16 +51,6 @@ const teamMembers = [
     },
     link: 'https://www.tue.nl/en/education/student-stories-engd/parsa-safaee',
     image: `${process.env.PUBLIC_URL}/pic4.jpg`,
-  },
-  {
-    id: 'tno',
-    name: 'Menno Hinkema',
-    roles: {
-      nl: 'Senior Researcher at TNO',
-      en: 'Senior Researcher at TNO',
-    },
-    // link: 'https://www.tue.nl/en/',
-    image: `${process.env.PUBLIC_URL}/pic5.jpg`,
   },
 ];
 
@@ -537,6 +537,10 @@ export default function Info() {
                     {member.id !== 'tno' && (
   <p className="mt-4 text-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
     {language === 'nl' ? 'Lees meer bij TU/e' : 'Learn more at TU/e'}
+  </p>
+)}{member.id == 'tno' && (
+  <p className="mt-4 text-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
+    {language === 'nl' ? 'Lees meer bij LinkedIn' : 'Learn more at LinkedIn'}
   </p>
 )}
                   </div>
