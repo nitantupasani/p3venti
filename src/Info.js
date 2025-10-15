@@ -36,8 +36,8 @@ const teamMembers = [
     id: 'nitant',
     name: 'Nitant Upasani',
     roles: {
-      nl: 'Application Developer/PhD Candidate at TU/e',
-      en: 'Application Developer/PhD Candidate at TU/e',
+      nl: 'Application Developer/ PhD Candidate at TU/e',
+      en: 'Application Developer/ PhD Candidate at TU/e',
     },
     link: 'https://research.tue.nl/en/persons/nitant-upasani',
     image: `${process.env.PUBLIC_URL}/pic3.jpg`,
@@ -46,8 +46,8 @@ const teamMembers = [
     id: 'parsa',
     name: 'Parsa Safaee',
     roles: {
-      nl: 'Application Designer/EngD Candidate at TU/e',
-      en: 'Application Designer/EngD Candidate at TU/e',
+      nl: 'Application Designer/ EngD Candidate at TU/e',
+      en: 'Application Designer/ EngD Candidate at TU/e',
     },
     link: 'https://www.tue.nl/en/education/student-stories-engd/parsa-safaee',
     image: `${process.env.PUBLIC_URL}/pic4.jpg`,
@@ -538,7 +538,7 @@ export default function Info() {
   <p className="mt-4 text-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
     {language === 'nl' ? 'Lees meer bij TU/e' : 'Learn more at TU/e'}
   </p>
-)}{member.id == 'tno' && (
+)}{member.id === 'tno' && (
   <p className="mt-4 text-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
     {language === 'nl' ? 'Lees meer bij LinkedIn' : 'Learn more at LinkedIn'}
   </p>
